@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "X2FwfiYUdKU=",
+  "dgSpecHash": "wXqFZgfWe9s=",
   "success": true,
   "projectFilePath": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Linky.csproj",
   "expectedPackageFiles": [
@@ -104,8 +104,7 @@
     "C:\\Users\\Andrei\\.nuget\\packages\\yarp.reverseproxy\\2.3.0\\yarp.reverseproxy.2.3.0.nupkg.sha512",
     "C:\\Users\\Andrei\\.nuget\\packages\\ziggycreatures.fusioncache\\2.4.0\\ziggycreatures.fusioncache.2.4.0.nupkg.sha512",
     "C:\\Users\\Andrei\\.nuget\\packages\\ziggycreatures.fusioncache.backplane.stackexchangeredis\\2.4.0\\ziggycreatures.fusioncache.backplane.stackexchangeredis.2.4.0.nupkg.sha512",
-    "C:\\Users\\Andrei\\.nuget\\packages\\ziggycreatures.fusioncache.serialization.newtonsoftjson\\2.4.0\\ziggycreatures.fusioncache.serialization.newtonsoftjson.2.4.0.nupkg.sha512",
-    "C:\\Users\\Andrei\\.nuget\\packages\\microsoft.netcore.app.crossgen2.win-x64\\9.0.9\\microsoft.netcore.app.crossgen2.win-x64.9.0.9.nupkg.sha512"
+    "C:\\Users\\Andrei\\.nuget\\packages\\ziggycreatures.fusioncache.serialization.newtonsoftjson\\2.4.0\\ziggycreatures.fusioncache.serialization.newtonsoftjson.2.4.0.nupkg.sha512"
   ],
   "logs": [
     {
