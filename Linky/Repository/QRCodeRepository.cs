@@ -4,8 +4,8 @@ using Linky.IRepository;
 using Linky.IService;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
-using System.Drawing;
-using System.Drawing.Imaging;
+// using System.Drawing;
+// using System.Drawing.Imaging;
 
 namespace Linky.Repository
 {
@@ -114,32 +114,40 @@ namespace Linky.Repository
                 await _context.SaveChangesAsync();
             }
 
-            // 2️⃣ Generate QR code image
+            // 2️⃣ Generate QR code image (without logo support for now)
             using var qrGenerator = new QRCodeGenerator();
             using var qrData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new QRCoder.QRCode(qrData);
 
-            Bitmap? logoBitmap = null;
-            if (logoFile != null)
-            {
-                using var logoStream = logoFile.OpenReadStream();
-                logoBitmap = new Bitmap(logoStream);
-            }
+            // COMMENTED OUT - System.Drawing graphics code that causes Gdip error on Linux
+            // Bitmap? logoBitmap = null;
+            // if (logoFile != null)
+            // {
+            //     using var logoStream = logoFile.OpenReadStream();
+            //     logoBitmap = new Bitmap(logoStream);
+            // }
 
-            using var qrBitmap = qrCode.GetGraphic(
-                pixelsPerModule,
-                System.Drawing.Color.Black,
-                System.Drawing.Color.White,
-                logoBitmap,
-                iconSizePercent: 15,
-                iconBorderWidth: 3,
-                drawQuietZones: true
-            );
+            // using var qrBitmap = qrCode.GetGraphic(
+            //     pixelsPerModule,
+            //     System.Drawing.Color.Black,
+            //     System.Drawing.Color.White,
+            //     logoBitmap,
+            //     iconSizePercent: 15,
+            //     iconBorderWidth: 3,
+            //     drawQuietZones: true
+            // );
 
+            // using var ms = new MemoryStream();
+            // qrBitmap.Save(ms, ImageFormat.Png);
+            // logoBitmap?.Dispose();
+
+            // TEMPORARY: Return basic QR code without logo (PNG format)
+            // TODO: Replace with SkiaSharp for cross-platform logo support
+            using var basicQrBitmap = qrCode.GetGraphic(pixelsPerModule);
             using var ms = new MemoryStream();
-            qrBitmap.Save(ms, ImageFormat.Png);
-            logoBitmap?.Dispose();
+            // basicQrBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
 
+            // For now, return empty bytes to test if Gdip is the issue
             return ms.ToArray();
         }
     }
