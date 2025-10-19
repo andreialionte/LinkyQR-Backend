@@ -31,8 +31,11 @@ namespace Linky
             builder.Services.AddOpenApi();
 
             builder.Services.AddScoped<DapperDbContext>();
+            var dbConnection = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
             builder.Services.AddDbContext<DataContextEf>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(dbConnection));
 
 
             builder.Services.AddScoped<IActiveVisitorRepository, ActiveVisitorRepository>();
@@ -128,6 +131,8 @@ namespace Linky
 
             builder.Services.AddMemoryCache();
 
+
+
             builder.Services.AddFusionCache()
                 .WithSerializer(new FusionCacheNewtonsoftJsonSerializer(new JsonSerializerSettings
                 {
@@ -141,7 +146,8 @@ namespace Linky
                         {
                             ConnectionMultiplexerFactory = async () =>
                             {
-                                var connectionString = builder.Configuration.GetConnectionString("Valkey");
+                                var connectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("Valkey");
 
                                 // Dacă nu există, returnează null și FusionCache va folosi doar Memory
                                 if (string.IsNullOrEmpty(connectionString))
