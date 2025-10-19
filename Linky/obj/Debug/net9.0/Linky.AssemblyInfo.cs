@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Linky")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+035fb4495b0039d95cae04b7b8e5a2c529421835")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+342b8bdff1851048305a3a15cb37462d733201d2")]
 [assembly: System.Reflection.AssemblyProductAttribute("Linky")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Linky")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
