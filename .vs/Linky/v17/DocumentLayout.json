@@ -59,10 +59,6 @@
       "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\repository\\qrcoderepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Migrations\\20251019151348_AddConntentColToQRCodeTable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Migrations\\20251019151348_AddConntentColToQRCodeTable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\source\\repos\\linky\\linky\\models\\qrcode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\models\\qrcode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -124,6 +120,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\source\\repos\\linky\\linky\\migrations\\20251018141026_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\migrations\\20251018141026_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\source\\repos\\linky\\linky\\migrations\\20251019151348_addconntentcoltoqrcodetable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\migrations\\20251019151348_addconntentcoltoqrcodetable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -149,8 +149,7 @@
               "RelativeToolTip": "Linky\\DI\\NatsDI.cs",
               "ViewState": "AgIAABwAAAAAAAAAAAAUwC0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-19T17:04:43.407Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T17:04:43.407Z"
             },
             {
               "$type": "Document",
@@ -162,8 +161,7 @@
               "RelativeToolTip": "Linky\\Program.cs",
               "ViewState": "AgIAAEAAAAAAAAAAAAAmwEkAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-19T12:49:41.073Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T12:49:41.073Z"
             },
             {
               "$type": "Document",
@@ -175,21 +173,19 @@
               "RelativeToolTip": "Linky\\Repository\\ActiveVisitorRepository.cs",
               "ViewState": "AgIAABAAAAAAAAAAAAAEwBIAAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-18T14:59:30.125Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-18T14:59:30.125Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "docker-compose",
+              "Title": "docker-compose.dcproj",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\docker-compose.dcproj",
               "RelativeDocumentMoniker": "docker-compose.dcproj",
               "ToolTip": "C:\\Users\\Andrei\\source\\repos\\Linky\\docker-compose.dcproj",
               "RelativeToolTip": "docker-compose.dcproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-10-19T16:47:00.875Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T16:47:00.875Z"
             },
             {
               "$type": "Document",
@@ -214,8 +210,7 @@
               "RelativeToolTip": "docker-compose.yml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
-              "WhenOpened": "2025-10-19T16:47:08.415Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T16:47:08.415Z"
             },
             {
               "$type": "Document",
@@ -227,8 +222,7 @@
               "RelativeToolTip": "global.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-10-19T16:47:19.329Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T16:47:19.329Z"
             },
             {
               "$type": "Document",
@@ -240,8 +234,7 @@
               "RelativeToolTip": "Linky\\Config\\NatsConfig.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAswBEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-19T17:04:45.052Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T17:04:45.052Z"
             },
             {
               "$type": "Document",
@@ -253,8 +246,7 @@
               "RelativeToolTip": "Linky\\Service\\NatsService.cs",
               "ViewState": "AgIAAEoAAAAAAAAAAAAwwFkAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-19T17:04:40.5Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T17:04:40.5Z"
             },
             {
               "$type": "Document",
@@ -266,8 +258,7 @@
               "RelativeToolTip": "Linky\\IService\\INatsService.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAUwBcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-19T17:04:36.028Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T17:04:36.028Z"
             },
             {
               "$type": "Document",
@@ -279,8 +270,7 @@
               "RelativeToolTip": "Linky\\Dockerfile",
               "ViewState": "AgIAAAsAAAAAAAAAAAAQwB0AAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-10-19T16:49:12.836Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T16:49:12.836Z"
             },
             {
               "$type": "Document",
@@ -292,8 +282,7 @@
               "RelativeToolTip": "Linky\\Linky.csproj",
               "ViewState": "AgIAAAkAAAAAAAAAAAAAAA0AAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-10-19T13:18:11.125Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T13:18:11.125Z"
             },
             {
               "$type": "Document",
@@ -305,12 +294,11 @@
               "RelativeToolTip": "launchSettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-10-18T14:13:21.882Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-18T14:13:21.882Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 30,
               "Title": "20251019151348_AddConntentColToQRCodeTable.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Migrations\\20251019151348_AddConntentColToQRCodeTable.cs",
               "RelativeDocumentMoniker": "Linky\\Migrations\\20251019151348_AddConntentColToQRCodeTable.cs",
@@ -318,12 +306,11 @@
               "RelativeToolTip": "Linky\\Migrations\\20251019151348_AddConntentColToQRCodeTable.cs",
               "ViewState": "AgIAABAAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-19T15:13:48.401Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T15:13:48.401Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 15,
               "Title": "README.md",
               "DocumentMoniker": "C:\\Users\\Andrei\\.nuget\\packages\\owaspheaders.core\\9.9.0\\contentFiles\\any\\net9.0\\README.md",
               "RelativeDocumentMoniker": "..\\..\\..\\.nuget\\packages\\owaspheaders.core\\9.9.0\\contentFiles\\any\\net9.0\\README.md",
@@ -336,7 +323,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 19,
               "Title": "GeoIpService.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Service\\GeoIpService.cs",
               "RelativeDocumentMoniker": "Linky\\Service\\GeoIpService.cs",
@@ -348,7 +335,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 18,
               "Title": "QRCodeController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Controllers\\QRCodeController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\QRCodeController.cs",
@@ -368,12 +355,11 @@
               "RelativeToolTip": "Linky\\Repository\\QRCodeRepository.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-19T11:32:38.363Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-19T11:32:38.363Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 16,
               "Title": "IURLShortenerRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\IRepository\\IURLShortenerRepository.cs",
               "RelativeDocumentMoniker": "Linky\\IRepository\\IURLShortenerRepository.cs",
@@ -385,7 +371,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 14,
               "Title": "QRCode.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Models\\QRCode.cs",
               "RelativeDocumentMoniker": "Linky\\Models\\QRCode.cs",
@@ -393,12 +379,11 @@
               "RelativeToolTip": "Linky\\Models\\QRCode.cs",
               "ViewState": "AgIAAAIAAAAAAAAAAAAxwAUAAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-18T15:17:44.531Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-18T15:17:44.531Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 21,
               "Title": "BaseController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Controllers\\BaseController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\BaseController.cs",
@@ -410,7 +395,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 17,
               "Title": "URLShortenerRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Repository\\URLShortenerRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\URLShortenerRepository.cs",
@@ -422,7 +407,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 22,
               "Title": "CacheService.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Service\\CacheService.cs",
               "RelativeDocumentMoniker": "Linky\\Service\\CacheService.cs",
@@ -434,7 +419,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 20,
               "Title": "UrlShortenerControllers.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Controllers\\UrlShortenerControllers.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\UrlShortenerControllers.cs",
@@ -446,7 +431,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 23,
               "Title": "ActiveVisitorsHub.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Hubs\\ActiveVisitorsHub.cs",
               "RelativeDocumentMoniker": "Linky\\Hubs\\ActiveVisitorsHub.cs",
@@ -458,7 +443,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 25,
               "Title": "ActiveVisitorDto.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\DTOs\\ActiveVisitorDto.cs",
               "RelativeDocumentMoniker": "Linky\\DTOs\\ActiveVisitorDto.cs",
@@ -470,7 +455,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 24,
               "Title": "DataContextEf.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\DataLayer\\DataContextEf.cs",
               "RelativeDocumentMoniker": "Linky\\DataLayer\\DataContextEf.cs",
@@ -482,7 +467,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 26,
               "Title": "ActiveVisitor.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Models\\ActiveVisitor.cs",
               "RelativeDocumentMoniker": "Linky\\Models\\ActiveVisitor.cs",
@@ -494,7 +479,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 27,
               "Title": "VisitorStatsRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Repository\\VisitorStatsRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\VisitorStatsRepository.cs",
@@ -506,7 +491,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 28,
               "Title": "VisitorRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Repository\\VisitorRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\VisitorRepository.cs",
@@ -518,7 +503,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 29,
               "Title": "20251018141026_Init.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\source\\repos\\Linky\\Linky\\Migrations\\20251018141026_Init.cs",
               "RelativeDocumentMoniker": "Linky\\Migrations\\20251018141026_Init.cs",
