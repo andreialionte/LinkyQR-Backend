@@ -4,10 +4,7 @@ C:\Users\Andrei\source\repos\Linky\bin\Debug\Linky.runtimeconfig.json
 C:\Users\Andrei\source\repos\Linky\bin\Debug\appsettings.Development.json
 C:\Users\Andrei\source\repos\Linky\bin\Debug\appsettings.json
 C:\Users\Andrei\source\repos\Linky\bin\Debug\Linky.staticwebassets.endpoints.json
-C:\Users\Andrei\source\repos\Linky\bin\Debug\Linky.exe
 C:\Users\Andrei\source\repos\Linky\bin\Debug\Linky.dll
-C:\Users\Andrei\source\repos\Linky\bin\Debug\NATS.Client.Core.dll
-C:\Users\Andrei\source\repos\Linky\bin\Debug\NATS.Client.JetStream.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\ZiggyCreatures.FusionCache.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\StackExchange.Redis.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\QRCoder.dll
@@ -25,7 +22,6 @@ C:\Users\Andrei\source\repos\Linky\bin\Debug\Swashbuckle.AspNetCore.SwaggerGen.d
 C:\Users\Andrei\source\repos\Linky\bin\Debug\NetEscapades.AspNetCore.SecurityHeaders.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\Swashbuckle.AspNetCore.SwaggerUI.dll
-C:\Users\Andrei\source\repos\Linky\bin\Debug\NATS.Client.Serializers.Json.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\Pipelines.Sockets.Unofficial.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\Polly.Core.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\Microsoft.OpenApi.dll
