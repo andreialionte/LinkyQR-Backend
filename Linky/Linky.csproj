@@ -2,7 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-	  
+
+	  <IlcEnableProfileGuidedOptimization>true</IlcEnableProfileGuidedOptimization>
+	  <OptimizationPreference>Speed</OptimizationPreference>
+	  <Deterministic>true</Deterministic>
+	  <DebugSymbols>false</DebugSymbols>
+	  <StripSymbols>true</StripSymbols>
+	  <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+	  <PublishReadyToRun>true</PublishReadyToRun>
+
 	  <PublishSingleFile>false</PublishSingleFile>
 	  <SelfContained>false</SelfContained>
 	  <UseAppHost>false</UseAppHost>
