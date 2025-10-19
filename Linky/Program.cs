@@ -189,7 +189,7 @@ namespace Linky
             {
                 opts.AddPolicy("main", opts =>
                 {
-                    opts.WithOrigins("http://localhost:4200") // your Angular app
+                    opts.WithOrigins("https://linkyqr.com", "https://www.linkyqr.com", "https://linky-qr-frontend.vercel.app/") // your Angular app
                                 .AllowAnyHeader()
                                 .AllowAnyMethod()
                                 .AllowCredentials(); // important for SignalR
@@ -266,3 +266,9 @@ namespace Linky
         }
     }
 }
+
+
+
+
+
+// docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token eyJhIjoiODUyZDEwZTMzMTgzMDBmZDM0MWNlNGM4ZDIxNmY0MDAiLCJ0IjoiNWEwOWRjZDItZGVjZi00YWNlLTk2Y2MtOTA0M2Y3Mzk3NjI0IiwicyI6Ik9URTFaVEptT0RBdFpUUXlaaTAwT1RrMkxXSTFOVGt0TmpCa1pUY3hZbVZtTXpNeSJ9
