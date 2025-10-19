@@ -1,0 +1,68 @@
+version: "3.8"
+services:
+  linky:
+    build:
+      context: .
+      dockerfile: Linky/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=5000
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=LinkyDB;Username=postgres;Password=postgres
+      - ConnectionStrings__Valkey=dragonfly:6379
+      # - ConnectionStrings__Nats=nats://nats:4222
+    ports:
+      - "8080:8080"
+      - "5000:5000"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    depends_on:
+      # postgres:
+      #   condition: service_healthy
+      dragonfly:
+        condition: service_started
+      # nats:
+      #   condition: service_started
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    restart: unless-stopped
+    ulimits:
+      memlock: -1
+    ports:
+      - "6379:6379"
+    volumes:
+      - dragonfly_data:/data
+    command: ["--logtostderr", "--dir=/data", "--proactor_threads=2", "--cache_mode=true", "--maxmemory=4GiB" ]
+
+  # nats:
+  #   image: nats:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - "4222:4222"
+  #     - "6222:6222"
+  #     - "8222:8222"
+
+  # postgres:
+  #   image: postgres:15    
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: LinkyDB
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres -d LinkyDB"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+volumes:
+  dragonfly_data:
+  # pgdata:
