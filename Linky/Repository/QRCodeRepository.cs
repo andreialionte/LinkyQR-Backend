@@ -4,7 +4,7 @@ using Linky.IRepository;
 using Linky.IService;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
-using SkiaSharp;
+using System.Text;
 
 namespace Linky.Repository
 {
@@ -113,119 +113,14 @@ namespace Linky.Repository
                 await _context.SaveChangesAsync();
             }
 
-            // 2️⃣ Generate QR code using SkiaSharp (no System.Drawing)
+            // 2️⃣ Generate QR code as SVG (no graphics libraries needed)
             using var qrGenerator = new QRCodeGenerator();
             using var qrData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new SvgQRCode(qrData);
 
-            // Use SkiaSharp renderer instead of System.Drawing
-            var renderer = new SkiaSharpQRCodeRenderer();
-            var qrCodeImage = renderer.RenderQrCode(qrData, pixelsPerModule);
-
-            byte[] imageBytes = qrCodeImage;
-
-            // If logo exists, overlay it
-            if (logoFile != null)
-            {
-                imageBytes = await OverlayLogoOnQRAsync(imageBytes, logoFile, pixelsPerModule);
-            }
-
-            return imageBytes;
-        }
-
-        private async Task<byte[]> OverlayLogoOnQRAsync(byte[] qrImageBytes, IFormFile logoFile, int pixelsPerModule)
-        {
-            using var qrStream = new MemoryStream(qrImageBytes);
-            using var qrImage = SKImage.FromEncodedData(qrStream);
-
-            using var logoStream = logoFile.OpenReadStream();
-            using var logoImage = SKImage.FromEncodedData(logoStream);
-
-            if (qrImage == null || logoImage == null)
-                throw new InvalidOperationException("Failed to load QR code or logo image");
-
-            // Create a canvas the size of the QR code
-            using var surface = SKSurface.Create(new SKImageInfo(qrImage.Width, qrImage.Height));
-            using var canvas = surface.Canvas;
-
-            // Draw QR code background
-            canvas.Clear(SKColors.White);
-            canvas.DrawImage(qrImage, 0, 0);
-
-            // Calculate logo size (15% of QR code)
-            int logoSize = (int)(qrImage.Width * 0.15);
-            int logoPosX = (qrImage.Width - logoSize) / 2;
-            int logoPosY = (qrImage.Height - logoSize) / 2;
-            int borderWidth = 3;
-
-            // Draw white background for logo (with border)
-            var bgPaint = new SKPaint
-            {
-                Color = SKColors.White,
-                IsAntialias = true
-            };
-            canvas.DrawRect(
-                new SKRect(
-                    logoPosX - borderWidth,
-                    logoPosY - borderWidth,
-                    logoPosX + logoSize + borderWidth,
-                    logoPosY + logoSize + borderWidth
-                ),
-                bgPaint
-            );
-
-            // Draw logo
-            canvas.DrawImage(
-                logoImage,
-                new SKRect(logoPosX, logoPosY, logoPosX + logoSize, logoPosY + logoSize)
-            );
-
-            // Encode to PNG
-            using var finalImage = surface.Snapshot();
-            using var data = finalImage.Encode(SKEncodedImageFormat.Png, 100);
-            return data.ToArray();
-        }
-    }
-
-    /// <summary>
-    /// SkiaSharp-based QR code renderer (cross-platform, no System.Drawing)
-    /// </summary>
-    public class SkiaSharpQRCodeRenderer
-    {
-        public byte[] RenderQrCode(QRCodeData qrCodeData, int pixelsPerModule = 20)
-        {
-            int moduleCount = qrCodeData.ModuleMatrix.Count;
-            int imageSize = moduleCount * pixelsPerModule;
-
-            using var surface = SKSurface.Create(new SKImageInfo(imageSize, imageSize));
-            using var canvas = surface.Canvas;
-
-            // Clear white background
-            canvas.Clear(SKColors.White);
-
-            using var blackPaint = new SKPaint { Color = SKColors.Black };
-
-            // Draw QR code modules
-            for (int y = 0; y < moduleCount; y++)
-            {
-                for (int x = 0; x < moduleCount; x++)
-                {
-                    if (qrCodeData.ModuleMatrix[y][x])
-                    {
-                        var rect = new SKRect(
-                            x * pixelsPerModule,
-                            y * pixelsPerModule,
-                            (x + 1) * pixelsPerModule,
-                            (y + 1) * pixelsPerModule
-                        );
-                        canvas.DrawRect(rect, blackPaint);
-                    }
-                }
-            }
-
-            // Encode to PNG
-            using var image = surface.Snapshot();
-            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-            return data.ToArray();
+            // Get SVG string and return as bytes
+            string svgString = qrCode.GetGraphic(pixelsPerModule);
+            return Encoding.UTF8.GetBytes(svgString);
         }
     }
 }
