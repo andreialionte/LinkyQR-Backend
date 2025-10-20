@@ -1,6 +1,5 @@
 ﻿using Linky.IRepository;
 using Linky.IService;
-using Linky.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linky.Controllers
@@ -20,7 +19,7 @@ namespace Linky.Controllers
         public async Task<IActionResult> GetTodayStats()
         {
             var cacheKey = "visitorstats:today";
-            var cached = await _cacheService.GetAsync<VisitorStats>(cacheKey);
+            var cached = await _cacheService.GetAsync<object>(cacheKey);
             if (cached != null)
                 return Ok(cached);
 
@@ -28,14 +27,19 @@ namespace Linky.Controllers
             var stats = await _statsRepo.GetStatsForDate(today);
 
             if (stats == null)
-            {
-                //or exception idk 
                 return NotFound(new { message = "Stats not available yet" });
-            }
 
-            await _cacheService.SetAsync(cacheKey, stats, TimeSpan.FromMinutes(10));
-            return Ok(stats);
+            var response = new
+            {
+                totalVisits = stats.TotalVisits,
+                uniqueVisitors = stats.UniqueVisitors,
+                stats
+            };
+
+            await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+            return Ok(response);
         }
+
 
         [HttpGet("7days")]
         public async Task<IActionResult> GetLast7Days()
