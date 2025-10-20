@@ -203,6 +203,7 @@ namespace Linky
             });
 
             var app = builder.Build();
+            app.UseCors("main");
 
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             //app.UseDelta();
@@ -238,8 +239,6 @@ namespace Linky
             });
 
 
-
-            app.UseCors("main");
             //app.MapReverseProxy();
 
             app.UseMiddleware<VisitorIdMiddleware>();
