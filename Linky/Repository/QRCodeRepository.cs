@@ -4,7 +4,8 @@ using Linky.IRepository;
 using Linky.IService;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
-using System.Text;
+// using System.Drawing;
+// using System.Drawing.Imaging;
 
 namespace Linky.Repository
 {
@@ -113,14 +114,74 @@ namespace Linky.Repository
                 await _context.SaveChangesAsync();
             }
 
-            // 2️⃣ Generate QR code as SVG (no graphics libraries needed)
+            // 2️⃣ Generate QR code image (without logo support for now)
             using var qrGenerator = new QRCodeGenerator();
             using var qrData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
-            using var qrCode = new SvgQRCode(qrData);
+            using var qrCode = new QRCoder.QRCode(qrData);
 
-            // Get SVG string and return as bytes
-            string svgString = qrCode.GetGraphic(pixelsPerModule);
-            return Encoding.UTF8.GetBytes(svgString);
+            // COMMENTED OUT - System.Drawing graphics code that causes Gdip error on Linux
+            // Bitmap? logoBitmap = null;
+            // if (logoFile != null)
+            // {
+            //     using var logoStream = logoFile.OpenReadStream();
+            //     logoBitmap = new Bitmap(logoStream);
+            // }
+
+            // using var qrBitmap = qrCode.GetGraphic(
+            //     pixelsPerModule,
+            //     System.Drawing.Color.Black,
+            //     System.Drawing.Color.White,
+            //     logoBitmap,
+            //     iconSizePercent: 15,
+            //     iconBorderWidth: 3,
+            //     drawQuietZones: true
+            // );
+
+            // using var ms = new MemoryStream();
+            // qrBitmap.Save(ms, ImageFormat.Png);
+            // logoBitmap?.Dispose();
+
+            // TEMPORARY: Return basic QR code without logo (PNG format)
+            // TODO: Replace with SkiaSharp for cross-platform logo support
+            using var basicQrBitmap = qrCode.GetGraphic(pixelsPerModule);
+            using var ms = new MemoryStream();
+            // basicQrBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+
+            // For now, return empty bytes to test if Gdip is the issue
+            return ms.ToArray();
         }
     }
 }
+
+
+//public async Task<byte[]> GenerateQrCodeImageAsync(string text, IFormFile? logoFile = null, int pixelsPerModule = 20)
+//{
+//    // 1️⃣ Check if QR code metadata exists
+//    var qrEntity = await _context.QRCodes
+//        .FirstOrDefaultAsync(q => q.Content == text);
+
+//    if (qrEntity == null)
+//    {
+//        qrEntity = new Linky.Models.QRCode
+//        {
+//            Id = Guid.NewGuid(),
+//            Content = text,
+//            CreatedAt = DateTime.UtcNow,
+//            ExpirationDate = null,
+//            IsActive = true,
+//            LastScannedAt = DateTime.MinValue,
+//            ScanCount = 0
+//        };
+//        _context.QRCodes.Add(qrEntity);
+//        await _context.SaveChangesAsync();
+//    }
+
+//    // 2️⃣ Generate QR code as SVG (no graphics libraries needed)
+//    using var qrGenerator = new QRCodeGenerator();
+//    using var qrData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
+//    using var qrCode = new SvgQRCode(qrData);
+
+//    // Get SVG string and return as bytes
+//    string svgString = qrCode.GetGraphic(pixelsPerModule);
+//    return Encoding.UTF8.GetBytes(svgString);
+//}

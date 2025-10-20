@@ -273,8 +273,3 @@ namespace Linky
     }
 }
 
-
-
-
-
-// docker run cloudflare/cloudflared:latest tunnel --no-autoupdate run --token eyJhIjoiODUyZDEwZTMzMTgzMDBmZDM0MWNlNGM4ZDIxNmY0MDAiLCJ0IjoiNWEwOWRjZDItZGVjZi00YWNlLTk2Y2MtOTA0M2Y3Mzk3NjI0IiwicyI6Ik9URTFaVEptT0RBdFpUUXlaaTAwT1RrMkxXSTFOVGt0TmpCa1pUY3hZbVZtTXpNeSJ9
