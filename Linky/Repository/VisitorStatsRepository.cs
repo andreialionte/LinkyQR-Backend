@@ -1,152 +1,113 @@
-﻿using Dapper;
-using Linky.DataLayer;
+﻿using Linky.DataLayer;
 using Linky.IRepository;
 using Linky.Models;
-using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace Linky.Repository
 {
     public class VisitorStatsRepository : IVisitorStatsRepository
     {
-        private readonly DapperDbContext _context;
+        private readonly DataContextEf _context;
 
-        public VisitorStatsRepository(DapperDbContext context)
+        public VisitorStatsRepository(DataContextEf context)
         {
             _context = context;
         }
 
         public async Task AggregateStatsForDate(DateOnly date)
         {
-            // Convert DateOnly to DateTime for Dapper
-            var dateTime = date.ToDateTime(TimeOnly.MinValue);
-            var nextDay = date.AddDays(1).ToDateTime(TimeOnly.MinValue);
+            // build DateTime range for filtering visitor timestamps
+            var startDateTime = date.ToDateTime(TimeOnly.MinValue);
+            var endDateTime = date.AddDays(1).ToDateTime(TimeOnly.MinValue);
 
-            using var connection = _context.CreateConnection();
+            // query visitors for the day
+            var visitorsQuery = _context.Visitors
+                .Where(v => v.Timestamp >= startDateTime && v.Timestamp < endDateTime);
 
-            // Calculate daily stats
-            const string statsSql = @"
-                SELECT 
-                    COUNT(*) AS TotalVisits,
-                    COUNT(DISTINCT ""Ip"") AS UniqueVisitors
-                FROM ""Visitors""
-                WHERE ""Timestamp"" >= @Date AND ""Timestamp"" < @NextDay";
+            var totalVisits = await visitorsQuery.CountAsync();
+            var uniqueVisitors = await visitorsQuery
+                .Select(v => v.Ip)
+                .Distinct()
+                .CountAsync();
 
-            var stats = await connection.QuerySingleOrDefaultAsync<dynamic>(
-                statsSql,
-                new { Date = dateTime, NextDay = nextDay }
-            ) ?? new { TotalVisits = 0, UniqueVisitors = 0 };
+            // top pages
+            var pages = await visitorsQuery
+                .GroupBy(v => v.Path)
+                .Select(g => new { Path = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(10)
+                .ToListAsync();
 
-            // Get top pages
-            const string pagesSql = @"
-                SELECT ""Path"", COUNT(*) AS Count
-                FROM ""Visitors""
-                WHERE ""Timestamp"" >= @Date AND ""Timestamp"" < @NextDay
-                GROUP BY ""Path""
-                ORDER BY Count DESC
-                LIMIT 10";
+            var topPages = pages
+                .Where(p => p.Path != null)
+                .ToDictionary(p => p.Path!, p => p.Count);
 
-            var pages = await connection.QueryAsync<dynamic>(pagesSql, new { Date = dateTime, NextDay = nextDay });
-            var topPages = pages.ToDictionary(p => (string)p.Path, p => (int)p.Count);
+            // top countries (exclude null)
+            var countries = await visitorsQuery
+                .Where(v => v.Country != null)
+                .GroupBy(v => v.Country)
+                .Select(g => new { Country = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(10)
+                .ToListAsync();
 
-            // Get top countries
-            const string countriesSql = @"
-                SELECT ""Country"", COUNT(*) AS Count
-                FROM ""Visitors""
-                WHERE ""Timestamp"" >= @Date AND ""Timestamp"" < @NextDay AND ""Country"" IS NOT NULL
-                GROUP BY ""Country""
-                ORDER BY Count DESC
-                LIMIT 10";
+            var topCountries = countries
+                .Where(c => c.Country != null)
+                .ToDictionary(c => c.Country!, c => c.Count);
 
-            var countries = await connection.QueryAsync<dynamic>(countriesSql, new { Date = dateTime, NextDay = nextDay });
-            var topCountries = countries.ToDictionary(c => (string)c.Country, c => (int)c.Count);
+            // find existing stats by DateOnly (assumes VisitorStats.Date is DateOnly)
+            var existing = await _context.VisitorStats
+                .FirstOrDefaultAsync(s => s.Date == date);
 
-            // Check if stats already exist
-            const string checkSql = "SELECT COUNT(*) FROM \"VisitorStats\" WHERE \"Date\" = @Date";
-            var exists = await connection.ExecuteScalarAsync<int>(checkSql, new { Date = dateTime }) > 0;
-
-            if (exists)
+            if (existing != null)
             {
-                // Update existing record
-                const string updateSql = @"
-                    UPDATE ""VisitorStats"" 
-                    SET 
-                        ""TotalVisits"" = @TotalVisits, 
-                        ""UniqueVisitors"" = @UniqueVisitors,
-                        ""TopPages"" = @TopPages,
-                        ""TopCountries"" = @TopCountries
-                    WHERE ""Date"" = @Date";
+                existing.TotalVisits = totalVisits;
+                existing.UniqueVisitors = uniqueVisitors;
 
-                await connection.ExecuteAsync(updateSql, new
-                {
-                    Date = dateTime,
-                    TotalVisits = (int)stats.TotalVisits,
-                    UniqueVisitors = (int)stats.UniqueVisitors,
-                    TopPages = JsonConvert.SerializeObject(topPages),
-                    TopCountries = JsonConvert.SerializeObject(topCountries)
-                });
+                // assign dictionaries directly (assumes entity properties are Dictionary<string,int>)
+                existing.TopPages = topPages;
+                existing.TopCountries = topCountries;
+
+                _context.VisitorStats.Update(existing);
             }
             else
             {
-                // Insert new record
-                const string insertSql = @"
-                    INSERT INTO ""VisitorStats"" (""Id"", ""Date"", ""TotalVisits"", ""UniqueVisitors"", ""TopPages"", ""TopCountries"")
-                    VALUES (@Id, @Date, @TotalVisits, @UniqueVisitors, @TopPages, @TopCountries)";
-
-                await connection.ExecuteAsync(insertSql, new
+                var newStats = new Models.VisitorStats
                 {
                     Id = Guid.NewGuid(),
-                    Date = dateTime,
-                    TotalVisits = (int)stats.TotalVisits,
-                    UniqueVisitors = (int)stats.UniqueVisitors,
-                    TopPages = JsonConvert.SerializeObject(topPages),
-                    TopCountries = JsonConvert.SerializeObject(topCountries)
-                });
+                    Date = date, // DateOnly
+                    TotalVisits = totalVisits,
+                    UniqueVisitors = uniqueVisitors,
+                    TopPages = topPages,
+                    TopCountries = topCountries
+                };
+
+                await _context.VisitorStats.AddAsync(newStats);
             }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<VisitorStats?> GetStatsForDate(DateOnly date)
         {
-            using var connection = _context.CreateConnection();
-            var dateTime = date.ToDateTime(TimeOnly.MinValue);
+            // Query by DateOnly and return the entity directly
+            var result = await _context.VisitorStats
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Date == date);
 
-            const string sql = @"SELECT * FROM ""VisitorStats"" WHERE ""Date"" = @Date";
-            var result = await connection.QueryFirstOrDefaultAsync<dynamic>(sql, new { Date = dateTime });
-
-            if (result == null) return null;
-
-            return new VisitorStats
-            {
-                Id = result.Id,
-                Date = DateOnly.FromDateTime(result.Date),
-                TotalVisits = result.TotalVisits,
-                UniqueVisitors = result.UniqueVisitors,
-                TopPages = JsonConvert.DeserializeObject<Dictionary<string, int>>(result.TopPages ?? "{}")!,
-                TopCountries = JsonConvert.DeserializeObject<Dictionary<string, int>>(result.TopCountries ?? "{}")!
-            };
+            return result;
         }
 
         public async Task<IEnumerable<VisitorStats>> GetStatsRange(DateOnly start, DateOnly end)
         {
-            using var connection = _context.CreateConnection();
-            var startDateTime = start.ToDateTime(TimeOnly.MinValue);
-            var endDateTime = end.ToDateTime(TimeOnly.MinValue);
+            // Compare DateOnly to DateOnly (assumes VisitorStats.Date is DateOnly)
+            var results = await _context.VisitorStats
+                .AsNoTracking()
+                .Where(s => s.Date >= start && s.Date <= end)
+                .OrderByDescending(s => s.Date)
+                .ToListAsync();
 
-            const string sql = @"
-                SELECT * FROM ""VisitorStats"" 
-                WHERE ""Date"" BETWEEN @Start AND @End
-                ORDER BY ""Date"" DESC";
-
-            var results = await connection.QueryAsync<dynamic>(sql, new { Start = startDateTime, End = endDateTime });
-
-            return results.Select(r => new VisitorStats
-            {
-                Id = r.Id,
-                Date = DateOnly.FromDateTime(r.Date),
-                TotalVisits = r.TotalVisits,
-                UniqueVisitors = r.UniqueVisitors,
-                TopPages = JsonConvert.DeserializeObject<Dictionary<string, int>>(r.TopPages ?? "{}")!,
-                TopCountries = JsonConvert.DeserializeObject<Dictionary<string, int>>(r.TopCountries ?? "{}")!
-            });
+            return results;
         }
     }
 }
