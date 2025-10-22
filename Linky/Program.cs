@@ -195,10 +195,12 @@ namespace Linky
             {
                 opts.AddPolicy("main", opts =>
                 {
-                    opts.WithOrigins("https://localhost4200", "https://linkyqr.com", "https://www.linkyqr.com", "https://linky-qr-frontend.vercel.app/") // your Angular app
+                    opts.WithOrigins("https://linkyqr.com", "https://www.linkyqr.com", "https://linky-qr-frontend.vercel.app/") // your Angular app
                                 .AllowAnyHeader()
                                 .AllowAnyMethod()
-                                .AllowCredentials(); // important for SignalR
+                                .AllowCredentials()
+                                .SetPreflightMaxAge(TimeSpan.FromHours(1));  // Perfmc
+                    // important for SignalR
                 });
             });
 
@@ -245,7 +247,7 @@ namespace Linky
             app.MapHub<ActiveVisitorsHub>("/ActiveVisitorsHub");
 
 
-            //app.UseSecurityHeaders(); // https://github.com/andrewlock/NetEscapades.AspNetCore.SecurityHeaders
+            app.UseSecurityHeaders(); // https://github.com/andrewlock/NetEscapades.AspNetCore.SecurityHeaders
 
             //app.UseRateLimiter();
 
