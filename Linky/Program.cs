@@ -113,8 +113,7 @@ namespace Linky
             {
                 options.ListenAnyIP(5000, listenOptions =>
                 {
-                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
-                    //listenOptions.UseHttps();
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                 });
             });
 
@@ -199,7 +198,7 @@ namespace Linky
                                 .AllowAnyHeader()
                                 .AllowAnyMethod()
                                 .AllowCredentials()
-                                .SetPreflightMaxAge(TimeSpan.FromHours(1));  // Perfmc
+                                .SetPreflightMaxAge(TimeSpan.FromHours(1));  // PRF
                     // important for SignalR
                 });
             });

@@ -1,6 +1,0 @@
-@Linky_HostAddress = http://localhost:5090
-
-GET {{Linky_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

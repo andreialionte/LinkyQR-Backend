@@ -19,7 +19,7 @@ namespace Linky.Repository
             _cacheService = cacheService;
         }
 
-        public async Task AddVisitor(VisitorDto visitor)
+        public async Task AddVisitor(VisitorDto visitor) //aici ar trb sa bagam si la stats la visitorstats gen
         {
             // Check if this sessionId already exists
             var exists = await _context.Visitors

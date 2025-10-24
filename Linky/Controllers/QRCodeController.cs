@@ -139,6 +139,9 @@ namespace Linky.Controllers
         /// Generates a QR code image
         /// </summary>
         [HttpPost("GenerateQrCodeImage")]
+        [Consumes("multipart/form-data")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+
         public async Task<IActionResult> GenerateQrCodeImage([FromForm] string text, [FromForm] IFormFile? logoFile = null, [FromForm] int pixelsPerModule = 20)
         {
             if (string.IsNullOrEmpty(text))
