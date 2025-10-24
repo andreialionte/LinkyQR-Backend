@@ -113,7 +113,7 @@ namespace Linky
             {
                 options.ListenAnyIP(5000, listenOptions =>
                 {
-                    listenOptions.Protocols = HttpProtocols.Http3;
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
                 });
             });
 
