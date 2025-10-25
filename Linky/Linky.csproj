@@ -58,6 +58,8 @@
     <PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="1.2.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.15.0" />
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
 	<PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.6" ExcludeAssets="All" />
     <!--<PackageReference Include="NATS.Client.Jetweam" Version="2.6.10" />-->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
