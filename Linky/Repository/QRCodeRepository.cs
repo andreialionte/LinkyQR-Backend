@@ -53,6 +53,23 @@ namespace Linky.Repository
             return entity;
         }
 
+        public async Task<Linky.Models.QRCode?> GetByContentAsync(string content)
+        {
+            var cacheKey = $"QRCode:Content:{content}";
+
+            var cachedVal = await _cacheService.GetAsync<Linky.Models.QRCode>(cacheKey);
+            if (cachedVal != null) return cachedVal;
+
+            var entity = await _context.QRCodes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(q => q.Content == content);
+
+            if (entity != null)
+                await _cacheService.SetAsync(cacheKey, entity, TimeSpan.FromMinutes(20));
+
+            return entity;
+        }
+
         public async Task<IEnumerable<Linky.Models.QRCode>> GetAllAsync()
         {
             const string cacheKey = "QRCode:All";
@@ -91,31 +108,27 @@ namespace Linky.Repository
             await _cacheService.RemoveAsync(cacheKey);
         }
 
+        public async Task UpdateContentAsync(Guid id, string content)
+        {
+            var qrCode = await _context.QRCodes.FirstOrDefaultAsync(q => q.Id == id);
+            if (qrCode == null) throw new InvalidOperationException($"QR code with ID {id} not found");
+
+            qrCode.Content = content;
+            await _context.SaveChangesAsync();
+
+            // Invalidate cache
+            var cacheKey = $"QRCode:{id}";
+            await _cacheService.RemoveAsync(cacheKey);
+        }
+
         public async Task<byte[]> GenerateQrCodeImageAsync(string text, IFormFile? logoFile = null, int pixelsPerModule = 20)
         {
-            var qrEntity = await _context.QRCodes
-                .FirstOrDefaultAsync(q => q.Content == text);
-
-            if (qrEntity == null)
-            {
-                qrEntity = new Linky.Models.QRCode
-                {
-                    Id = Guid.NewGuid(),
-                    Content = text,
-                    CreatedAt = DateTime.UtcNow,
-                    ExpirationDate = null,
-                    IsActive = true,
-                    LastScannedAt = DateTime.MinValue,
-                    ScanCount = 0
-                };
-                _context.QRCodes.Add(qrEntity);
-                await _context.SaveChangesAsync();
-            }
-
+            // Generate QR code as SVG (no native dependencies!)
             using var qrGenerator = new QRCodeGenerator();
             using var qrData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new SvgQRCode(qrData);
 
+            // Get SVG with customization
             string svgString = qrCode.GetGraphic(
                 pixelsPerModule,
                 "#000000",  // Dark color

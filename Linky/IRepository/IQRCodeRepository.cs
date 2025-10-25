@@ -11,5 +11,6 @@ namespace Linky.IRepository
         //Total QRCode Created
         Task IncrementScanAsync(Guid id, string clientIp, string? country, string? city);
         Task<byte[]> GenerateQrCodeImageAsync(string text, IFormFile? logoFile = null, int pixelsPerModule = 20);
+        Task UpdateContentAsync(Guid id, string content);
     }
 }

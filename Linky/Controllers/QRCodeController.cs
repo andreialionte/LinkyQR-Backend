@@ -168,9 +168,21 @@ namespace Linky.Controllers
 
             try
             {
-                // The QR code now embeds the tracking URL instead of direct URL
-                // So it will hit GetById endpoint which tracks the scan
-                var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(text, logoFile, pixelsPerModule);
+                // Step 1: Create QR code metadata in DB
+                var dto = new QRCodeDto
+                {
+                    ExpirationDate = null
+                };
+                var qrCode = await _qrcodeRepository.CreateAsync(dto);
+
+                // Step 2: Store the destination URL in Content field
+                await _qrcodeRepository.UpdateContentAsync(qrCode.Id, text);
+
+                // Step 3: Build tracking URL that will be embedded in QR code
+                var trackingUrl = $"{Request.Scheme}://{Request.Host}/api/QRCode/{qrCode.Id}";
+
+                // Step 4: Generate QR code with TRACKING URL (not original URL)
+                var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(trackingUrl, logoFile, pixelsPerModule);
 
                 return File(svgBytes, "image/svg+xml", $"qrcode-{DateTime.UtcNow:yyyyMMddHHmmss}.svg");
             }
