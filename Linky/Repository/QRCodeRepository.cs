@@ -93,7 +93,6 @@ namespace Linky.Repository
 
         public async Task<byte[]> GenerateQrCodeImageAsync(string text, IFormFile? logoFile = null, int pixelsPerModule = 20)
         {
-            // 1️⃣ Check if QR code metadata exists
             var qrEntity = await _context.QRCodes
                 .FirstOrDefaultAsync(q => q.Content == text);
 
