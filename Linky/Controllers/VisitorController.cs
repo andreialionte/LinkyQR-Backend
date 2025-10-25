@@ -1,6 +1,7 @@
 ﻿using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
+using Linky.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linky.Controllers
@@ -9,17 +10,19 @@ namespace Linky.Controllers
     {
         private readonly IVisitorRepository _visitorRepo;
         private readonly IGeoIPService _geoIpService;
+        private readonly IClientIp _clientIp;
 
-        public VisitorController(IVisitorRepository visitorRepo, IGeoIPService geoIpSerive)
+        public VisitorController(IVisitorRepository visitorRepo, IGeoIPService geoIpSerive, IClientIp clientIp)
         {
             _visitorRepo = visitorRepo;
             _geoIpService = geoIpSerive;
+            _clientIp = clientIp;
         }
 
         [HttpPost("AddVisitor")]
         public async Task<IActionResult> AddVisitor([FromBody] VisitorDto visitorDto)
         {
-            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var ip = _clientIp.GetClientIp();
             var geoLoc = _geoIpService.GetLocationByIp(ip);
 
             var visitorWithSession = visitorDto with

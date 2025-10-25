@@ -1,6 +1,7 @@
 ﻿using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
+using Linky.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linky.Controllers
@@ -10,11 +11,13 @@ namespace Linky.Controllers
     {
         private readonly IURLShortenerRepository _urlRepo;
         private readonly IGeoIPService _geoIpService;
+        private readonly IClientIp _clientIp;
 
-        public UrlShortenerControllers(IURLShortenerRepository urlRepo, IGeoIPService geoIpService)
+        public UrlShortenerControllers(IURLShortenerRepository urlRepo, IGeoIPService geoIpService, IClientIp clientIp)
         {
             _urlRepo = urlRepo;
             _geoIpService = geoIpService;
+            _clientIp = clientIp;
         }
 
         [HttpPost("ShortUrl")]
@@ -33,7 +36,7 @@ namespace Linky.Controllers
 
             // Create or return existing URL
             var url = await _urlRepo.CreateShortUrlAsync(urlDto, customAlias);
-            
+
             // If TotalClicks > 0, it already existed in DB
             if (url.TotalClicks > 0)
             {
@@ -54,7 +57,7 @@ namespace Linky.Controllers
             if (url == null)
                 return NotFound();
 
-            var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var clientIp = _clientIp.GetClientIp();
             var userAgent = Request.Headers["User-Agent"].ToString();
             var referrer = Request.Headers["Referer"].ToString();
 

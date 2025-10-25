@@ -1,6 +1,7 @@
 ﻿using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
+using Linky.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linky.Controllers
@@ -9,33 +10,16 @@ namespace Linky.Controllers
     {
         private readonly IQRCodeRepository _qrcodeRepository;
         private readonly IGeoIPService _geolocationService;
+        private readonly IClientIp _clientIp;
 
-        public QRCodeController(IQRCodeRepository qrcodeRepository, IGeoIPService geolocationService)
+        public QRCodeController(IQRCodeRepository qrcodeRepository, IGeoIPService geolocationService, IClientIp clientIp)
         {
             _qrcodeRepository = qrcodeRepository;
             _geolocationService = geolocationService;
+            _clientIp = clientIp;
         }
 
-        /// <summary>
-        /// Gets client IP from HttpContext, handling proxies and X-Forwarded-For headers
-        /// </summary>
-        private string GetClientIp()
-        {
-            if (Request.Headers.TryGetValue("X-Forwarded-For", out var forwarded))
-            {
-                var ip = forwarded.ToString().Split(',').FirstOrDefault();
-                if (!string.IsNullOrEmpty(ip))
-                    return ip.Trim();
-            }
 
-            if (Request.Headers.TryGetValue("X-Real-IP", out var realIp))
-            {
-                if (!string.IsNullOrEmpty(realIp.ToString()))
-                    return realIp.ToString();
-            }
-
-            return HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown";
-        }
 
         /// <summary>
         /// Creates a new QR code metadata entry
@@ -74,7 +58,7 @@ namespace Linky.Controllers
                     return NotFound(new { success = false, message = "QR code not found" });
 
                 // Track scan - just like URL shortener tracks clicks
-                var clientIp = GetClientIp();
+                var clientIp = _clientIp.GetClientIp();
                 var location = _geolocationService.GetLocationByIp(clientIp);
 
                 await _qrcodeRepository.IncrementScanAsync(id, clientIp, location.Country, location.City);

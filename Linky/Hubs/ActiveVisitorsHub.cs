@@ -1,6 +1,7 @@
 ﻿using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
+using Linky.Utils;
 using Microsoft.AspNetCore.SignalR;
 
 public sealed class ActiveVisitorsHub : Hub
@@ -8,13 +9,16 @@ public sealed class ActiveVisitorsHub : Hub
     private readonly IActiveVisitorRepository _activeVisitorRepo;
     private readonly ILogger<ActiveVisitorsHub> _logger;
     private readonly IGeoIPService _geoIpService;
+    private readonly IClientIp _clientIp;
 
     public ActiveVisitorsHub(
         IActiveVisitorRepository activeVisitorRepo,
         ILogger<ActiveVisitorsHub> logger,
-        IGeoIPService geoIpService)
+        IGeoIPService geoIpService,
+        IClientIp clientIp)
     {
         _activeVisitorRepo = activeVisitorRepo;
+        _clientIp = clientIp;
         _logger = logger;
         _geoIpService = geoIpService;
     }
@@ -36,7 +40,7 @@ public sealed class ActiveVisitorsHub : Hub
         var visitorIdCookie = httpContext.Request.Cookies["VisitorId"];
         var visitorIdAsGuid = Guid.Parse(visitorIdCookie);
 
-        var currentIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        string currentIp = _clientIp.GetClientIp() ?? "unknown";
         var location = _geoIpService.GetLocationByIp(currentIp);
 
         var visitor = new ActiveVisitorDto(

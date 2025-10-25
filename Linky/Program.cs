@@ -5,6 +5,7 @@ using Linky.Jobs;
 using Linky.Middlewares.Linky.Middleware;
 using Linky.Repository;
 using Linky.Service;
+using Linky.Utils;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,7 @@ namespace Linky
             builder.Services.AddScoped<IQRCodeRepository, QRCodeRepository>();
 
             builder.Services.AddHttpContextAccessor(); //for ips etc i thhink
+            builder.Services.AddScoped<IClientIp, ClientIp>();
 
             builder.Services.AddSingleton<IGeoIPService, GeoIpService>();
             builder.Services.AddSingleton<ICacheService, CacheService>(); //sau singleton trb sa inteleg bussiness logic-ul la app
