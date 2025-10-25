@@ -38,7 +38,7 @@ namespace Linky.Controllers
         }
 
         /// <summary>
-        /// Creates a new QR code
+        /// Creates a new QR code metadata entry
         /// </summary>
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] QRCodeDto dto)
@@ -58,9 +58,10 @@ namespace Linky.Controllers
         }
 
         /// <summary>
-        /// Gets a QR code by ID
+        /// This is the tracking endpoint - just like URL shortener's GetByCode
+        /// When QR code is scanned, it hits this endpoint, tracks the scan, then redirects
         /// </summary>
-        [HttpGet("GetById/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             if (id == Guid.Empty)
@@ -71,6 +72,18 @@ namespace Linky.Controllers
                 var qrcode = await _qrcodeRepository.GetByIdAsync(id);
                 if (qrcode == null)
                     return NotFound(new { success = false, message = "QR code not found" });
+
+                // Track scan - just like URL shortener tracks clicks
+                var clientIp = GetClientIp();
+                var location = _geolocationService.GetLocationByIp(clientIp);
+
+                await _qrcodeRepository.IncrementScanAsync(id, clientIp, location.Country, location.City);
+
+                // Redirect to the actual destination URL
+                if (!string.IsNullOrEmpty(qrcode.Content))
+                {
+                    return Redirect(qrcode.Content);
+                }
 
                 return Ok(new { success = true, data = qrcode });
             }
@@ -98,7 +111,7 @@ namespace Linky.Controllers
         }
 
         /// <summary>
-        /// Increments scan count for a QR code
+        /// Manual increment scan (for external tracking)
         /// </summary>
         [HttpPost("IncrementScan/{id}")]
         public async Task<IActionResult> IncrementScan(Guid id, [FromBody] ScanRequestDto request)
@@ -111,7 +124,6 @@ namespace Linky.Controllers
 
             try
             {
-                // Get client geolocation if not provided
                 string? country = request.Country;
                 string? city = request.City;
 
@@ -136,10 +148,9 @@ namespace Linky.Controllers
         }
 
         /// <summary>
-        /// Generates a QR code image
-        /// </summary>
-        /// <summary>
-        /// Generates a QR code image as SVG
+        /// Generates a QR code image with embedded tracking URL
+        /// The QR code contains: yourapp.com/api/QRCode/{id}
+        /// When scanned, it hits GetById which tracks + redirects
         /// </summary>
         [HttpPost("GenerateQrCodeImage")]
         [Consumes("multipart/form-data")]
@@ -157,9 +168,10 @@ namespace Linky.Controllers
 
             try
             {
+                // The QR code now embeds the tracking URL instead of direct URL
+                // So it will hit GetById endpoint which tracks the scan
                 var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(text, logoFile, pixelsPerModule);
 
-                // Return as SVG - browsers and QR scanners can handle this perfectly
                 return File(svgBytes, "image/svg+xml", $"qrcode-{DateTime.UtcNow:yyyyMMddHHmmss}.svg");
             }
             catch (Exception ex)
@@ -169,9 +181,6 @@ namespace Linky.Controllers
         }
     }
 
-    /// <summary>
-    /// DTO for scan request - contains client IP and optional geolocation data
-    /// </summary>
     public class ScanRequestDto
     {
         public string ClientIp { get; set; } = string.Empty;
