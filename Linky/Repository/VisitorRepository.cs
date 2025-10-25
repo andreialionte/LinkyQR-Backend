@@ -19,7 +19,7 @@ namespace Linky.Repository
             _cacheService = cacheService;
         }
 
-        public async Task AddVisitor(VisitorDto visitor) //aici ar trb sa bagam si la stats la visitorstats gen
+        public async Task AddVisitor(VisitorDto visitor)
         {
             // Check if this sessionId already exists
             var exists = await _context.Visitors
@@ -46,6 +46,27 @@ namespace Linky.Repository
             };
 
             _context.Visitors.Add(newVisitor);
+
+            // Add VisitorStats entry for today if it doesn't exist
+            var today = DateOnly.FromDateTime(visitor.Timestamp);
+            var statsExists = await _context.VisitorStats
+                .AnyAsync(s => s.Date == today);
+
+            if (!statsExists)
+            {
+                var newStats = new VisitorStats
+                {
+                    Id = Guid.NewGuid(),
+                    Date = today,
+                    TotalVisits = 0,
+                    UniqueVisitors = 0,
+                    TopPages = new Dictionary<string, int>(),
+                    TopCountries = new Dictionary<string, int>()
+                };
+
+                _context.VisitorStats.Add(newStats);
+            }
+
             await _context.SaveChangesAsync();
         }
 
