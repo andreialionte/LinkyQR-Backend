@@ -138,11 +138,16 @@ namespace Linky.Controllers
         /// <summary>
         /// Generates a QR code image
         /// </summary>
+        /// <summary>
+        /// Generates a QR code image as SVG
+        /// </summary>
         [HttpPost("GenerateQrCodeImage")]
         [Consumes("multipart/form-data")]
         [ApiExplorerSettings(IgnoreApi = true)]
-
-        public async Task<IActionResult> GenerateQrCodeImage([FromForm] string text, [FromForm] IFormFile? logoFile = null, [FromForm] int pixelsPerModule = 20)
+        public async Task<IActionResult> GenerateQrCodeImage(
+            [FromForm] string text,
+            [FromForm] IFormFile? logoFile = null,
+            [FromForm] int pixelsPerModule = 20)
         {
             if (string.IsNullOrEmpty(text))
                 return BadRequest(new { success = false, message = "Text is required to generate QR code" });
@@ -150,14 +155,12 @@ namespace Linky.Controllers
             if (pixelsPerModule < 1 || pixelsPerModule > 100)
                 return BadRequest(new { success = false, message = "pixelsPerModule must be between 1 and 100" });
 
-            // Validate logo file if provided
-            if (logoFile != null && logoFile.Length > 5 * 1024 * 1024) // 5MB limit
-                return BadRequest(new { success = false, message = "Logo file size must not exceed 5MB" });
-
             try
             {
-                var imageBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(text, logoFile, pixelsPerModule);
-                return File(imageBytes, "image/png", $"qrcode-{DateTime.UtcNow:yyyyMMddHHmmss}.png");
+                var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(text, logoFile, pixelsPerModule);
+
+                // Return as SVG - browsers and QR scanners can handle this perfectly
+                return File(svgBytes, "image/svg+xml", $"qrcode-{DateTime.UtcNow:yyyyMMddHHmmss}.svg");
             }
             catch (Exception ex)
             {

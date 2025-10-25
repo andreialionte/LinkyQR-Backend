@@ -4,7 +4,7 @@ using Linky.IRepository;
 using Linky.IService;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
-using SkiaSharp;
+using System.Text;
 
 namespace Linky.Repository
 {
@@ -113,70 +113,18 @@ namespace Linky.Repository
                 await _context.SaveChangesAsync();
             }
 
-            // 2️⃣ Generate QR code using SkiaSharp
             using var qrGenerator = new QRCodeGenerator();
             using var qrData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new SvgQRCode(qrData);
 
-            // Get QR code matrix
-            var qrMatrix = qrData.ModuleMatrix;
-            int moduleCount = qrMatrix.Count;
-            int imageSize = moduleCount * pixelsPerModule;
+            string svgString = qrCode.GetGraphic(
+                pixelsPerModule,
+                "#000000",  // Dark color
+                "#ffffff",  // Light color
+                true        // Draw quiet zones
+            );
 
-            // Create bitmap with SkiaSharp
-            using var surface = SKSurface.Create(new SKImageInfo(imageSize, imageSize));
-            var canvas = surface.Canvas;
-            canvas.Clear(SKColors.White);
-
-            // Draw QR code modules
-            using var blackPaint = new SKPaint { Color = SKColors.Black, Style = SKPaintStyle.Fill };
-
-            for (int y = 0; y < moduleCount; y++)
-            {
-                for (int x = 0; x < moduleCount; x++)
-                {
-                    if (qrMatrix[y][x])
-                    {
-                        canvas.DrawRect(
-                            x * pixelsPerModule,
-                            y * pixelsPerModule,
-                            pixelsPerModule,
-                            pixelsPerModule,
-                            blackPaint
-                        );
-                    }
-                }
-            }
-
-            // 3️⃣ Add logo if provided
-            if (logoFile != null && logoFile.Length > 0)
-            {
-                using var logoStream = logoFile.OpenReadStream();
-                using var logoBitmap = SKBitmap.Decode(logoStream);
-
-                if (logoBitmap != null)
-                {
-                    // Calculate logo size (15% of QR code)
-                    int logoSize = (int)(imageSize * 0.15);
-                    int logoX = (imageSize - logoSize) / 2;
-                    int logoY = (imageSize - logoSize) / 2;
-
-                    // Draw white background for logo
-                    using var whitePaint = new SKPaint { Color = SKColors.White, Style = SKPaintStyle.Fill };
-                    int logoBgSize = logoSize + (pixelsPerModule * 2);
-                    int logoBgX = (imageSize - logoBgSize) / 2;
-                    int logoBgY = (imageSize - logoBgSize) / 2;
-                    canvas.DrawRect(logoBgX, logoBgY, logoBgSize, logoBgSize, whitePaint);
-
-                    // Draw logo
-                    var destRect = new SKRect(logoX, logoY, logoX + logoSize, logoY + logoSize);
-                    canvas.DrawBitmap(logoBitmap, destRect);
-                }
-            }
-
-            // 4️⃣ Convert to PNG bytes
-            using var image = surface.Snapshot();
-            using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-            return data.ToArray();
+            return Encoding.UTF8.GetBytes(svgString);
         }
     }
 }
