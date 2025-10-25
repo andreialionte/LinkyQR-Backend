@@ -14,6 +14,6 @@
 
         //NAV
 
-        public Visitor? Visitor { get; set; }
+        //public Visitor? Visitor { get; set; }
     }
 }

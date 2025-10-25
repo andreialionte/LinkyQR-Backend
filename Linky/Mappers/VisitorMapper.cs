@@ -15,8 +15,8 @@ namespace Linky.Mappers
                 visitor.City,
                 visitor.Referer,
                 visitor.IsUnique,
-                visitor.UserAgent,
-                visitor.SessionId
+                visitor.UserAgent
+            //visitor.SessionId
             );
 
         public static Visitor ToModel(VisitorDto dto) =>

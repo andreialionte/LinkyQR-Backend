@@ -9,7 +9,6 @@ C:\Users\Andrei\source\repos\Linky\bin\Debug\ZiggyCreatures.FusionCache.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\StackExchange.Redis.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\QRCoder.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\System.Drawing.Common.dll
-C:\Users\Andrei\source\repos\Linky\bin\Debug\Dapper.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\FluentMigrator.Abstractions.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\FluentMigrator.dll
 C:\Users\Andrei\source\repos\Linky\bin\Debug\Npgsql.dll

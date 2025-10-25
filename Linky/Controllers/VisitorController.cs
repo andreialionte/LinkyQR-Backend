@@ -9,6 +9,7 @@ namespace Linky.Controllers
     {
         private readonly IVisitorRepository _visitorRepo;
         private readonly IGeoIPService _geoIpService;
+
         public VisitorController(IVisitorRepository visitorRepo, IGeoIPService geoIpSerive)
         {
             _visitorRepo = visitorRepo;
@@ -18,24 +19,12 @@ namespace Linky.Controllers
         [HttpPost("AddVisitor")]
         public async Task<IActionResult> AddVisitor([FromBody] VisitorDto visitorDto)
         {
-            var sessionId = Request.Cookies["VisitorId"];
-            if (string.IsNullOrWhiteSpace(sessionId))
-                return BadRequest("Missing VisitorId cookie.");
-
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
-            var existing = await _visitorRepo.GetVisitorBySessionId(Guid.Parse(sessionId));
-            if (existing != null)
-            {
-                return StatusCode(StatusCodes.Status304NotModified, new { message = "Already created" });
-            }
-
             var geoLoc = _geoIpService.GetLocationByIp(ip);
 
             var visitorWithSession = visitorDto with
             {
                 Id = Guid.NewGuid(),
-                SessionId = Guid.Parse(sessionId),            // string stays string in your DTO
                 Ip = ip,
                 Timestamp = DateTime.UtcNow,
                 Country = geoLoc?.Country,
@@ -45,16 +34,13 @@ namespace Linky.Controllers
 
             await _visitorRepo.AddVisitor(visitorWithSession);
 
-            return CreatedAtAction(nameof(GetVisitorBySessionId),
-                new { sessionId = visitorWithSession.SessionId }, visitorWithSession);
+            return Ok(new { message = "Visitor added successfully", id = visitorWithSession.Id });
         }
 
-
-
-        [HttpGet("visitor/{sessionId}")]
-        public async Task<IActionResult> GetVisitorBySessionId(string sessionId)
+        [HttpGet("visitor/{visitorId}")]
+        public async Task<IActionResult> GetVisitorById(Guid visitorId)
         {
-            var visitor = await _visitorRepo.GetVisitorBySessionId(Guid.Parse(sessionId));
+            var visitor = await _visitorRepo.GetVisitorBySessionId(visitorId);
             if (visitor == null) return NotFound();
             return Ok(visitor);
         }
@@ -65,10 +51,7 @@ namespace Linky.Controllers
             var visitors = await _visitorRepo.GetRecentVisitors(limit);
             if (visitors == null || !visitors.Any())
                 return NotFound("No visitors found.");
-
             return Ok(visitors);
         }
-
-
     }
 }

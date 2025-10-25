@@ -55,12 +55,12 @@ namespace Linky.DataLayer
                 entity.Property(v => v.UserAgent);
                 entity.Property(v => v.IsUnique).HasDefaultValue(true);
 
-                entity.Property(v => v.SessionId).IsRequired();
+                //entity.Property(v => v.SessionId).IsRequired();
 
-                entity.HasOne(v => v.ActiveVisitor)
-                      .WithOne(a => a.Visitor)
-                      .HasForeignKey<Visitor>(v => v.SessionId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                //entity.HasOne(v => v.ActiveVisitor)
+                //      .WithOne(a => a.Visitor)
+                //      .HasForeignKey<Visitor>(v => v.SessionId)
+                //      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ActiveVisitor

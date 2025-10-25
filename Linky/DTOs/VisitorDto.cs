@@ -9,7 +9,7 @@
         string? City,
         string? Referer,
         bool IsUnique,
-        string? UserAgent,
-        Guid SessionId
+        string? UserAgent
+    //Guid SessionId
     );
 }

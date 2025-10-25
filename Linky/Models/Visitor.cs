@@ -13,9 +13,9 @@
         public string? UserAgent { get; set; }
 
         //FK
-        public Guid SessionId { get; set; } = default!;
+        //public Guid SessionId { get; set; } = default!;
 
-        // Navigation property
-        public ActiveVisitor? ActiveVisitor { get; set; }
+        //// Navigation property
+        //public ActiveVisitor? ActiveVisitor { get; set; }
     }
 }

@@ -21,13 +21,16 @@ namespace Linky.Repository
 
         public async Task AddVisitor(VisitorDto visitor)
         {
-            // Check if this sessionId already exists
-            var exists = await _context.Visitors
-                .AnyAsync(v => v.SessionId == visitor.SessionId);
+            // Check if this IP already visited this path recently (ex: last 30 minutes)
+            var recentVisit = await _context.Visitors
+                .Where(v => v.Ip == visitor.Ip
+                         && v.Path == visitor.Path
+                         && v.Timestamp >= DateTime.UtcNow.AddMinutes(-30))
+                .AnyAsync();
 
-            if (exists)
+            if (recentVisit)
             {
-                return;
+                return; // Don't add duplicate visit
             }
 
             // Insert new visitor
@@ -41,32 +44,10 @@ namespace Linky.Repository
                 City = visitor.City,
                 Referer = visitor.Referer,
                 IsUnique = visitor.IsUnique,
-                UserAgent = visitor.UserAgent,
-                SessionId = visitor.SessionId
+                UserAgent = visitor.UserAgent
             };
 
             _context.Visitors.Add(newVisitor);
-
-            // Add VisitorStats entry for today if it doesn't exist
-            var today = DateOnly.FromDateTime(visitor.Timestamp);
-            var statsExists = await _context.VisitorStats
-                .AnyAsync(s => s.Date == today);
-
-            if (!statsExists)
-            {
-                var newStats = new VisitorStats
-                {
-                    Id = Guid.NewGuid(),
-                    Date = today,
-                    TotalVisits = 0,
-                    UniqueVisitors = 0,
-                    TopPages = new Dictionary<string, int>(),
-                    TopCountries = new Dictionary<string, int>()
-                };
-
-                _context.VisitorStats.Add(newStats);
-            }
-
             await _context.SaveChangesAsync();
         }
 
@@ -118,13 +99,14 @@ namespace Linky.Repository
         public async Task<Visitor?> GetVisitorBySessionId(Guid sessionId)
         {
             string cacheKey = GetCacheKey(sessionId.ToString());
-
             var cachedVisitor = await _cacheService.GetAsync<Visitor>(cacheKey);
+
             if (cachedVisitor != null)
                 return cachedVisitor;
 
             var visitor = await _context.Visitors
-                .FirstOrDefaultAsync(v => v.SessionId == sessionId);
+                .OrderByDescending(v => v.Timestamp)
+                .FirstOrDefaultAsync(v => v.Id == sessionId);
 
             if (visitor != null)
             {
