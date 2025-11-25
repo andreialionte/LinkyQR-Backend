@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using OwaspHeaders.Core.Extensions;
 using Quartz;
 using StackExchange.Redis;
 using System.Text.Json;
@@ -248,7 +249,8 @@ namespace Linky
             app.MapHub<ActiveVisitorsHub>("/ActiveVisitorsHub");
 
 
-            app.UseSecurityHeaders(); // https://github.com/andrewlock/NetEscapades.AspNetCore.SecurityHeaders
+            //app.UseSecurityHeaders(); // https://github.com/andrewlock/NetEscapades.AspNetCore.SecurityHeaders
+            app.UseSecureHeadersMiddleware(); //https://www.nuget.org/packages/OwaspHeaders.Core
 
             //app.UseRateLimiter();
 
