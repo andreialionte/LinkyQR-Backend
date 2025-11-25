@@ -136,13 +136,54 @@ namespace Linky.Controllers
         /// The QR code contains: yourapp.com/api/QRCode/{id}
         /// When scanned, it hits GetById which tracks + redirects
         /// </summary>
+        //[HttpPost("GenerateQrCodeImage")]
+        //[Consumes("multipart/form-data")]
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        //public async Task<IActionResult> GenerateQrCodeImage(
+        //    [FromForm] string text,
+        //    [FromForm] IFormFile? logoFile = null,
+        //    [FromForm] int pixelsPerModule = 20)
+        //{
+        //    if (string.IsNullOrEmpty(text))
+        //        return BadRequest(new { success = false, message = "Text is required to generate QR code" });
+
+        //    if (pixelsPerModule < 1 || pixelsPerModule > 100)
+        //        return BadRequest(new { success = false, message = "pixelsPerModule must be between 1 and 100" });
+
+        //    try
+        //    {
+        //        // Step 1: Create QR code metadata in DB
+        //        var dto = new QRCodeDto
+        //        {
+        //            ExpirationDate = null
+        //        };
+        //        var qrCode = await _qrcodeRepository.CreateAsync(dto);
+
+        //        // Step 2: Store the destination URL in Content field
+        //        await _qrcodeRepository.UpdateContentAsync(qrCode.Id, text);
+
+        //        // Step 3: Build tracking URL that will be embedded in QR code
+        //        var trackingUrl = $"{Request.Scheme}://{Request.Host}/api/QRCode/{qrCode.Id}";
+
+        //        // Step 4: Generate QR code with TRACKING URL (not original URL)
+        //        var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(trackingUrl, logoFile, pixelsPerModule);
+
+        //        return File(svgBytes, "image/svg+xml", $"qrcode-{DateTime.UtcNow:yyyyMMddHHmmss}.svg");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { success = false, message = ex.Message });
+        //    }
+        //}
+
+
         [HttpPost("GenerateQrCodeImage")]
         [Consumes("multipart/form-data")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> GenerateQrCodeImage(
-            [FromForm] string text,
-            [FromForm] IFormFile? logoFile = null,
-            [FromForm] int pixelsPerModule = 20)
+    [FromForm] string text,
+    [FromForm] IFormFile? logoFile = null,
+    [FromForm] int pixelsPerModule = 20)
         {
             if (string.IsNullOrEmpty(text))
                 return BadRequest(new { success = false, message = "Text is required to generate QR code" });
@@ -152,21 +193,17 @@ namespace Linky.Controllers
 
             try
             {
-                // Step 1: Create QR code metadata in DB
-                var dto = new QRCodeDto
-                {
-                    ExpirationDate = null
-                };
+                // Previous tracking behavior commented out to avoid embedding backend redirect URL:
+                /*
+                var dto = new QRCodeDto { ExpirationDate = null };
                 var qrCode = await _qrcodeRepository.CreateAsync(dto);
-
-                // Step 2: Store the destination URL in Content field
                 await _qrcodeRepository.UpdateContentAsync(qrCode.Id, text);
-
-                // Step 3: Build tracking URL that will be embedded in QR code
                 var trackingUrl = $"{Request.Scheme}://{Request.Host}/api/QRCode/{qrCode.Id}";
-
-                // Step 4: Generate QR code with TRACKING URL (not original URL)
                 var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(trackingUrl, logoFile, pixelsPerModule);
+                */
+
+                // Privacy-safe behavior: embed the original text directly into the QR code
+                var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(text, logoFile, pixelsPerModule);
 
                 return File(svgBytes, "image/svg+xml", $"qrcode-{DateTime.UtcNow:yyyyMMddHHmmss}.svg");
             }

@@ -8,11 +8,13 @@ namespace Linky.Controllers
     {
         private readonly IVisitorStatsRepository _statsRepo;
         private readonly ICacheService _cacheService;
+        private readonly IVisitorRepository _visitorRepo;
 
-        public VisitorStatsController(IVisitorStatsRepository statsRepo, ICacheService cacheService)
+        public VisitorStatsController(IVisitorStatsRepository statsRepo, ICacheService cacheService, IVisitorRepository visitorRepo)
         {
             _statsRepo = statsRepo;
             _cacheService = cacheService;
+            _visitorRepo = visitorRepo;
         }
 
         [HttpGet("Today")]
@@ -27,7 +29,22 @@ namespace Linky.Controllers
             var stats = await _statsRepo.GetStatsForDate(today);
 
             if (stats == null)
-                return NotFound(new { message = "Stats not available yet" });
+            {
+                // Fallback: compute live from Visitors table for today
+                var start = DateTime.UtcNow.Date;
+                var totalVisits = await _visitorRepo.GetTotalVisits(start);
+                var uniqueVisitors = await _visitorRepo.GetUniqueVisitors(start);
+
+                var responseLive = new
+                {
+                    totalVisits,
+                    uniqueVisitors,
+                    stats = (object?)null
+                };
+
+                await _cacheService.SetAsync(cacheKey, responseLive, TimeSpan.FromMinutes(1));
+                return Ok(responseLive);
+            }
 
             var response = new
             {

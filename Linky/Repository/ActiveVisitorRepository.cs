@@ -105,15 +105,13 @@ namespace Linky.Repository
 
         public async Task<int> GetActiveVisitorCount()
         {
-            var cached = await _cacheService.GetAsync<int>(VISITOR_COUNT_KEY);
-            if (cached > 0)
-                return cached;
+            var cachedNullable = await _cacheService.GetAsync<int?>(VISITOR_COUNT_KEY);
+            if (cachedNullable.HasValue)
+                return cachedNullable.Value;
 
             var count = await _context.ActiveVisitors.CountAsync();
 
-            // Cache for 41s
-            if (count > 0)
-                await _cacheService.SetAsync(VISITOR_COUNT_KEY, count, TimeSpan.FromSeconds(41));
+            await _cacheService.SetAsync(VISITOR_COUNT_KEY, count, TimeSpan.FromSeconds(41));
 
             return count;
         }

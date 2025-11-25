@@ -5,6 +5,8 @@ using Linky.IService;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
 using System.Text;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Http;
 
 namespace Linky.Repository
 {
@@ -123,20 +125,63 @@ namespace Linky.Repository
 
         public async Task<byte[]> GenerateQrCodeImageAsync(string text, IFormFile? logoFile = null, int pixelsPerModule = 20)
         {
+            // Build deterministic cache key from text + logo content (if any) + pixel size
+            byte[] logoBytes = Array.Empty<byte>();
+            if (logoFile != null)
+            {
+                using var ms = new MemoryStream();
+                await logoFile.CopyToAsync(ms);
+                logoBytes = ms.ToArray();
+            }
+
+            // compute SHA256 over combined inputs
+            byte[] hash;
+            using (var sha = SHA256.Create())
+            {
+                // text bytes
+                var textBytes = Encoding.UTF8.GetBytes(text ?? string.Empty);
+                sha.TransformBlock(textBytes, 0, textBytes.Length, null, 0);
+
+                // pixels
+                var pixelBytes = BitConverter.GetBytes(pixelsPerModule);
+                sha.TransformBlock(pixelBytes, 0, pixelBytes.Length, null, 0);
+
+                // logo
+                if (logoBytes.Length > 0)
+                {
+                    sha.TransformBlock(logoBytes, 0, logoBytes.Length, null, 0);
+                }
+
+                sha.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+                hash = sha.Hash ?? Array.Empty<byte>();
+            }
+
+            string cacheKey = "qrgenerator:svg:" + Convert.ToHexString(hash);
+
+            var cached = await _cacheService.GetAsync<byte[]>(cacheKey);
+            if (cached != null && cached.Length > 0)
+            {
+                return cached;
+            }
+
             // Generate QR code as SVG (no native dependencies!)
             using var qrGenerator = new QRCodeGenerator();
             using var qrData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
             using var qrCode = new SvgQRCode(qrData);
 
-            // Get SVG with customization
             string svgString = qrCode.GetGraphic(
                 pixelsPerModule,
-                "#000000",  // Dark color
-                "#ffffff",  // Light color
-                true        // Draw quiet zones
+                "#000000",
+                "#ffffff",
+                true
             );
 
-            return Encoding.UTF8.GetBytes(svgString);
+            var bytes = Encoding.UTF8.GetBytes(svgString);
+
+            // cache the produced SVG bytes (shared globally if same inputs)
+            await _cacheService.SetAsync(cacheKey, bytes, TimeSpan.FromHours(1));
+
+            return bytes;
         }
     }
 }

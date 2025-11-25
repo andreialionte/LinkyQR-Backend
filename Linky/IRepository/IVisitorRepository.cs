@@ -10,6 +10,6 @@ namespace Linky.IRepository
         Task<IEnumerable<Visitor>> GetVisitorsByDateRange(DateTime start, DateTime end);
         Task<int> GetTotalVisits(DateTime? start = null);
         Task<int> GetUniqueVisitors(DateTime? start = null);
-        Task<Visitor> GetVisitorBySessionId(Guid sessionId);
+        Task<Visitor?> GetVisitorBySessionId(Guid sessionId);
     }
 }

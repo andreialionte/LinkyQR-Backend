@@ -19,6 +19,11 @@ namespace Linky.Repository
             _cacheService = cacheService;
         }
 
+        private static string GetRecentVisitorsKey(int limit) => $"visitors:recent:{limit}";
+        private static string GetVisitorsRangeKey(DateTime start, DateTime end) => $"visitors:range:{start:O}:{end:O}";
+        private static string GetTotalVisitsKey(DateTime? start) => start.HasValue ? $"visitors:total:{start.Value:O}" : "visitors:total:all";
+        private static string GetUniqueVisitorsKey(DateTime? start) => start.HasValue ? $"visitors:unique:{start.Value:O}" : "visitors:unique:all";
+
         public async Task AddVisitor(VisitorDto visitor)
         {
             // Check if this IP already visited this path recently (ex: last 30 minutes)
@@ -33,10 +38,10 @@ namespace Linky.Repository
                 return; // Don't add duplicate visit
             }
 
-            // Insert new visitor
+            // Insert new visitor (reuse provided Id when available)
             var newVisitor = new Visitor
             {
-                Id = Guid.NewGuid(),
+                Id = visitor.Id == Guid.Empty ? Guid.NewGuid() : visitor.Id,
                 Path = visitor.Path,
                 Timestamp = visitor.Timestamp,
                 Ip = visitor.Ip,
@@ -49,51 +54,106 @@ namespace Linky.Repository
 
             _context.Visitors.Add(newVisitor);
             await _context.SaveChangesAsync();
+            await _cacheService.RemoveAsync(GetRecentVisitorsKey(100));
+            await _cacheService.RemoveAsync(GetRecentVisitorsKey(50));
+            await _cacheService.RemoveAsync(GetTotalVisitsKey(null));
+            await _cacheService.RemoveAsync(GetUniqueVisitorsKey(null));
+            var today = DateTime.UtcNow.Date;
+            await _cacheService.RemoveAsync(GetTotalVisitsKey(today));
+            await _cacheService.RemoveAsync(GetUniqueVisitorsKey(today));
+
+            // cache inserted visitor for immediate subsequent reads
+            var visitorCacheKey = GetCacheKey(newVisitor.Id.ToString());
+            await _cacheService.SetAsync(visitorCacheKey, newVisitor, TimeSpan.FromMinutes(10));
+
+            // Invalidate visitor stats caches so dashboards reflect recent writes
+            await _cacheService.RemoveAsync("visitorstats:today");
+            await _cacheService.RemoveAsync("visitorstats:7days");
+            await _cacheService.RemoveAsync("visitorstats:30days");
+
         }
 
         public async Task<IEnumerable<Visitor>> GetRecentVisitors(int limit = 100)
         {
-            return await _context.Visitors
+            var cacheKey = GetRecentVisitorsKey(limit);
+            var cached = await _cacheService.GetAsync<IEnumerable<Visitor>>(cacheKey);
+            if (cached != null) return cached;
+
+            var list = await _context.Visitors
+                .AsNoTracking()
                 .OrderByDescending(v => v.Timestamp)
                 .Take(limit)
                 .ToListAsync();
+
+            await _cacheService.SetAsync(cacheKey, list, TimeSpan.FromSeconds(30));
+            return list;
         }
 
         public async Task<IEnumerable<Visitor>> GetVisitorsByDateRange(DateTime start, DateTime end)
         {
-            return await _context.Visitors
+            var cacheKey = GetVisitorsRangeKey(start, end);
+            var cached = await _cacheService.GetAsync<IEnumerable<Visitor>>(cacheKey);
+            if (cached != null) return cached;
+
+            var list = await _context.Visitors
+                .AsNoTracking()
                 .Where(v => v.Timestamp >= start && v.Timestamp <= end)
                 .OrderByDescending(v => v.Timestamp)
                 .ToListAsync();
+
+            await _cacheService.SetAsync(cacheKey, list, TimeSpan.FromMinutes(1));
+            return list;
         }
 
         public async Task<int> GetTotalVisits(DateTime? start = null)
         {
+            var cacheKey = GetTotalVisitsKey(start);
+            var cached = await _cacheService.GetAsync<int?>(cacheKey);
+            if (cached.HasValue)
+                return cached.Value;
+
+            int count;
             if (start.HasValue)
             {
-                return await _context.Visitors
+                count = await _context.Visitors
                     .Where(v => v.Timestamp >= start.Value)
                     .CountAsync();
             }
+            else
+            {
+                count = await _context.Visitors.CountAsync();
+            }
 
-            return await _context.Visitors.CountAsync();
+            await _cacheService.SetAsync(cacheKey, count, TimeSpan.FromMinutes(1));
+            return count;
         }
 
         public async Task<int> GetUniqueVisitors(DateTime? start = null)
         {
+            var cacheKey = GetUniqueVisitorsKey(start);
+            var cached = await _cacheService.GetAsync<int?>(cacheKey);
+            if (cached.HasValue)
+                return cached.Value;
+
+            int count;
             if (start.HasValue)
             {
-                return await _context.Visitors
+                count = await _context.Visitors
                     .Where(v => v.Timestamp >= start.Value)
                     .Select(v => v.Ip)
                     .Distinct()
                     .CountAsync();
             }
+            else
+            {
+                count = await _context.Visitors
+                    .Select(v => v.Ip)
+                    .Distinct()
+                    .CountAsync();
+            }
 
-            return await _context.Visitors
-                .Select(v => v.Ip)
-                .Distinct()
-                .CountAsync();
+            await _cacheService.SetAsync(cacheKey, count, TimeSpan.FromMinutes(1));
+            return count;
         }
 
         public async Task<Visitor?> GetVisitorBySessionId(Guid sessionId)
