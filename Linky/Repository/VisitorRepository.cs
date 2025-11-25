@@ -1,5 +1,6 @@
 ﻿using Linky.DataLayer;
 using Linky.DTOs;
+using Linky.Mappers;
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Models;
@@ -39,18 +40,7 @@ namespace Linky.Repository
             }
 
             // Insert new visitor (reuse provided Id when available)
-            var newVisitor = new Visitor
-            {
-                Id = visitor.Id == Guid.Empty ? Guid.NewGuid() : visitor.Id,
-                Path = visitor.Path,
-                Timestamp = visitor.Timestamp,
-                Ip = visitor.Ip,
-                Country = visitor.Country,
-                City = visitor.City,
-                Referer = visitor.Referer,
-                IsUnique = visitor.IsUnique,
-                UserAgent = visitor.UserAgent
-            };
+            var newVisitor = VisitorMapper.ToModel(visitor);
 
             _context.Visitors.Add(newVisitor);
             await _context.SaveChangesAsync();
@@ -66,7 +56,7 @@ namespace Linky.Repository
             var visitorCacheKey = GetCacheKey(newVisitor.Id.ToString());
             await _cacheService.SetAsync(visitorCacheKey, newVisitor, TimeSpan.FromMinutes(10));
 
-            // Invalidate visitor stats caches so dashboards reflect recent writes
+            // invalidate visitor stats caches so dashboards reflect recent writes
             await _cacheService.RemoveAsync("visitorstats:today");
             await _cacheService.RemoveAsync("visitorstats:7days");
             await _cacheService.RemoveAsync("visitorstats:30days");

@@ -2,6 +2,7 @@
 using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
+using Linky.Mappers;
 using Microsoft.EntityFrameworkCore;
 using QRCoder;
 using System.Text;
@@ -23,15 +24,7 @@ namespace Linky.Repository
 
         public async Task<Linky.Models.QRCode> CreateAsync(QRCodeDto dto)
         {
-            var entity = new Linky.Models.QRCode
-            {
-                Id = Guid.NewGuid(),
-                CreatedAt = DateTime.UtcNow,
-                ExpirationDate = dto.ExpirationDate,
-                IsActive = true,
-                LastScannedAt = DateTime.MinValue,
-                ScanCount = 0
-            };
+            var entity = QRCodeMapper.FromDto(dto);
 
             _context.QRCodes.Add(entity);
             await _context.SaveChangesAsync();

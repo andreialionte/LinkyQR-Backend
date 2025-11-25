@@ -3,6 +3,7 @@ using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Models;
+using Linky.Mappers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -68,17 +69,8 @@ namespace Linky.Repository
             // Get client IP from HttpContext
             var clientIp = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-            // Create the entity to save in the database
-            var entity = new URLShortener
-            {
-                OriginalUrl = dto.OriginalUrl,
-                ShortenedUrl = shortCode,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true,
-                TotalClicks = 0,
-                LastIp = clientIp,
-                ClickedAt = DateTime.UtcNow
-            };
+            var entity = URLShortenerMapper.FromDtoToEntity(dto, shortCode);
+            entity.LastIp = clientIp;
 
             _context.URLShorteners.Add(entity);
             await _context.SaveChangesAsync();
@@ -127,7 +119,7 @@ namespace Linky.Repository
 
             await _context.SaveChangesAsync();
 
-            // Invalidate cache
+            // invalidate cache
             await _cacheService.RemoveAsync($"urlshortener:GetByCode:{code}");
         }
 

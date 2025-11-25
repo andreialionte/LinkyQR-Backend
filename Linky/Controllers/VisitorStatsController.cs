@@ -1,5 +1,6 @@
 ﻿using Linky.IRepository;
 using Linky.IService;
+using Linky.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linky.Controllers
@@ -46,15 +47,17 @@ namespace Linky.Controllers
                 return Ok(responseLive);
             }
 
-            var response = new
-            {
-                totalVisits = stats.TotalVisits,
-                uniqueVisitors = stats.UniqueVisitors,
-                stats
-            };
+                var statsDto = VisitorStatsMapper.ToDto(stats);
 
-            await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
-            return Ok(response);
+                var response = new
+                {
+                    totalVisits = stats.TotalVisits,
+                    uniqueVisitors = stats.UniqueVisitors,
+                    stats = statsDto
+                };
+
+                await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+                return Ok(response);
         }
 
 
@@ -70,10 +73,11 @@ namespace Linky.Controllers
             var start = end.AddDays(-6);
 
             var stats = (await _statsRepo.GetStatsRange(start, end)).ToList();
-            var totalVisits = stats.Sum(s => s.TotalVisits);
-            var uniqueVisitors = stats.Sum(s => s.UniqueVisitors);
+            var dtoList = stats.Select(VisitorStatsMapper.ToDto).ToList();
+            var totalVisits = dtoList.Sum(s => s.TotalVisits);
+            var uniqueVisitors = dtoList.Sum(s => s.UniqueVisitors);
 
-            var response = new { totalVisits, uniqueVisitors, stats };
+            var response = new { totalVisits, uniqueVisitors, stats = dtoList };
             await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
 
             return Ok(response);
@@ -91,10 +95,11 @@ namespace Linky.Controllers
             var start = end.AddDays(-29);
 
             var stats = (await _statsRepo.GetStatsRange(start, end)).ToList();
-            var totalVisits = stats.Sum(s => s.TotalVisits);
-            var uniqueVisitors = stats.Sum(s => s.UniqueVisitors);
+            var dtoList = stats.Select(VisitorStatsMapper.ToDto).ToList();
+            var totalVisits = dtoList.Sum(s => s.TotalVisits);
+            var uniqueVisitors = dtoList.Sum(s => s.UniqueVisitors);
 
-            var response = new { totalVisits, uniqueVisitors, stats };
+            var response = new { totalVisits, uniqueVisitors, stats = dtoList };
             await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
 
             return Ok(response);

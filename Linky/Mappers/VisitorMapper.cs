@@ -22,7 +22,7 @@ namespace Linky.Mappers
         public static Visitor ToModel(VisitorDto dto) =>
             new Visitor
             {
-                Id = Guid.NewGuid(),
+                Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
                 Path = dto.Path,
                 Timestamp = dto.Timestamp,
                 Ip = dto.Ip,

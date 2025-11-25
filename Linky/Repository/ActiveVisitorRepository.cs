@@ -66,16 +66,7 @@ namespace Linky.Repository
             else
             {
                 // New SessionId → INSERT
-                var newVisitor = new ActiveVisitor
-                {
-                    SessionId = visitorDto.SessionId,
-                    Ip = visitorDto.Ip,
-                    CurrentPath = visitorDto.CurrentPath,
-                    LastSeenUtc = visitorDto.LastSeenUtc,
-                    Country = visitorDto.Country,
-                    City = visitorDto.City,
-                    UserAgent = visitorDto.UserAgent
-                };
+                var newVisitor = ActiveVisitorMapping.ToModel(visitorDto);
 
                 _context.ActiveVisitors.Add(newVisitor);
                 await _context.SaveChangesAsync();

@@ -1,4 +1,5 @@
 ﻿using Linky.DTOs;
+using Linky.Mappers;
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Utils;
@@ -45,7 +46,8 @@ namespace Linky.Controllers
         {
             var visitor = await _visitorRepo.GetVisitorBySessionId(visitorId);
             if (visitor == null) return NotFound();
-            return Ok(visitor);
+            var dto = VisitorMapper.ToDto(visitor);
+            return Ok(dto);
         }
 
         [HttpGet("RecentVisitors")]
@@ -54,7 +56,8 @@ namespace Linky.Controllers
             var visitors = await _visitorRepo.GetRecentVisitors(limit);
             if (visitors == null || !visitors.Any())
                 return NotFound("No visitors found.");
-            return Ok(visitors);
+            var dtos = visitors.Select(VisitorMapper.ToDto);
+            return Ok(dtos);
         }
     }
 }

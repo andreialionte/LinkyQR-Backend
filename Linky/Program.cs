@@ -101,11 +101,11 @@ namespace Linky
                 var jobKey2 = new JobKey("AggregateVisitorStatsJob");
                 q.AddJob<AggregateVisitorStats>(opts => opts.WithIdentity(jobKey2));
 
-                // Trigger: run daily at 00:05 UTC
+                // Trigger: run daily at 06:00 UTC (aggregates previous 06:00 -> current 06:00 window)
                 q.AddTrigger(opts => opts
                     .ForJob(jobKey2)
                     .WithIdentity("AggregateVisitorStatsTrigger")
-                    .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 5))
+                    .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(6, 0))
                     );
             });
 
