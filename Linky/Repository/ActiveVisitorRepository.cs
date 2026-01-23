@@ -61,7 +61,7 @@ namespace Linky.Repository
                 _context.ActiveVisitors.Update(existing);
                 await _context.SaveChangesAsync();
 
-                // update may affect cached list/order → invalidate caches
+                // update may affect cached list/order invalidate caches
                 await _cacheService.RemoveAsync(VISITORS_LIST_KEY);
                 await _cacheService.RemoveAsync(VISITOR_COUNT_KEY);
 
