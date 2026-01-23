@@ -61,6 +61,13 @@ namespace Linky.Repository
             await _cacheService.RemoveAsync("visitorstats:7days");
             await _cacheService.RemoveAsync("visitorstats:30days");
 
+            // ???? also invalidate common visitors range caches covering today / recent windows
+            var startToday = DateTime.UtcNow.Date;
+            var now = DateTime.UtcNow;
+            await _cacheService.RemoveAsync(GetVisitorsRangeKey(startToday, now));
+            await _cacheService.RemoveAsync(GetVisitorsRangeKey(startToday.AddDays(-6), now));
+            await _cacheService.RemoveAsync(GetVisitorsRangeKey(startToday.AddDays(-29), now));
+
         }
 
         public async Task<IEnumerable<Visitor>> GetRecentVisitors(int limit = 100)

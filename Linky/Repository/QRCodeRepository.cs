@@ -28,6 +28,12 @@ namespace Linky.Repository
 
             _context.QRCodes.Add(entity);
             await _context.SaveChangesAsync();
+
+            // invalidate cached lists and content lookups so new QR appears in lists
+            await _cacheService.RemoveAsync("QRCode:All");
+            if (!string.IsNullOrEmpty(entity.Content))
+                await _cacheService.RemoveAsync($"QRCode:Content:{entity.Content}");
+
             return entity;
         }
 
@@ -108,12 +114,18 @@ namespace Linky.Repository
             var qrCode = await _context.QRCodes.FirstOrDefaultAsync(q => q.Id == id);
             if (qrCode == null) throw new InvalidOperationException($"QR code with ID {id} not found");
 
+            var oldContent = qrCode.Content;
             qrCode.Content = content;
             await _context.SaveChangesAsync();
 
-            // Invalidate cache
+            // invalidate cache entries for id, old content (if any), new content and list
             var cacheKey = $"QRCode:{id}";
             await _cacheService.RemoveAsync(cacheKey);
+            if (!string.IsNullOrEmpty(oldContent))
+                await _cacheService.RemoveAsync($"QRCode:Content:{oldContent}");
+            if (!string.IsNullOrEmpty(content))
+                await _cacheService.RemoveAsync($"QRCode:Content:{content}");
+            await _cacheService.RemoveAsync("QRCode:All");
         }
 
         public async Task<byte[]> GenerateQrCodeImageAsync(string text, IFormFile? logoFile = null, int pixelsPerModule = 20)

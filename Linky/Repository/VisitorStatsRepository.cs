@@ -2,6 +2,7 @@
 using Linky.IRepository;
 using Linky.Models;
 using Linky.Mappers;
+using Linky.IService;
 using Microsoft.EntityFrameworkCore;
 
 namespace Linky.Repository
@@ -9,10 +10,12 @@ namespace Linky.Repository
     public class VisitorStatsRepository : IVisitorStatsRepository
     {
         private readonly DataContextEf _context;
+        private readonly ICacheService _cacheService;
 
-        public VisitorStatsRepository(DataContextEf context)
+        public VisitorStatsRepository(DataContextEf context, ICacheService cacheService)
         {
             _context = context;
+            _cacheService = cacheService;
         }
 
         public async Task AggregateStatsForDate(DateOnly date)
@@ -79,6 +82,21 @@ namespace Linky.Repository
             }
 
             await _context.SaveChangesAsync();
+
+            // invalidate visitor stats caches for affected ranges so controllers serve fresh data
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (date == today)
+            {
+                await _cacheService.RemoveAsync("visitorstats:today");
+            }
+            if (date >= today.AddDays(-6))
+            {
+                await _cacheService.RemoveAsync("visitorstats:7days");
+            }
+            if (date >= today.AddDays(-29))
+            {
+                await _cacheService.RemoveAsync("visitorstats:30days");
+            }
         }
 
         public async Task AggregateStatsForRange(DateTime startUtc, DateTime endUtc)
@@ -137,6 +155,21 @@ namespace Linky.Repository
             }
 
             await _context.SaveChangesAsync();
+
+            // invalidate visitor stats caches for affected ranges so controllers serve fresh data
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (dateKey == today)
+            {
+                await _cacheService.RemoveAsync("visitorstats:today");
+            }
+            if (dateKey >= today.AddDays(-6))
+            {
+                await _cacheService.RemoveAsync("visitorstats:7days");
+            }
+            if (dateKey >= today.AddDays(-29))
+            {
+                await _cacheService.RemoveAsync("visitorstats:30days");
+            }
         }
 
         public async Task<VisitorStats?> GetStatsForDate(DateOnly date)

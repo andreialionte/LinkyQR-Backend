@@ -75,7 +75,10 @@ namespace Linky.Repository
             _context.URLShorteners.Add(entity);
             await _context.SaveChangesAsync();
 
-            return entity;
+            // invalidate cache for lookup by code so next GetByCode returns fresh entity
+            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{entity.ShortenedUrl}");
+
+            return entity; 
         }
 
         public async Task<URLShortener?> GetByCode(string code)
