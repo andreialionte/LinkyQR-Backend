@@ -24,8 +24,9 @@ namespace Linky.Repository
             var startDateTime = date.ToDateTime(TimeOnly.MinValue);
             var endDateTime = date.AddDays(1).ToDateTime(TimeOnly.MinValue);
 
-            // query visitors for the day
+            // query visitors for the day (no change tracking for heavy scans)
             var visitorsQuery = _context.Visitors
+                .AsNoTracking()
                 .Where(v => v.Timestamp >= startDateTime && v.Timestamp < endDateTime);
 
             var totalVisits = await visitorsQuery.CountAsync();
@@ -102,6 +103,7 @@ namespace Linky.Repository
         public async Task AggregateStatsForRange(DateTime startUtc, DateTime endUtc)
         {
             var visitorsQuery = _context.Visitors
+                .AsNoTracking()
                 .Where(v => v.Timestamp >= startUtc && v.Timestamp < endUtc);
 
             var totalVisits = await visitorsQuery.CountAsync();

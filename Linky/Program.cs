@@ -101,11 +101,31 @@ namespace Linky
                 var jobKey2 = new JobKey("AggregateVisitorStatsJob");
                 q.AddJob<AggregateVisitorStats>(opts => opts.WithIdentity(jobKey2));
 
-                // Trigger: run daily at 06:00 UTC (aggregates previous 06:00 -> current 06:00 window)
+                // Trigger: run weekly at 05:00 Romania time (aggregates previous 05:00 -> current 05:00 window)
+                // Resolve Romania timezone in a cross-platform way (Linux: "Europe/Bucharest", Windows: "E. Europe Standard Time")
+                TimeZoneInfo romaniaTimeZone;
+                try
+                {
+                    romaniaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest");
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                    try
+                    {
+                        romaniaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. Europe Standard Time");
+                    }
+                    catch
+                    {
+                        // Fallback to UTC if Romania TZ cannot be found
+                        romaniaTimeZone = TimeZoneInfo.Utc;
+                    }
+                }
+
                 q.AddTrigger(opts => opts
                     .ForJob(jobKey2)
                     .WithIdentity("AggregateVisitorStatsTrigger")
-                    .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(6, 0))
+                    .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Monday, 5, 0)
+                        .InTimeZone(romaniaTimeZone))
                     );
             });
 

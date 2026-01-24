@@ -113,12 +113,15 @@ namespace Linky.Repository
             if (start.HasValue)
             {
                 count = await _context.Visitors
+                    .AsNoTracking()
                     .Where(v => v.Timestamp >= start.Value)
                     .CountAsync();
             }
             else
             {
-                count = await _context.Visitors.CountAsync();
+                count = await _context.Visitors
+                    .AsNoTracking()
+                    .CountAsync();
             }
 
             await _cacheService.SetAsync(cacheKey, count, TimeSpan.FromMinutes(1));
@@ -136,6 +139,7 @@ namespace Linky.Repository
             if (start.HasValue)
             {
                 count = await _context.Visitors
+                    .AsNoTracking()
                     .Where(v => v.Timestamp >= start.Value)
                     .Select(v => v.Ip)
                     .Distinct()
@@ -144,6 +148,7 @@ namespace Linky.Repository
             else
             {
                 count = await _context.Visitors
+                    .AsNoTracking()
                     .Select(v => v.Ip)
                     .Distinct()
                     .CountAsync();
