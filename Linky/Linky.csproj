@@ -56,6 +56,7 @@
     <PackageReference Include="NATS.Net" Version="2.7.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.15.1" />
+    <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
 	<PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.6" ExcludeAssets="All" />

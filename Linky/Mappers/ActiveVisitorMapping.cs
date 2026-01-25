@@ -1,33 +1,17 @@
 ﻿using Linky.DTOs;
 using Linky.Models;
+using Riok.Mapperly.Abstractions;
 
-namespace Linky.Mappers
+namespace Linky.Mappers;
+
+[Mapper]
+public partial class ActiveVisitorMapper
 {
-    public static class ActiveVisitorMapping
-    {
-        public static ActiveVisitorDto ToDto(ActiveVisitor model) =>
-            new(
-                model.SessionId,
-                model.Ip,
-                model.CurrentPath,
-                //model.PathHistory.AsReadOnly(),
-                model.LastSeenUtc,
-                model.Country,
-                model.City,
-                model.UserAgent
-            );
+    public partial ActiveVisitorDto ToDto(ActiveVisitor model);
 
-        public static ActiveVisitor ToModel(ActiveVisitorDto dto) =>
-            new ActiveVisitor
-            {
-                SessionId = dto.SessionId,
-                Ip = dto.Ip,
-                CurrentPath = dto.CurrentPath,
-                //PathHistory = dto.PathHistory.ToList(),
-                LastSeenUtc = dto.LastSeenUtc,
-                Country = dto.Country,
-                City = dto.City,
-                UserAgent = dto.UserAgent
-            };
-    }
+    [MapProperty(nameof(ActiveVisitorDto.SessionId), nameof(ActiveVisitor.SessionId), Use = nameof(MapSessionId))]
+    public partial ActiveVisitor ToModel(ActiveVisitorDto dto);
+
+    [UserMapping(Default = false)]
+    private Guid MapSessionId(Guid sessionId) => sessionId == Guid.Empty ? Guid.NewGuid() : sessionId;
 }

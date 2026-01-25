@@ -12,10 +12,12 @@ namespace Linky.Controllers
         private readonly IVisitorRepository _visitorRepo;
         private readonly IGeoIPService _geoIpService;
         private readonly IClientIp _clientIp;
+        private readonly VisitorMapper _mapper;
 
-        public VisitorController(IVisitorRepository visitorRepo, IGeoIPService geoIpSerive, IClientIp clientIp)
+        public VisitorController(IVisitorRepository visitorRepo, IGeoIPService geoIpSerive, IClientIp clientIp, VisitorMapper mapper)
         {
             _visitorRepo = visitorRepo;
+            _mapper = mapper;
             _geoIpService = geoIpSerive;
             _clientIp = clientIp;
         }
@@ -46,7 +48,7 @@ namespace Linky.Controllers
         {
             var visitor = await _visitorRepo.GetVisitorBySessionId(visitorId);
             if (visitor == null) return NotFound();
-            var dto = VisitorMapper.ToDto(visitor);
+            var dto = _mapper.ToDto(visitor);
             return Ok(dto);
         }
 
@@ -56,7 +58,7 @@ namespace Linky.Controllers
             var visitors = await _visitorRepo.GetRecentVisitors(limit);
             if (visitors == null || !visitors.Any())
                 return NotFound("No visitors found.");
-            var dtos = visitors.Select(VisitorMapper.ToDto);
+            var dtos = visitors.Select(_mapper.ToDto);
             return Ok(dtos);
         }
     }

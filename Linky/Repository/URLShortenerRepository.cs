@@ -16,12 +16,14 @@ namespace Linky.Repository
         private readonly DataContextEf _context;
         private readonly ICacheService _cacheService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly URLShortenerMapper _mapper;
 
-        public URLShortenerRepository(DataContextEf context, ICacheService cacheService, IHttpContextAccessor httpContextAccessor)
+        public URLShortenerRepository(DataContextEf context, ICacheService cacheService, IHttpContextAccessor httpContextAccessor, URLShortenerMapper mapper)
         {
             _context = context;
             _cacheService = cacheService;
             _httpContextAccessor = httpContextAccessor;
+            _mapper = mapper;
         }
 
         public async Task<URLShortener> CreateShortUrlAsync(URLShortenerDto dto, string? customAlias = null)
@@ -69,7 +71,7 @@ namespace Linky.Repository
             // Get client IP from HttpContext
             var clientIp = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-            var entity = URLShortenerMapper.FromDtoToEntity(dto, shortCode);
+            var entity = _mapper.FromDtoToEntity(dto, shortCode);
             entity.LastIp = clientIp;
 
             _context.URLShorteners.Add(entity);

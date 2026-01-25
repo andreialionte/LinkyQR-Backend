@@ -12,14 +12,16 @@ namespace Linky.Repository
     {
         private readonly DataContextEf _context;
         private readonly ICacheService _cacheService;
+        private readonly ActiveVisitorMapper _mapper;
 
         private const string VISITOR_COUNT_KEY = "active_visitor_count";
         private const string VISITORS_LIST_KEY = "active_visitors_list";
 
-        public ActiveVisitorRepository(DataContextEf context, ICacheService cacheService)
+        public ActiveVisitorRepository(DataContextEf context, ICacheService cacheService, ActiveVisitorMapper mapper)
         {
             _context = context;
             _cacheService = cacheService;
+            _mapper = mapper;
         }
 
         public async Task<IList<ActiveVisitorDto>> GetActiveVisitors()
@@ -35,7 +37,7 @@ namespace Linky.Repository
                 throw new Exception("No active visitors found");
             }
 
-            var visitors = result.Select(ActiveVisitorMapping.ToDto).ToList();
+            var visitors = result.Select(_mapper.ToDto).ToList();
             await _cacheService.SetAsync(VISITORS_LIST_KEY, visitors, TimeSpan.FromSeconds(41));
 
             return visitors;
@@ -65,12 +67,12 @@ namespace Linky.Repository
                 await _cacheService.RemoveAsync(VISITORS_LIST_KEY);
                 await _cacheService.RemoveAsync(VISITOR_COUNT_KEY);
 
-                return ActiveVisitorMapping.ToDto(existing);
+                return _mapper.ToDto(existing);
             }
             else
             {
                 // New SessionId → INSERT
-                var newVisitor = ActiveVisitorMapping.ToModel(visitorDto);
+                var newVisitor = _mapper.ToModel(visitorDto);
 
                 _context.ActiveVisitors.Add(newVisitor);
                 await _context.SaveChangesAsync();
@@ -79,7 +81,7 @@ namespace Linky.Repository
                 await _cacheService.RemoveAsync(VISITOR_COUNT_KEY);
                 await _cacheService.RemoveAsync(VISITORS_LIST_KEY);
 
-                return ActiveVisitorMapping.ToDto(newVisitor);
+                return _mapper.ToDto(newVisitor);
             }
         }
 

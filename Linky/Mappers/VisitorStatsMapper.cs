@@ -1,28 +1,24 @@
 ﻿using Linky.Models;
 using Linky.DTOs;
+using Riok.Mapperly.Abstractions;
 
-namespace Linky.Mappers
+namespace Linky.Mappers;
+
+[Mapper]
+public partial class VisitorStatsMapper
 {
-    public static class VisitorStatsMapper
-    {
-        public static VisitorStatsDto ToDto(VisitorStats stats) =>
-            new(
-                stats.Date,
-                stats.TotalVisits,
-                stats.UniqueVisitors,
-                new Dictionary<string, int>(stats.TopPages),
-                new Dictionary<string, int>(stats.TopCountries)
-            );
+    [MapperIgnoreSource(nameof(VisitorStats.Id))]
+    [MapProperty(nameof(VisitorStats.TopPages), nameof(VisitorStatsDto.TopPages), Use = nameof(CopyDictionary))]
+    [MapProperty(nameof(VisitorStats.TopCountries), nameof(VisitorStatsDto.TopCountries), Use = nameof(CopyDictionary))]
+    public partial VisitorStatsDto ToDto(VisitorStats stats);
 
-        public static VisitorStats ToModel(VisitorStatsDto dto) =>
-            new VisitorStats
-            {
-                Id = Guid.NewGuid(),
-                Date = dto.Date,
-                TotalVisits = dto.TotalVisits,
-                UniqueVisitors = dto.UniqueVisitors,
-                TopPages = new Dictionary<string, int>(dto.TopPages),
-                TopCountries = new Dictionary<string, int>(dto.TopCountries)
-            };
-    }
+    [MapperIgnoreTarget(nameof(VisitorStats.Id))]
+    [MapProperty(nameof(VisitorStatsDto.TopPages), nameof(VisitorStats.TopPages), Use = nameof(CopyDictionary))]
+    [MapProperty(nameof(VisitorStatsDto.TopCountries), nameof(VisitorStats.TopCountries), Use = nameof(CopyDictionary))]
+    public partial VisitorStats ToModel(VisitorStatsDto dto);
+
+    [UserMapping(Default = false)]
+    private Dictionary<string, int> CopyDictionary(Dictionary<string, int> source) => new Dictionary<string, int>(source);
+
+    private Guid CreateNewId() => Guid.NewGuid();
 }

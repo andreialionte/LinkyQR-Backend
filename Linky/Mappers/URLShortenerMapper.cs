@@ -1,27 +1,28 @@
 ﻿using Linky.DTOs;
 using Linky.Models;
+using Riok.Mapperly.Abstractions;
 
-namespace Linky.Mappers
+namespace Linky.Mappers;
+
+[Mapper]
+public partial class URLShortenerMapper
 {
-    public static class URLShortenerMapper
+    public URLShortener FromDtoToEntity(URLShortenerDto dto, string shortenedUrl)
     {
-        public static URLShortener FromDtoToEntity(URLShortenerDto dto, string shortenedUrl)
+        return new URLShortener
         {
-            return new URLShortener
-            {
-                Id = Guid.NewGuid(),
-                OriginalUrl = dto.OriginalUrl,
-                ShortenedUrl = shortenedUrl,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true,
-                LastIp = dto.ClientIp ?? "unknown",
-                LastCountry = dto.Country,
-                LastCity = dto.City,
-                ClickedAt = DateTime.UtcNow,
-                UserAgent = dto.UserAgent,
-                Referrer = dto.Referrer,
-                TotalClicks = 0
-            };
-        }
+            Id = Guid.NewGuid(),
+            OriginalUrl = dto.OriginalUrl,
+            ShortenedUrl = shortenedUrl,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true,
+            LastIp = dto.ClientIp ?? "unknown",
+            LastCountry = dto.Country,
+            LastCity = dto.City,
+            UserAgent = dto.UserAgent,
+            Referrer = dto.Referrer,
+            ClickedAt = DateTime.UtcNow,
+            TotalClicks = 0
+        };
     }
 }

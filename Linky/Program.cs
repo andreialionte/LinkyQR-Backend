@@ -2,6 +2,7 @@
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Jobs;
+using Linky.Mappers;
 using Linky.Middlewares.Linky.Middleware;
 using Linky.Repository;
 using Linky.Service;
@@ -45,6 +46,13 @@ namespace Linky
             builder.Services.AddScoped<IVisitorRepository, VisitorRepository>();
             builder.Services.AddScoped<IVisitorStatsRepository, VisitorStatsRepository>();
             builder.Services.AddScoped<IQRCodeRepository, QRCodeRepository>();
+
+            // Register Mapperly mappers
+            builder.Services.AddSingleton<VisitorMapper>();
+            builder.Services.AddSingleton<VisitorStatsMapper>();
+            builder.Services.AddSingleton<QRCodeMapper>();
+            builder.Services.AddSingleton<URLShortenerMapper>();
+            builder.Services.AddSingleton<ActiveVisitorMapper>();
 
             builder.Services.AddHttpContextAccessor(); //for ips etc i thhink
             builder.Services.AddScoped<IClientIp, ClientIp>();

@@ -10,12 +10,14 @@ namespace Linky.Controllers
         private readonly IVisitorStatsRepository _statsRepo;
         private readonly ICacheService _cacheService;
         private readonly IVisitorRepository _visitorRepo;
+        private readonly VisitorStatsMapper _mapper;
 
-        public VisitorStatsController(IVisitorStatsRepository statsRepo, ICacheService cacheService, IVisitorRepository visitorRepo)
+        public VisitorStatsController(IVisitorStatsRepository statsRepo, ICacheService cacheService, IVisitorRepository visitorRepo, VisitorStatsMapper mapper)
         {
             _statsRepo = statsRepo;
             _cacheService = cacheService;
             _visitorRepo = visitorRepo;
+            _mapper = mapper;
         }
 
         [HttpGet("Today")]
@@ -47,7 +49,7 @@ namespace Linky.Controllers
                 return Ok(responseLive);
             }
 
-                var statsDto = VisitorStatsMapper.ToDto(stats);
+                var statsDto = _mapper.ToDto(stats);
 
                 var response = new
                 {
@@ -73,7 +75,7 @@ namespace Linky.Controllers
             var start = end.AddDays(-6);
 
             var stats = (await _statsRepo.GetStatsRange(start, end)).ToList();
-            var dtoList = stats.Select(VisitorStatsMapper.ToDto).ToList();
+            var dtoList = stats.Select(_mapper.ToDto).ToList();
             var totalVisits = dtoList.Sum(s => s.TotalVisits);
             var uniqueVisitors = dtoList.Sum(s => s.UniqueVisitors);
 
@@ -95,7 +97,7 @@ namespace Linky.Controllers
             var start = end.AddDays(-29);
 
             var stats = (await _statsRepo.GetStatsRange(start, end)).ToList();
-            var dtoList = stats.Select(VisitorStatsMapper.ToDto).ToList();
+            var dtoList = stats.Select(_mapper.ToDto).ToList();
             var totalVisits = dtoList.Sum(s => s.TotalVisits);
             var uniqueVisitors = dtoList.Sum(s => s.UniqueVisitors);
 

@@ -1,36 +1,17 @@
 ﻿using Linky.DTOs;
 using Linky.Models;
+using Riok.Mapperly.Abstractions;
 
-namespace Linky.Mappers
-{ // https://vitorafgomes.medium.com/automapper-vs-manual-mapping-in-net-c7b2e81a199c
-    public static class VisitorMapper
-    {
-        public static VisitorDto ToDto(Visitor visitor) =>
-            new(
-                visitor.Id,
-                visitor.Path,
-                visitor.Timestamp,
-                visitor.Ip,
-                visitor.Country,
-                visitor.City,
-                visitor.Referer,
-                visitor.IsUnique,
-                visitor.UserAgent
-            //visitor.SessionId
-            );
+namespace Linky.Mappers;
 
-        public static Visitor ToModel(VisitorDto dto) =>
-            new Visitor
-            {
-                Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
-                Path = dto.Path,
-                Timestamp = dto.Timestamp,
-                Ip = dto.Ip,
-                Country = dto.Country,
-                City = dto.City,
-                Referer = dto.Referer,
-                IsUnique = dto.IsUnique,
-                UserAgent = dto.UserAgent
-            };
-    }
+[Mapper]
+public partial class VisitorMapper
+{
+    public partial VisitorDto ToDto(Visitor visitor);
+
+    [MapProperty(nameof(VisitorDto.Id), nameof(Visitor.Id), Use = nameof(MapId))]
+    public partial Visitor ToModel(VisitorDto dto);
+
+    [UserMapping(Default = false)]
+    private Guid MapId(Guid id) => id == Guid.Empty ? Guid.NewGuid() : id;
 }

@@ -11,11 +11,13 @@ namespace Linky.Repository
     {
         private readonly DataContextEf _context;
         private readonly ICacheService _cacheService;
+        private readonly VisitorStatsMapper _mapper;
 
-        public VisitorStatsRepository(DataContextEf context, ICacheService cacheService)
+        public VisitorStatsRepository(DataContextEf context, ICacheService cacheService, VisitorStatsMapper mapper)
         {
             _context = context;
             _cacheService = cacheService;
+            _mapper = mapper;
         }
 
         public async Task AggregateStatsForDate(DateOnly date)
@@ -78,7 +80,7 @@ namespace Linky.Repository
             else
             {
                 var dto = new DTOs.VisitorStatsDto(date, totalVisits, uniqueVisitors, topPages, topCountries);
-                var newStats = VisitorStatsMapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
+                var newStats = _mapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
                 await _context.VisitorStats.AddAsync(newStats);
             }
 
@@ -152,7 +154,7 @@ namespace Linky.Repository
             else
             {
                 var dto = new DTOs.VisitorStatsDto(dateKey, totalVisits, uniqueVisitors, topPages, topCountries);
-                var newStats = VisitorStatsMapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
+                var newStats = _mapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
                 await _context.VisitorStats.AddAsync(newStats);
             }
 

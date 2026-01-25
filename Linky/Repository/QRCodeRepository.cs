@@ -15,16 +15,18 @@ namespace Linky.Repository
     {
         private readonly DataContextEf _context;
         private readonly ICacheService _cacheService;
+        private readonly QRCodeMapper _mapper;
 
-        public QRCodeRepository(DataContextEf context, ICacheService cacheService)
+        public QRCodeRepository(DataContextEf context, ICacheService cacheService, QRCodeMapper mapper)
         {
             _context = context;
             _cacheService = cacheService;
+            _mapper = mapper;
         }
 
         public async Task<Linky.Models.QRCode> CreateAsync(QRCodeDto dto)
         {
-            var entity = QRCodeMapper.FromDto(dto);
+            var entity = _mapper.FromDto(dto);
 
             _context.QRCodes.Add(entity);
             await _context.SaveChangesAsync();

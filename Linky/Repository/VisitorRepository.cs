@@ -13,11 +13,13 @@ namespace Linky.Repository
         private static string GetCacheKey(string sessionId) => $"visitor:{sessionId}";
         private readonly DataContextEf _context;
         private readonly ICacheService _cacheService;
+        private readonly VisitorMapper _mapper;
 
-        public VisitorRepository(DataContextEf context, ICacheService cacheService)
+        public VisitorRepository(DataContextEf context, ICacheService cacheService, VisitorMapper mapper)
         {
             _context = context;
             _cacheService = cacheService;
+            _mapper = mapper;
         }
 
         private static string GetRecentVisitorsKey(int limit) => $"visitors:recent:{limit}";
@@ -40,7 +42,7 @@ namespace Linky.Repository
             }
 
             // Insert new visitor (reuse provided Id when available)
-            var newVisitor = VisitorMapper.ToModel(visitor);
+            var newVisitor = _mapper.ToModel(visitor);
 
             _context.Visitors.Add(newVisitor);
             await _context.SaveChangesAsync();
