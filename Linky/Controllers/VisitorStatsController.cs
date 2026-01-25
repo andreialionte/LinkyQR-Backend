@@ -33,13 +33,8 @@ namespace Linky.Controllers
             {
                 // Fallback: compute live from Visitors table for today
                 var start = DateTime.UtcNow.Date;
-
-                // counts in parallel(multithreadding) to reduce overall latency on cache miss
-                var totalTask = _visitorRepo.GetTotalVisits(start);
-                var uniqueTask = _visitorRepo.GetUniqueVisitors(start);
-                await Task.WhenAll(totalTask, uniqueTask);
-                var totalVisits = totalTask.Result;
-                var uniqueVisitors = uniqueTask.Result;
+                var totalVisits = await _visitorRepo.GetTotalVisits(start);
+                var uniqueVisitors = await _visitorRepo.GetUniqueVisitors(start);
 
                 var responseLive = new
                 {
