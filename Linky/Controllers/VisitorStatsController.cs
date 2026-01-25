@@ -45,7 +45,7 @@ namespace Linky.Controllers
                     stats = (object?)null
                 };
 
-                await _cacheService.SetAsync(cacheKey, responseLive, TimeSpan.FromMinutes(1));
+                await _cacheService.SetAsync(cacheKey, responseLive, TimeSpan.FromMinutes(5));
                 return Ok(responseLive);
             }
 
@@ -58,7 +58,7 @@ namespace Linky.Controllers
                     stats = statsDto
                 };
 
-                await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+                await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(30));
                 return Ok(response);
         }
 
@@ -80,7 +80,7 @@ namespace Linky.Controllers
             var uniqueVisitors = dtoList.Sum(s => s.UniqueVisitors);
 
             var response = new { totalVisits, uniqueVisitors, stats = dtoList };
-            await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+            await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromHours(1));
 
             return Ok(response);
         }
@@ -102,7 +102,7 @@ namespace Linky.Controllers
             var uniqueVisitors = dtoList.Sum(s => s.UniqueVisitors);
 
             var response = new { totalVisits, uniqueVisitors, stats = dtoList };
-            await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10));
+            await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromHours(2));
 
             return Ok(response);
         }
