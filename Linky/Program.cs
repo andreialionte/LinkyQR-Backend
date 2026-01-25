@@ -100,10 +100,9 @@ namespace Linky
                 q.AddTrigger(opts =>
                     opts.ForJob(jobKey)
                         .WithIdentity("ActiveVisitorJob-trigger")
-                        .StartNow() //run when app starts
                         .WithSimpleSchedule(x => x
                             .WithIntervalInSeconds(intervalSeconds)
-                            .WithMisfireHandlingInstructionFireNow()
+                            .WithMisfireHandlingInstructionIgnoreMisfires()
                             .RepeatForever()));
 
                 var jobKey2 = new JobKey("AggregateVisitorStatsJob");
@@ -133,7 +132,8 @@ namespace Linky
                     .ForJob(jobKey2)
                     .WithIdentity("AggregateVisitorStatsTrigger")
                     .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Monday, 5, 0)
-                        .InTimeZone(romaniaTimeZone))
+                        .InTimeZone(romaniaTimeZone)
+                        .WithMisfireHandlingInstructionDoNothing()) // Don't run missed schedules on startup
                     );
             });
 
