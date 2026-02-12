@@ -1,4 +1,5 @@
-﻿using Linky.DataLayer;
+﻿using Delta;
+using Linky.DataLayer;
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Jobs;
@@ -16,6 +17,7 @@ using OwaspHeaders.Core.Extensions;
 using Quartz;
 using StackExchange.Redis;
 using System.Text.Json;
+using System.Data;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson;
 
@@ -250,13 +252,12 @@ namespace Linky
 
                 }
             }
-
+            // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
+            app.UseDelta<DataContextEf>();
 
 
             app.UseCors("main");
 
-            // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
-            //app.UseDelta();
 
 
             app.MapHealthChecks("/health", new HealthCheckOptions  //for uptime_percentage health
