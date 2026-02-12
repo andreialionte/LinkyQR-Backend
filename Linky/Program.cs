@@ -300,6 +300,16 @@ namespace Linky
 
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             app.UseDelta<DataContextEf>();
+            app.Use(async (context, next) =>
+            {
+                await next();
+
+                if (context.Response.Headers.ContainsKey("ETag"))
+                {
+                    context.Response.Headers["Cache-Control"] = "no-cache";
+                }
+            });
+
 
             //app.UseRateLimiter();
 
