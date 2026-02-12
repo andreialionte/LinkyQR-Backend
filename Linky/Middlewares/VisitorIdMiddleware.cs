@@ -13,11 +13,15 @@
 
         public async Task InvokeAsync(HttpContext context)
         {
+            var allCookies = string.Join(", ", context.Request.Cookies.Select(c => $"{c.Key}={c.Value}"));
+            _logger.LogWarning($"[MIDDLEWARE] ALL COOKIES: {allCookies}");
+
             if (!context.Request.Cookies.TryGetValue("VisitorId", out var existingVisitorId) ||
                 string.IsNullOrEmpty(existingVisitorId))
             {
                 var visitorId = Guid.NewGuid().ToString();
-                //  deoarece visitorId se tot restarta la fiecare refresh
+                _logger.LogWarning($"[MIDDLEWARE] NO VisitorId! Creating new: {visitorId}");
+
                 var cookieOptions = new CookieOptions
                 {
                     Expires = DateTimeOffset.UtcNow.AddYears(1),
@@ -27,15 +31,14 @@
                     Path = "/",
                     IsEssential = true
                 };
-
                 context.Response.Cookies.Append("VisitorId", visitorId, cookieOptions);
                 context.Items["VisitorId"] = visitorId;
             }
             else
             {
+                _logger.LogWarning($"[MIDDLEWARE] FOUND VisitorId: {existingVisitorId}");
                 context.Items["VisitorId"] = existingVisitorId;
             }
-
             await _next(context);
         }
     }
