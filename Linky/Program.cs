@@ -16,8 +16,8 @@ using Newtonsoft.Json;
 using OwaspHeaders.Core.Extensions;
 using Quartz;
 using StackExchange.Redis;
-using System.Text.Json;
 using System.Data;
+using System.Text.Json;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson;
 
@@ -252,8 +252,7 @@ namespace Linky
 
                 }
             }
-            // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
-            app.UseDelta<DataContextEf>();
+
 
 
             app.UseCors("main");
@@ -297,7 +296,10 @@ namespace Linky
 
 
             //app.UseSecurityHeaders(); // https://github.com/andrewlock/NetEscapades.AspNetCore.SecurityHeaders
-            app.UseSecureHeadersMiddleware(); //https://www.nuget.org/packages/OwaspHeaders.Core
+            //app.UseSecureHeadersMiddleware(); //https://www.nuget.org/packages/OwaspHeaders.Core
+
+            // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
+            app.UseDelta<DataContextEf>();
 
             //app.UseRateLimiter();
 
