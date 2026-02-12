@@ -291,7 +291,6 @@ namespace Linky
 
             //app.MapReverseProxy();
 
-            app.UseMiddleware<VisitorIdMiddleware>();
             app.MapHub<ActiveVisitorsHub>("/ActiveVisitorsHub");
 
 
@@ -302,13 +301,18 @@ namespace Linky
             app.UseDelta<DataContextEf>();
             app.Use(async (context, next) =>
             {
-                await next();
-
-                if (context.Response.Headers.ContainsKey("ETag"))
+                context.Response.OnStarting(() =>
                 {
-                    context.Response.Headers["Cache-Control"] = "no-cache";
-                }
+                    if (context.Response.Headers.ContainsKey("ETag"))
+                    {
+                        context.Response.Headers["Cache-Control"] = "no-cache";
+                    }
+                    return Task.CompletedTask;
+                });
+
+                await next();
             });
+            app.UseMiddleware<VisitorIdMiddleware>();
 
 
             //app.UseRateLimiter();
