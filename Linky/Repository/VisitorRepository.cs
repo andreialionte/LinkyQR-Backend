@@ -1,8 +1,8 @@
 ﻿using Linky.DataLayer;
 using Linky.DTOs;
-using Linky.Mappers;
 using Linky.IRepository;
 using Linky.IService;
+using Linky.Mappers;
 using Linky.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,7 +29,25 @@ namespace Linky.Repository
 
         public async Task AddVisitor(VisitorDto visitor)
         {
-            // Check if this IP already visited this path recently (ex: last 30 minutes)
+            if (visitor.Id != Guid.Empty)
+            {
+                var existingById = await _context.Visitors.FirstOrDefaultAsync(v => v.Id == visitor.Id);
+                if (existingById != null)
+                {
+                    existingById.Timestamp = visitor.Timestamp;
+                    existingById.Path = visitor.Path ?? existingById.Path;
+                    existingById.Ip = visitor.Ip ?? existingById.Ip;
+                    existingById.Country = visitor.Country ?? existingById.Country;
+                    existingById.City = visitor.City ?? existingById.City;
+                    existingById.UserAgent = visitor.UserAgent ?? existingById.UserAgent;
+                    await _context.SaveChangesAsync();
+
+                    var visitorCacheKey = GetCacheKey(existingById.Id.ToString());
+                    await _cacheService.SetAsync(visitorCacheKey, existingById, TimeSpan.FromMinutes(10));
+                    return;
+                }
+            }
+
             var recentVisit = await _context.Visitors
                 .Where(v => v.Ip == visitor.Ip
                          && v.Path == visitor.Path
@@ -38,12 +56,10 @@ namespace Linky.Repository
 
             if (recentVisit)
             {
-                return; // Don't add duplicate visit
+                return;
             }
 
-            // Insert new visitor (reuse provided Id when available)
             var newVisitor = _mapper.ToModel(visitor);
-
             _context.Visitors.Add(newVisitor);
             await _context.SaveChangesAsync();
             await _cacheService.RemoveAsync(GetRecentVisitorsKey(100));
@@ -53,23 +69,16 @@ namespace Linky.Repository
             var today = DateTime.UtcNow.Date;
             await _cacheService.RemoveAsync(GetTotalVisitsKey(today));
             await _cacheService.RemoveAsync(GetUniqueVisitorsKey(today));
-
-            // cache inserted visitor for immediate subsequent reads
-            var visitorCacheKey = GetCacheKey(newVisitor.Id.ToString());
-            await _cacheService.SetAsync(visitorCacheKey, newVisitor, TimeSpan.FromMinutes(10));
-
-            // invalidate visitor stats caches so dashboards reflect recent writes
+            var visitorCacheKey2 = GetCacheKey(newVisitor.Id.ToString());
+            await _cacheService.SetAsync(visitorCacheKey2, newVisitor, TimeSpan.FromMinutes(10));
             await _cacheService.RemoveAsync("visitorstats:today");
             await _cacheService.RemoveAsync("visitorstats:7days");
             await _cacheService.RemoveAsync("visitorstats:30days");
-
-            // ???? also invalidate common visitors range caches covering today / recent windows
             var startToday = DateTime.UtcNow.Date;
             var now = DateTime.UtcNow;
             await _cacheService.RemoveAsync(GetVisitorsRangeKey(startToday, now));
             await _cacheService.RemoveAsync(GetVisitorsRangeKey(startToday.AddDays(-6), now));
             await _cacheService.RemoveAsync(GetVisitorsRangeKey(startToday.AddDays(-29), now));
-
         }
 
         public async Task<IEnumerable<Visitor>> GetRecentVisitors(int limit = 100)

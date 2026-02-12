@@ -1,7 +1,7 @@
 ﻿using Linky.DTOs;
-using Linky.Mappers;
 using Linky.IRepository;
 using Linky.IService;
+using Linky.Mappers;
 using Linky.Utils;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,12 +25,18 @@ namespace Linky.Controllers
         [HttpPost("AddVisitor")]
         public async Task<IActionResult> AddVisitor([FromBody] VisitorDto visitorDto)
         {
+            Guid sessionId = Guid.Empty;
+            if (Request.Cookies.TryGetValue("VisitorId", out var cookieValue) && Guid.TryParse(cookieValue, out var parsed))
+            {
+                sessionId = parsed;
+            }
+
             var ip = _clientIp.GetClientIp();
             var geoLoc = _geoIpService.GetLocationByIp(ip);
 
             var visitorWithSession = visitorDto with
             {
-                Id = Guid.NewGuid(),
+                Id = sessionId == Guid.Empty ? Guid.NewGuid() : sessionId,
                 Ip = ip,
                 Timestamp = DateTime.UtcNow,
                 Country = geoLoc?.Country,

@@ -3,7 +3,6 @@ using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Mappers;
-using Linky.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Linky.Repository

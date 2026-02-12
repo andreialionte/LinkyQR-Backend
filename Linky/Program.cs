@@ -299,6 +299,7 @@ namespace Linky
 
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             app.UseDelta<DataContextEf>();
+
             app.Use(async (context, next) =>
             {
                 context.Response.OnStarting(() =>
