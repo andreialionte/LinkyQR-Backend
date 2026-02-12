@@ -31,6 +31,13 @@ namespace Linky.Controllers
                 sessionId = parsed;
             }
 
+            if (sessionId != Guid.Empty)
+            {
+                var existing = await _visitorRepo.GetVisitorBySessionId(sessionId);
+                if (existing != null && existing.Timestamp >= DateTime.UtcNow.AddMinutes(-30))
+                    return StatusCode(StatusCodes.Status204NoContent);
+            }
+
             var ip = _clientIp.GetClientIp();
             var geoLoc = _geoIpService.GetLocationByIp(ip);
 
