@@ -12,7 +12,7 @@ namespace Linky.Utils
                 .UseContentDefaultSecurityPolicy()
                 .UsePermittedCrossDomainPolicies(XPermittedCrossDomainOptionValue.masterOnly)
                 .UseReferrerPolicy(ReferrerPolicyOptions.sameOrigin)
-                .UsePermissionsPolicy()
+                .UsePermissionsPolicy() 
                 .Build();
         }
     }
