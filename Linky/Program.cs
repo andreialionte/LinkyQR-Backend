@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using OwaspHeaders.Core.Extensions;
+using NetEscapades.AspNetCore.SecurityHeaders;
 using Quartz;
 using StackExchange.Redis;
 using System.Data;
@@ -300,7 +301,39 @@ namespace Linky
             app.MapHub<ActiveVisitorsHub>("/ActiveVisitorsHub");
 
 
-            app.UseSecureHeadersMiddleware(Linky.Utils.SecurityHeaders.CustomConfiguration()); // OWASP headers via OwaspHeaders.Core
+            var policyCollection = new HeaderPolicyCollection()
+                .AddDefaultSecurityHeaders()
+
+                
+                .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 63072000)
+                .AddReferrerPolicyNoReferrer()
+
+                // Content-Security-Policy )
+                .AddContentSecurityPolicy(builder =>
+                {
+                    builder.AddScriptSrc().Self();
+                    builder.AddObjectSrc().Self();
+                    builder.AddBlockAllMixedContent();
+                    builder.AddUpgradeInsecureRequests();
+                })
+
+                // Explicit Permissions-Policy 
+                .AddPermissionsPolicy(builder =>
+                {
+                    builder.AddCamera().None();
+                    builder.AddMicrophone().None();
+                    builder.AddGeolocation().Self();
+                    builder.AddCustomFeature("usb").None();
+                })
+
+                
+                .AddCustomHeader("X-XSS-Protection", "0")
+                .AddCustomHeader("X-Permitted-Cross-Domain-Policies", "none")
+                .AddCustomHeader("Cross-Origin-Embedder-Policy", "require-corp")
+                .AddCustomHeader("Cross-Origin-Resource-Policy", "same-origin")
+                .AddCustomHeader("Cache-Control", "max-age=0, no-store");
+
+            app.UseSecurityHeaders(policyCollection);
 
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             app.UseDelta<DataContextEf>();
@@ -336,7 +369,6 @@ namespace Linky
             //app.UseRateLimiter();
 
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
