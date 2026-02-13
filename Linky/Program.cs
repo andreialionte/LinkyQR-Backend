@@ -14,7 +14,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using OwaspHeaders.Core.Extensions;
-using NetEscapades.AspNetCore.SecurityHeaders;
 using Quartz;
 using StackExchange.Redis;
 using System.Data;
@@ -304,7 +303,7 @@ namespace Linky
             var policyCollection = new HeaderPolicyCollection()
                 .AddDefaultSecurityHeaders()
 
-                
+
                 .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 31536000)
                 .AddReferrerPolicyNoReferrer()
 
@@ -326,7 +325,7 @@ namespace Linky
                     builder.AddCustomFeature("usb").None();
                 })
 
-                
+
                 .AddCustomHeader("X-XSS-Protection", "0")
                 .AddCustomHeader("X-Permitted-Cross-Domain-Policies", "none")
                 .AddCustomHeader("Cross-Origin-Embedder-Policy", "require-corp")
@@ -373,7 +372,6 @@ namespace Linky
             {
                 app.MapOpenApi();
 
-                app.UseHsts();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
