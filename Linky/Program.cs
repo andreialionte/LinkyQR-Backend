@@ -1,4 +1,4 @@
-﻿using Delta;
+using Delta;
 using Linky.DataLayer;
 using Linky.IRepository;
 using Linky.IService;
@@ -295,7 +295,7 @@ namespace Linky
 
 
             //app.UseSecurityHeaders(); // https://github.com/andrewlock/NetEscapades.AspNetCore.SecurityHeaders
-            //app.UseSecureHeadersMiddleware(); //https://www.nuget.org/packages/OwaspHeaders.Core
+            app.UseSecureHeadersMiddleware(); //https://www.nuget.org/packages/OwaspHeaders.Core
 
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             app.UseDelta<DataContextEf>();
