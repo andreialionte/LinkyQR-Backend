@@ -284,6 +284,7 @@ namespace Linky
                     builder.AddCustomFeature("usb").None();
                 })
                 .AddCrossOriginOpenerPolicy(x => x.SameOrigin())
+                .AddCustomHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
                 .AddCustomHeader("X-XSS-Protection", "0")
                 .AddCustomHeader("X-Permitted-Cross-Domain-Policies", "none")
                 .AddCustomHeader("Cross-Origin-Embedder-Policy", "require-corp")
