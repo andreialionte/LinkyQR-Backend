@@ -263,7 +263,32 @@ namespace Linky
 
             app.UseCors("main");
 
+            // Security Headers - must be early in pipeline
+            var policyCollection = new HeaderPolicyCollection()
+                .AddDefaultSecurityHeaders()
+                .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 31536000)
+                .AddReferrerPolicyNoReferrer()
+                .AddContentSecurityPolicy(builder =>
+                {
+                    builder.AddScriptSrc().Self();
+                    builder.AddObjectSrc().Self();
+                    builder.AddBlockAllMixedContent();
+                    builder.AddUpgradeInsecureRequests();
+                })
+                .AddPermissionsPolicy(builder =>
+                {
+                    builder.AddCamera().None();
+                    builder.AddMicrophone().None();
+                    builder.AddGeolocation().Self();
+                    builder.AddCustomFeature("usb").None();
+                })
+                .AddCustomHeader("X-XSS-Protection", "0")
+                .AddCustomHeader("X-Permitted-Cross-Domain-Policies", "none")
+                .AddCustomHeader("Cross-Origin-Embedder-Policy", "require-corp")
+                .AddCustomHeader("Cross-Origin-Resource-Policy", "same-origin")
+                .AddCustomHeader("Cache-Control", "max-age=0, no-store");
 
+            app.UseSecurityHeaders(policyCollection);
 
             app.MapHealthChecks("/health", new HealthCheckOptions  //for uptime_percentage health
             {
@@ -298,40 +323,6 @@ namespace Linky
             //app.MapReverseProxy();
 
             app.MapHub<ActiveVisitorsHub>("/ActiveVisitorsHub");
-
-
-            var policyCollection = new HeaderPolicyCollection()
-                .AddDefaultSecurityHeaders()
-
-
-                .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 31536000)
-                .AddReferrerPolicyNoReferrer()
-
-                // Content-Security-Policy )
-                .AddContentSecurityPolicy(builder =>
-                {
-                    builder.AddScriptSrc().Self();
-                    builder.AddObjectSrc().Self();
-                    builder.AddBlockAllMixedContent();
-                    builder.AddUpgradeInsecureRequests();
-                })
-
-                // Explicit Permissions-Policy 
-                .AddPermissionsPolicy(builder =>
-                {
-                    builder.AddCamera().None();
-                    builder.AddMicrophone().None();
-                    builder.AddGeolocation().Self();
-                    builder.AddCustomFeature("usb").None();
-                })
-
-
-                .AddCustomHeader("X-XSS-Protection", "0")
-                .AddCustomHeader("X-Permitted-Cross-Domain-Policies", "none")
-                .AddCustomHeader("Cross-Origin-Embedder-Policy", "require-corp")
-                .AddCustomHeader("Cross-Origin-Resource-Policy", "same-origin")
-                .AddCustomHeader("Cache-Control", "max-age=0, no-store");
-
 
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             app.UseDelta<DataContextEf>();
@@ -370,13 +361,13 @@ namespace Linky
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
-                app.UseHsts();
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            } // PROD
+            else
+            {
+                app.UseHsts();
             }
-            // SECURITY HEADERS
-            app.UseSecurityHeaders(policyCollection);
-
 
             app.UseHttpsRedirection();
 
