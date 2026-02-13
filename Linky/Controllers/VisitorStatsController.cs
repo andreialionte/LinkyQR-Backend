@@ -49,17 +49,17 @@ namespace Linky.Controllers
                 return Ok(responseLive);
             }
 
-                var statsDto = _mapper.ToDto(stats);
+            var statsDto = _mapper.ToDto(stats);
 
-                var response = new
-                {
-                    totalVisits = stats.TotalVisits,
-                    uniqueVisitors = stats.UniqueVisitors,
-                    stats = statsDto
-                };
+            var response = new
+            {
+                totalVisits = stats.TotalVisits,
+                uniqueVisitors = stats.UniqueVisitors,
+                stats = statsDto
+            };
 
-                await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(30));
-                return Ok(response);
+            await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromMinutes(30));
+            return Ok(response);
         }
 
 
@@ -81,7 +81,6 @@ namespace Linky.Controllers
 
             var response = new { totalVisits, uniqueVisitors, stats = dtoList };
             await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromHours(1));
-
             return Ok(response);
         }
 
@@ -103,7 +102,6 @@ namespace Linky.Controllers
 
             var response = new { totalVisits, uniqueVisitors, stats = dtoList };
             await _cacheService.SetAsync(cacheKey, response, TimeSpan.FromHours(2));
-
             return Ok(response);
         }
     }

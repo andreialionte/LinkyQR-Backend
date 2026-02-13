@@ -35,6 +35,12 @@ namespace Linky
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
+            builder.Services.AddResponseCaching(options =>
+            {
+                options.UseCaseSensitivePaths = false;
+                options.MaximumBodySize = 1024;
+            });
+
             builder.Services.AddScoped<DapperDbContext>();
             var dbConnection = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
@@ -295,26 +301,38 @@ namespace Linky
 
 
             //app.UseSecurityHeaders(); // https://github.com/andrewlock/NetEscapades.AspNetCore.SecurityHeaders
-            //app.UseSecureHeadersMiddleware(); //https://www.nuget.org/packages/OwaspHeaders.Core
+            app.UseSecureHeadersMiddleware(Linky.Utils.SecurityHeaders.CustomConfiguration()); //https://www.nuget.org/packages/OwaspHeaders.Core
 
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             app.UseDelta<DataContextEf>();
 
-            app.Use(async (context, next) =>
-            {
-                context.Response.OnStarting(() =>
-                {
-                    if (context.Response.Headers.ContainsKey("ETag"))
-                    {
-                        context.Response.Headers["Cache-Control"] = "no-cache";
-                    }
-                    return Task.CompletedTask;
-                });
+            // Removed middleware that sets Cache-Control: no-cache when ETag is present
+            // This was preventing browsers from caching responses and sending If-None-Match for 304 Not Modified
+            // app.Use(async (context, next) =>
+            // {
+            //     context.Response.OnStarting(() =>
+            //     {
+            //         if (context.Response.Headers.ContainsKey("ETag"))
+            //         {
+            //             context.Response.Headers["Cache-Control"] = "no-cache";
+            //         }
+            //         return Task.CompletedTask;
+            //     });
 
-                await next();
-            });
+            //     await next();
+            // });
             app.UseMiddleware<VisitorIdMiddleware>();
 
+            app.UseResponseCaching();
+
+            app.Use(async (context, next) =>
+            {
+                await next();
+                if (context.Request.Method == "GET" && context.Response.StatusCode == 200 && !context.Response.Headers.ContainsKey("Cache-Control"))
+                {
+                    context.Response.Headers["Cache-Control"] = "public, max-age=3600";
+                }
+            });
 
             //app.UseRateLimiter();
 
