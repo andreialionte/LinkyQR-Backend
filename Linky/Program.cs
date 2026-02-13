@@ -332,7 +332,6 @@ namespace Linky
                 .AddCustomHeader("Cross-Origin-Resource-Policy", "same-origin")
                 .AddCustomHeader("Cache-Control", "max-age=0, no-store");
 
-            app.UseSecurityHeaders(policyCollection);
 
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             app.UseDelta<DataContextEf>();
@@ -371,10 +370,13 @@ namespace Linky
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
-
+                app.UseHsts();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            // SECURITY HEADERS
+            app.UseSecurityHeaders(policyCollection);
+
 
             app.UseHttpsRedirection();
 
