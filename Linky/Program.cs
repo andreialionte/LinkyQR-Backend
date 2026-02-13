@@ -366,10 +366,10 @@ namespace Linky
                 app.UseSwagger();
                 app.UseSwaggerUI();
             } // PROD
-            else
-            {
-                app.UseHsts();
-            }
+            // else
+            // {
+            //     app.UseHsts();
+            // }
 
             app.UseHttpsRedirection();
 
