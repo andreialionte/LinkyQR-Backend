@@ -265,7 +265,8 @@ namespace Linky
 
             // Security Headers - must be early in pipeline
             var policyCollection = new HeaderPolicyCollection()
-                .AddDefaultSecurityHeaders()
+                .AddFrameOptionsDeny()
+                .AddContentTypeOptionsNoSniff()
                 .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 31536000)
                 .AddReferrerPolicyNoReferrer()
                 .AddContentSecurityPolicy(builder =>
@@ -282,6 +283,7 @@ namespace Linky
                     builder.AddGeolocation().Self();
                     builder.AddCustomFeature("usb").None();
                 })
+                .AddCrossOriginOpenerPolicy(x => x.SameOrigin())
                 .AddCustomHeader("X-XSS-Protection", "0")
                 .AddCustomHeader("X-Permitted-Cross-Domain-Policies", "none")
                 .AddCustomHeader("Cross-Origin-Embedder-Policy", "require-corp")
