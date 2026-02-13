@@ -305,7 +305,7 @@ namespace Linky
                 .AddDefaultSecurityHeaders()
 
                 
-                .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 63072000)
+                .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 31536000)
                 .AddReferrerPolicyNoReferrer()
 
                 // Content-Security-Policy )
