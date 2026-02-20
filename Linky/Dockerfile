@@ -1,4 +1,4 @@
-# Debug version with maximum verbosity
+# Fixed logger syntax
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
@@ -9,11 +9,9 @@ WORKDIR /src
 # Copy everything 
 COPY . ./
 
-# Add maximum verbosity to see what's happening
+# Fixed logger parameters
 RUN dotnet publish -c Release -o /app/publish --self-contained false \
-    --verbosity diagnostic \
-    --logger "console;verbosity=diagnostic" \
-    /flp:logfile=build.log;verbosity=diagnostic
+    --verbosity diagnostic
 
 FROM base AS final
 WORKDIR /app
