@@ -330,34 +330,6 @@ namespace Linky
 
             app.MapHub<ActiveVisitorsHub>("/ActiveVisitorsHub");
 
-            // custom middleware stores last ETag per path and replays it on
-            // subsequent GETs when the client forgot to send If-None-Match. this
-            // makes curl behave like a browser and triggers 304s automatically.
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Method == "GET")
-                {
-                    var cache = context.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
-                    var key = "etag:" + context.Request.Path + context.Request.QueryString;
-                    if (!context.Request.Headers.ContainsKey("If-None-Match") && cache.TryGetValue(key, out string? previous))
-                    {
-                        context.Request.Headers["If-None-Match"] = previous;
-                    }
-
-                    // run rest of pipeline first so Delta computes a new ETag
-                    await next();
-
-                    if (context.Response.Headers.TryGetValue("ETag", out var current))
-                    {
-                        cache.Set(key, current.ToString(), TimeSpan.FromMinutes(5));
-                    }
-
-                    return;
-                }
-
-                await next();
-            });
-
             // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
             app.UseDelta<DataContextEf>();
 
