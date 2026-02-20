@@ -12,19 +12,21 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy everything first
+# Copy everything
 COPY . .
 
-# Find and restore the csproj file
-RUN find . -name "*.csproj" -type f -exec dotnet restore {} \;
+# Change to the project directory and restore
+WORKDIR /src/Linky
+RUN dotnet restore
 
-# Build with the found csproj
-RUN find . -name "*.csproj" -type f -exec dotnet build {} -c $BUILD_CONFIGURATION -o /app/build \;
+# Build the project
+RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN find . -name "*.csproj" -type f -exec dotnet publish {} -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false \;
+WORKDIR /src/Linky
+RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode
 FROM base AS final

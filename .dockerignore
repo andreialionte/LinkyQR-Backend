@@ -13,3 +13,4 @@ Dockerfile*
 *.md
 Linky/bin
 Linky/obj
+**/.vscode
