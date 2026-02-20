@@ -12,14 +12,17 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy everything first
+# copy only csproj(s) first so restore can be cached by Docker
+COPY Linky/Linky.csproj ./Linky/
+
+# restore project (and any referenced projects)
+RUN dotnet restore Linky/Linky.csproj
+
+# now copy the rest of the source
 COPY . .
 
-# Find and restore the csproj file
-RUN find . -name "*.csproj" -type f -exec dotnet restore {} \;
-
-# Build with the found csproj
-RUN find . -name "*.csproj" -type f -exec dotnet build {} -c $BUILD_CONFIGURATION -o /app/build \;
+# Build the project
+RUN dotnet build Linky/Linky.csproj -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
