@@ -14,8 +14,6 @@
 **/*.jfm
 **/azds.yaml
 **/charts
-**/docker-compose*
-**/Dockerfile*
 **/node_modules
 **/npm-debug.log
 **/secrets.dev.yaml
@@ -26,4 +24,3 @@ README.md
 # Exclude large GeoIP database files
 Data/GeoIP/*.mmdb
 **/Data/GeoIP/*.mmdb
-Linky/Data/GeoIP/*.mmdb
