@@ -15,18 +15,14 @@ WORKDIR /src
 # Copy everything
 COPY . .
 
-# Change to the project directory and restore
-WORKDIR /src/Linky
-RUN dotnet restore
-
-# Build the project
-RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
+# Restore and build the project directly
+RUN dotnet restore Linky.csproj
+RUN dotnet build Linky.csproj -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src/Linky
-RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish Linky.csproj -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode
 FROM base AS final
