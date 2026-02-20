@@ -9,9 +9,8 @@ WORKDIR /src
 # Copy everything 
 COPY . ./
 
-# Fixed logger parameters
-RUN dotnet publish -c Release -o /app/publish --self-contained false \
-    --verbosity diagnostic
+# Publish with normal verbosity
+RUN dotnet publish -c Release -o /app/publish --self-contained false --verbosity normal
 
 FROM base AS final
 WORKDIR /app
