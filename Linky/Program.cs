@@ -349,8 +349,9 @@ namespace Linky
             //   - Returns 304 Not Modified when ETag matches
             //   - COMPLEMENTS Delta.EF (doesn't replace it!)
             // 
-            // MUST be placed BEFORE Delta.EF to intercept responses first
-            app.UseMiddleware<CacheETagMiddleware>();
+            // TEMPORARILY DISABLED: Interfering with Delta.EF's ETag generation
+            // TODO: Fix middleware to not modify response body that Delta.EF processes
+            // app.UseMiddleware<CacheETagMiddleware>();
 
             // Delta.EF - Adds ETag support for EF Core database queries
             //   - Generates ETags using PostgreSQL change tracking
