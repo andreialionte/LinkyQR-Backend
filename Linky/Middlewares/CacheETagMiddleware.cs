@@ -48,8 +48,9 @@ namespace Linky.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Only process GET requests
-            if (context.Request.Method != HttpMethods.Get)
+            // Only process GET and HEAD requests (per RFC 7232)
+            if (context.Request.Method != HttpMethods.Get && 
+                context.Request.Method != HttpMethods.Head)
             {
                 await _next(context);
                 return;
@@ -90,15 +91,26 @@ namespace Linky.Middlewares
                     }
 
                     // Check If-None-Match header from client (browser/app sent previous ETag)
-                    if (context.Request.Headers.TryGetValue("If-None-Match", out var incomingETag))
+                    // Per RFC 7232: If-None-Match can contain multiple ETags comma-separated
+                    if (context.Request.Headers.TryGetValue("If-None-Match", out var incomingETags))
                     {
-                        if (incomingETag.ToString() == etag)
+                        // Split multiple ETags and check if current ETag matches any
+                        var etagList = incomingETags.ToString()
+                            .Split(',')
+                            .Select(e => e.Trim())
+                            .ToList();
+
+                        if (etagList.Contains(etag) || etagList.Contains("*"))
                         {
                             // ETags match - Content hasn't changed
                             // Return 304 Not Modified (saves bandwidth, ultra-fast response)
                             context.Response.StatusCode = StatusCodes.Status304NotModified;
                             context.Response.Body = originalBodyStream;
-                            context.Response.ContentLength = 0;
+                            
+                            // Per RFC 7232: Remove content-related headers for 304
+                            context.Response.Headers.Remove("Content-Length");
+                            context.Response.Headers.Remove("Content-Encoding");
+                            
                             return;
                         }
                     }
