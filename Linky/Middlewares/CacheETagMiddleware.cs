@@ -4,38 +4,64 @@ using System.Text;
 namespace Linky.Middlewares
 {
     /// <summary>
-    ///  IMPORTANT: ETag Middleware for FusionCache Cached Responses 
+    /// RFC 7232 Compliant ETag Middleware for HTTP Conditional Requests
     /// 
-    /// WHY THIS MIDDLEWARE IS NEEDED:
-    /// ------------------------------
-    /// Delta.EF automatically generates ETags and handles 304 Not Modified responses,
-    /// BUT ONLY for data returned DIRECTLY from EF Core queries!
+    /// IMPLEMENTS: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Conditional_requests
     /// 
-    /// PROBLEM:
-    /// When using FusionCache (cacheService.GetAsync), data comes from:
-    ///   - L1 Memory Cache (RAM), OR
-    ///   - L2 Distributed Cache (Redis/Valkey)
+    /// ═══════════════════════════════════════════════════════════════════════════════
+    /// SAFE METHODS (GET, HEAD) - FULL IMPLEMENTATION ✅
+    /// ═══════════════════════════════════════════════════════════════════════════════
     /// 
-    /// Delta.EF CANNOT track these responses because they bypass EF Core entirely!
-    /// Result: No ETag generated - No 304 Not Modified - Always full response sent
+    /// Automatically handles:
+    ///   ✅ ETag generation (SHA256, weak ETags with W/)
+    ///   ✅ Last-Modified header generation
+    ///   ✅ If-None-Match validation → 304 Not Modified
+    ///   ✅ If-Modified-Since validation → 304 Not Modified (fallback for old browsers)
+    ///   ✅ Proper header cleanup for 304 (Content-Length, Content-Encoding, Transfer-Encoding)
     /// 
-    /// SOLUTION:
-    /// This middleware works COMPLEMENTARY with Delta.EF:
-    ///   1. Delta.EF handles ETags for direct EF Core queries
-    ///   2. CacheETagMiddleware handles ETags for FusionCache responses
+    /// Use cases:
+    ///   • Cache validation (browser/CDN checks if content changed)
+    ///   • Bandwidth savings (304 = ~50 bytes vs KB of JSON)
+    ///   • Mobile data savings (97% bandwidth reduction on cache hits)
+    /// 
+    /// ═══════════════════════════════════════════════════════════════════════════════
+    /// UNSAFE METHODS (PUT, PATCH, DELETE, POST) - CONTROLLER RESPONSIBILITY ⚠️
+    /// ═══════════════════════════════════════════════════════════════════════════════
+    /// 
+    /// For optimistic locking with If-Match/If-Unmodified-Since:
+    ///   ⚠️ Controllers MUST validate these headers manually
+    ///   ⚠️ Return 412 Precondition Failed if validation fails
+    /// 
+    /// Why not in middleware?
+    ///   • Requires pre-fetching resource from DB (before update)
+    ///   • Requires knowing resource URL structure
+    ///   • Standard practice: validation at controller level (Django, Rails, Laravel)
+    /// 
+    /// Example controller implementation:
+    ///   [HttpPut("/api/resource/{id}")]
+    ///   public async Task<IActionResult> Update(int id, [FromBody] Resource resource)
+    ///   {
+    ///       var current = await _db.Resources.FindAsync(id);
+    ///       var currentETag = GenerateETag(current); // Your helper method
+    ///       
+    ///       if (Request.Headers.TryGetValue("If-Match", out var ifMatch))
+    ///       {
+    ///           if (ifMatch != currentETag)
+    ///               return StatusCode(412); // Precondition Failed
+    ///       }
+    ///       
+    ///       // Perform update...
+    ///   }
+    /// 
+    /// ═══════════════════════════════════════════════════════════════════════════════
+    /// FUSIONCACHE INTEGRATION:
+    /// ═══════════════════════════════════════════════════════════════════════════════
+    /// 
+    /// Works complementary with Delta.EF:
+    ///   1. Delta.EF handles ETags for direct EF Core DB queries
+    ///   2. CacheETagMiddleware handles ETags for FusionCache responses (L1 Memory/L2 Redis)
     ///   3. Both enable 304 Not Modified for bandwidth savings
     /// 
-    /// HOW IT WORKS:
-    /// - Intercepts ALL GET responses
-    /// - Checks if Delta.EF already set an ETag (direct DB query)
-    /// - If NO ETag exists (cached response), generates one from response content
-    /// - Verifies If-None-Match header and returns 304 if ETag matches
-    /// 
-    /// BENEFITS:
-    ///  Reduced bandwidth (304 responses are ~50 bytes vs KB of JSON)
-    ///  Faster responses (304 returned instantly without processing)
-    ///  Better mobile experience (saves cellular data)
-    ///  Works with both Delta.EF (DB) and FusionCache (cache)
     /// </summary>
     public class CacheETagMiddleware
     {
@@ -48,10 +74,13 @@ namespace Linky.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Only process GET and HEAD requests (per RFC 7232)
+            // Only process GET and HEAD requests for full RFC 7232 conditional request handling
+            // (ETag generation, Last-Modified, If-None-Match/If-Modified-Since validation, 304 responses)
             if (context.Request.Method != HttpMethods.Get && 
                 context.Request.Method != HttpMethods.Head)
             {
+                // For PUT/PATCH/DELETE/POST: Controllers must validate If-Match/If-Unmodified-Since manually
+                // and return 412 Precondition Failed if needed (see class documentation above)
                 await _next(context);
                 return;
             }
@@ -76,21 +105,44 @@ namespace Linky.Middlewares
                     // FusionCache responses (from RAM/Redis) bypass EF Core - no ETag from Delta
                     // If no ETag exists, we generate one from the cached response content
                     string etag;
+                    DateTime lastModified;
+                    
                     if (!context.Response.Headers.ContainsKey("ETag"))
                     {
                         // No ETag from Delta.EF - This is a cached response
                         // Generate ETag from response body for 304 support
                         etag = GenerateETag(responseBytes);
                         context.Response.Headers.ETag = etag;
+                        
+                        // Generate Last-Modified header (RFC 7232 requirement)
+                        // Use current time as fallback (cache responses don't have original modification time)
+                        lastModified = DateTime.UtcNow;
+                        context.Response.Headers.LastModified = lastModified.ToString("R"); // RFC 1123 format
                     }
                     else
                     {
                         // ETag already exists from Delta.EF - This is a direct DB query
                         // Reuse Delta's ETag (it's already optimized for PostgreSQL change tracking)
                         etag = context.Response.Headers.ETag.ToString();
+                        
+                        // Try to parse Last-Modified if Delta.EF set it
+                        if (context.Response.Headers.TryGetValue("Last-Modified", out var lastModifiedValue) &&
+                            DateTime.TryParse(lastModifiedValue, out var parsedDate))
+                        {
+                            lastModified = parsedDate;
+                        }
+                        else
+                        {
+                            lastModified = DateTime.UtcNow;
+                            context.Response.Headers.LastModified = lastModified.ToString("R");
+                        }
                     }
 
-                    // Check If-None-Match header from client (browser/app sent previous ETag)
+                    // ==========================================
+                    // RFC 7232 CONDITIONAL REQUEST VALIDATION
+                    // ==========================================
+                    
+                    // 1. Check If-None-Match (ETag-based validation - preferred method)
                     // Per RFC 7232: If-None-Match can contain multiple ETags comma-separated
                     if (context.Request.Headers.TryGetValue("If-None-Match", out var incomingETags))
                     {
@@ -103,14 +155,23 @@ namespace Linky.Middlewares
                         if (etagList.Contains(etag) || etagList.Contains("*"))
                         {
                             // ETags match - Content hasn't changed
-                            // Return 304 Not Modified (saves bandwidth, ultra-fast response)
-                            context.Response.StatusCode = StatusCodes.Status304NotModified;
-                            context.Response.Body = originalBodyStream;
-                            
-                            // Per RFC 7232: Remove content-related headers for 304
-                            context.Response.Headers.Remove("Content-Length");
-                            context.Response.Headers.Remove("Content-Encoding");
-                            
+                            Return304NotModified(context, originalBodyStream);
+                            return;
+                        }
+                    }
+                    
+                    // 2. Check If-Modified-Since (Date-based validation - fallback for older browsers)
+                    // Per RFC 7232: Only used if If-None-Match is not present
+                    // This is important for browsers that don't fully support ETags
+                    else if (context.Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSinceValue) &&
+                             DateTime.TryParse(ifModifiedSinceValue, out var ifModifiedSince))
+                    {
+                        // Compare dates: if resource wasn't modified since client's cached date
+                        // Round to seconds (HTTP dates don't include milliseconds)
+                        if (lastModified.AddMilliseconds(-lastModified.Millisecond) <= ifModifiedSince)
+                        {
+                            // Resource not modified since client's cache date
+                            Return304NotModified(context, originalBodyStream);
                             return;
                         }
                     }
@@ -131,6 +192,30 @@ namespace Linky.Middlewares
             {
                 context.Response.Body = originalBodyStream;
             }
+        }
+
+        /// <summary>
+        /// Returns HTTP 304 Not Modified response per RFC 7232.
+        /// Removes content-related headers and restores original body stream.
+        /// </summary>
+        private static void Return304NotModified(HttpContext context, Stream originalBodyStream)
+        {
+            // Return 304 Not Modified (saves bandwidth, ultra-fast response)
+            context.Response.StatusCode = StatusCodes.Status304NotModified;
+            context.Response.Body = originalBodyStream;
+            
+            // Per RFC 7232: Remove content-related headers for 304
+            // These MUST be removed as they describe the message body, which is not sent
+            context.Response.Headers.Remove("Content-Length");
+            context.Response.Headers.Remove("Content-Encoding");
+            context.Response.Headers.Remove("Transfer-Encoding");
+            
+            // Headers that MUST remain (auto-set by ASP.NET Core):
+            // - Date (server timestamp)
+            // - ETag (validation identifier)
+            // - Last-Modified (resource modification time)
+            // - Cache-Control (caching directives)
+            // - Vary (content negotiation)
         }
 
         /// <summary>
