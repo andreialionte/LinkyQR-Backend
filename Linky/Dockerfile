@@ -9,7 +9,7 @@ WORKDIR /src
 # Copy csproj and restore with cache mount
 COPY ["Linky.csproj", "./"]
 RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet restore "Linky.csproj" --disable-parallel --verbosity normal
+    dotnet restore "Linky.csproj" -r linux-x64 --disable-parallel --verbosity normal
 
 # Copy everything else
 COPY . ./
