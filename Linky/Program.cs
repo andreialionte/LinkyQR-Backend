@@ -300,8 +300,9 @@ namespace Linky
                 .AddCustomHeader("X-XSS-Protection", "0")
                 .AddCustomHeader("X-Permitted-Cross-Domain-Policies", "none")
                 .AddCustomHeader("Cross-Origin-Embedder-Policy", "require-corp")
-                .AddCustomHeader("Cross-Origin-Resource-Policy", "same-origin")
-                .AddCustomHeader("Cache-Control", "max-age=0, no-store");
+                .AddCustomHeader("Cross-Origin-Resource-Policy", "same-origin");
+                // REMOVED: Cache-Control from security headers
+                // Let the ETag middleware and response caching middleware handle Cache-Control instead
 
             app.UseSecurityHeaders(policyCollection);
 
