@@ -14,15 +14,20 @@ namespace Linky.Middlewares
     /// 
     /// Automatically handles:
     ///   ✅ ETag generation (SHA256, weak ETags with W/)
-    ///   ✅ Last-Modified header generation
     ///   ✅ If-None-Match validation → 304 Not Modified
-    ///   ✅ If-Modified-Since validation → 304 Not Modified (fallback for old browsers)
+    ///   ✅ If-Modified-Since validation → 304 Not Modified (only for Delta.EF DB responses)
     ///   ✅ Proper header cleanup for 304 (Content-Length, Content-Encoding, Transfer-Encoding)
+    ///   ✅ Body cleared (0 bytes) for 304 responses
     /// 
     /// Use cases:
     ///   • Cache validation (browser/CDN checks if content changed)
-    ///   • Bandwidth savings (304 = ~50 bytes vs KB of JSON)
-    ///   • Mobile data savings (97% bandwidth reduction on cache hits)
+    ///   • Bandwidth savings (304 = ~400 bytes vs 1.5 kB full response)
+    ///   • Mobile data savings (~75% bandwidth reduction on cache hits)
+    /// 
+    /// IMPORTANT: Last-Modified behavior:
+    ///   • FusionCache responses: Only ETag (no Last-Modified timestamp available)
+    ///   • Delta.EF DB responses: Both ETag + Last-Modified (from DB)
+    ///   • This prevents ETag mismatch bugs from changing timestamps
     /// 
     /// ═══════════════════════════════════════════════════════════════════════════════
     /// UNSAFE METHODS (PUT, PATCH, DELETE, POST) - CONTROLLER RESPONSIBILITY ⚠️
@@ -105,7 +110,6 @@ namespace Linky.Middlewares
                     // FusionCache responses (from RAM/Redis) bypass EF Core - no ETag from Delta
                     // If no ETag exists, we generate one from the cached response content
                     string etag;
-                    DateTime lastModified;
                     
                     if (!context.Response.Headers.ContainsKey("ETag"))
                     {
@@ -114,10 +118,10 @@ namespace Linky.Middlewares
                         etag = GenerateETag(responseBytes);
                         context.Response.Headers.ETag = etag;
                         
-                        // Generate Last-Modified header (RFC 7232 requirement)
-                        // Use current time as fallback (cache responses don't have original modification time)
-                        lastModified = DateTime.UtcNow;
-                        context.Response.Headers.LastModified = lastModified.ToString("R"); // RFC 1123 format
+                        // DO NOT set Last-Modified for cached responses!
+                        // Why? FusionCache doesn't preserve original modification timestamp.
+                        // Using DateTime.UtcNow would change on every request, breaking 304 validation.
+                        // ETags alone are sufficient and more reliable for cache validation.
                     }
                     else
                     {
@@ -125,24 +129,15 @@ namespace Linky.Middlewares
                         // Reuse Delta's ETag (it's already optimized for PostgreSQL change tracking)
                         etag = context.Response.Headers.ETag.ToString();
                         
-                        // Try to parse Last-Modified if Delta.EF set it
-                        if (context.Response.Headers.TryGetValue("Last-Modified", out var lastModifiedValue) &&
-                            DateTime.TryParse(lastModifiedValue, out var parsedDate))
-                        {
-                            lastModified = parsedDate;
-                        }
-                        else
-                        {
-                            lastModified = DateTime.UtcNow;
-                            context.Response.Headers.LastModified = lastModified.ToString("R");
-                        }
+                        // Only use Last-Modified if Delta.EF already set it
+                        // (Delta.EF knows the actual DB modification timestamp)
                     }
 
                     // ==========================================
                     // RFC 7232 CONDITIONAL REQUEST VALIDATION
                     // ==========================================
                     
-                    // 1. Check If-None-Match (ETag-based validation - preferred method)
+                    // Check If-None-Match (ETag-based validation - primary method)
                     // Per RFC 7232: If-None-Match can contain multiple ETags comma-separated
                     if (context.Request.Headers.TryGetValue("If-None-Match", out var incomingETags))
                     {
@@ -160,11 +155,14 @@ namespace Linky.Middlewares
                         }
                     }
                     
-                    // 2. Check If-Modified-Since (Date-based validation - fallback for older browsers)
-                    // Per RFC 7232: Only used if If-None-Match is not present
-                    // This is important for browsers that don't fully support ETags
-                    else if (context.Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSinceValue) &&
-                             DateTime.TryParse(ifModifiedSinceValue, out var ifModifiedSince))
+                    // If-Modified-Since validation only for responses that have Last-Modified
+                    // (Delta.EF responses from direct DB queries)
+                    // We don't set Last-Modified for cached responses, so this only applies to DB queries
+                    else if (context.Response.Headers.ContainsKey("Last-Modified") &&
+                             context.Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSinceValue) &&
+                             DateTime.TryParse(ifModifiedSinceValue, out var ifModifiedSince) &&
+                             context.Response.Headers.TryGetValue("Last-Modified", out var lastModifiedValue) &&
+                             DateTime.TryParse(lastModifiedValue, out var lastModified))
                     {
                         // Compare dates: if resource wasn't modified since client's cached date
                         // Round to seconds (HTTP dates don't include milliseconds)
@@ -205,18 +203,21 @@ namespace Linky.Middlewares
             context.Response.Body = originalBodyStream;
             
             // CRITICAL: 304 responses MUST have empty body (0 bytes)
-            // Set ContentLength to 0 to ensure no body is sent
-            context.Response.ContentLength = 0;
+            // Clear the response body stream to ensure nothing is sent
+            context.Response.Body.SetLength(0);
             
             // Per RFC 7232: Remove content-related headers for 304
             // These MUST be removed as they describe the message body, which is not sent
             context.Response.Headers.Remove("Content-Encoding");
             context.Response.Headers.Remove("Transfer-Encoding");
             
-            // Headers that MUST remain (auto-set by ASP.NET Core):
+            // Set Content-Length to 0 explicitly
+            context.Response.ContentLength = 0;
+            
+            // Headers that remain (auto-set by ASP.NET Core or already present):
             // - Date (server timestamp)
             // - ETag (validation identifier)
-            // - Last-Modified (resource modification time)
+            // - Last-Modified (only if set by Delta.EF for DB queries)
             // - Cache-Control (caching directives)
             // - Vary (content negotiation)
         }
