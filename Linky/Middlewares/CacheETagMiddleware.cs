@@ -150,8 +150,8 @@ namespace Linky.Middlewares
                         if (etagList.Contains(etag) || etagList.Contains("*"))
                         {
                             // ETags match - Content hasn't changed
-                            // Clear the response body to ensure 0 bytes are sent
-                            responseBody.SetLength(0);
+                            // DON'T copy responseBody to originalBodyStream at all
+                            // Just set 304 status and return immediately (Delta.EF approach)
                             Return304NotModified(context, originalBodyStream);
                             return;
                         }
@@ -171,8 +171,8 @@ namespace Linky.Middlewares
                         if (lastModified.AddMilliseconds(-lastModified.Millisecond) <= ifModifiedSince)
                         {
                             // Resource not modified since client's cache date
-                            // Clear the response body to ensure 0 bytes are sent
-                            responseBody.SetLength(0);
+                            // DON'T copy responseBody to originalBodyStream at all
+                            // Just set 304 status and return immediately
                             Return304NotModified(context, originalBodyStream);
                             return;
                         }
@@ -199,21 +199,30 @@ namespace Linky.Middlewares
         /// <summary>
         /// Returns HTTP 304 Not Modified response per RFC 7232.
         /// Removes content-related headers and ensures empty body (0 bytes).
+        /// 
+        /// DELTA.EF APPROACH: Don't write ANY body data - just set status code and headers.
+        /// The key is to NOT copy the responseBody MemoryStream to originalBodyStream at all.
         /// </summary>
         private static void Return304NotModified(HttpContext context, Stream originalBodyStream)
         {
             // Return 304 Not Modified (saves bandwidth, ultra-fast response)
             context.Response.StatusCode = StatusCodes.Status304NotModified;
-            context.Response.Body = originalBodyStream;
             
-            // CRITICAL: Set Content-Length to 0 to ensure no body is sent
-            // ASP.NET Core will honor this and not write any body data
+            // CRITICAL: Set Content-Length to 0 BEFORE setting Body stream
+            // This tells ASP.NET Core to NOT write any content
             context.Response.ContentLength = 0;
+            
+            // Switch back to the original body stream (which has nothing written to it)
+            // All JSON generation happened in the temporary MemoryStream, which we discard
+            context.Response.Body = originalBodyStream;
             
             // Per RFC 7232: Remove content-related headers for 304
             // These MUST be removed as they describe the message body, which is not sent
             context.Response.Headers.Remove("Content-Encoding");
             context.Response.Headers.Remove("Transfer-Encoding");
+            
+            // Explicitly clear Content-Type as well (no body = no content type)
+            context.Response.Headers.Remove("Content-Type");
             
             // Headers that remain (auto-set by ASP.NET Core or already present):
             // - Date (server timestamp)
