@@ -150,6 +150,8 @@ namespace Linky.Middlewares
                         if (etagList.Contains(etag) || etagList.Contains("*"))
                         {
                             // ETags match - Content hasn't changed
+                            // Clear the response body to ensure 0 bytes are sent
+                            responseBody.SetLength(0);
                             Return304NotModified(context, originalBodyStream);
                             return;
                         }
@@ -169,6 +171,8 @@ namespace Linky.Middlewares
                         if (lastModified.AddMilliseconds(-lastModified.Millisecond) <= ifModifiedSince)
                         {
                             // Resource not modified since client's cache date
+                            // Clear the response body to ensure 0 bytes are sent
+                            responseBody.SetLength(0);
                             Return304NotModified(context, originalBodyStream);
                             return;
                         }
