@@ -202,17 +202,14 @@ namespace Linky.Middlewares
             context.Response.StatusCode = StatusCodes.Status304NotModified;
             context.Response.Body = originalBodyStream;
             
-            // CRITICAL: 304 responses MUST have empty body (0 bytes)
-            // Clear the response body stream to ensure nothing is sent
-            context.Response.Body.SetLength(0);
+            // CRITICAL: Set Content-Length to 0 to ensure no body is sent
+            // ASP.NET Core will honor this and not write any body data
+            context.Response.ContentLength = 0;
             
             // Per RFC 7232: Remove content-related headers for 304
             // These MUST be removed as they describe the message body, which is not sent
             context.Response.Headers.Remove("Content-Encoding");
             context.Response.Headers.Remove("Transfer-Encoding");
-            
-            // Set Content-Length to 0 explicitly
-            context.Response.ContentLength = 0;
             
             // Headers that remain (auto-set by ASP.NET Core or already present):
             // - Date (server timestamp)
