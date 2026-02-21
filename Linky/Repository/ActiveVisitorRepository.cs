@@ -53,7 +53,7 @@ namespace Linky.Repository
 
             if (existing != null)
             {
-                // SessionId exists → just UPDATE
+                // SessionId exists - just UPDATE
                 existing.LastSeenUtc = visitorDto.LastSeenUtc;
                 existing.CurrentPath = visitorDto.CurrentPath;
                 existing.UserAgent = visitorDto.UserAgent;
@@ -70,7 +70,7 @@ namespace Linky.Repository
             }
             else
             {
-                // New SessionId → INSERT
+                // New SessionId - INSERT
                 var newVisitor = _mapper.ToModel(visitorDto);
 
                 _context.ActiveVisitors.Add(newVisitor);

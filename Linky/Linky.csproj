@@ -32,7 +32,6 @@
 
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
-    <PackageReference Include="BitFaster.Caching" Version="2.5.4" />
     <PackageReference Include="Cloudmersive.APIClient.NETCore.VirusScan" Version="4.0.0" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Delta.EF" Version="8.0.1" />
@@ -40,6 +39,7 @@
     <PackageReference Include="FluentMigrator.Runner.Core" Version="8.0.1" />
     <PackageReference Include="FluentMigrator.Runner.Postgres" Version="8.0.1" />
     <PackageReference Include="MaxMind.GeoIP2" Version="5.4.1" />
+    <PackageReference Include="MemoryPack" Version="1.21.4" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
@@ -77,6 +77,7 @@
     <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
     <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.5.0" />
     <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.5.0" />
+    <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.CysharpMemoryPack" Version="2.5.0" />
     <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson" Version="2.5.0" />
   </ItemGroup>
 

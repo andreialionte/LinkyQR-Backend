@@ -10,7 +10,7 @@ namespace Linky.DataLayer
         {
         }
 
-        // ✅ Optional: fallback config for EF tools (so Add-Migration works even without full app startup)
+        // Optional: fallback config for EF tools (so Add-Migration works even without full app startup)
 
         // DbSets
         public DbSet<URLShortener> URLShorteners { get; set; } = default!;

@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\linky.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\linky.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
@@ -13,10 +17,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\cookies.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\cookies.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\hubs\\activevisitorshub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -174,27 +174,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "cookies.txt",
-              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\cookies.txt",
-              "RelativeDocumentMoniker": "Linky\\cookies.txt",
-              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\cookies.txt",
-              "RelativeToolTip": "Linky\\cookies.txt",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2026-02-20T20:27:19.833Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 8,
               "Title": "ActiveVisitorController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\ActiveVisitorController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\ActiveVisitorController.cs",
               "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\ActiveVisitorController.cs",
               "RelativeToolTip": "Linky\\Controllers\\ActiveVisitorController.cs",
-              "ViewState": "AgIAABsAAAAAAAAAAIBJwCsAAABdAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAIBZwCsAAABdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T20:40:06.757Z"
+              "WhenOpened": "2025-10-25T20:40:06.757Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -206,7 +195,8 @@
               "RelativeToolTip": "Linky\\Controllers\\VisitorController.cs",
               "ViewState": "AgIAADoAAAAAAAAAAAAmwE0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:36:13.484Z"
+              "WhenOpened": "2025-10-25T19:36:13.484Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -218,7 +208,8 @@
               "RelativeToolTip": "Linky\\Controllers\\UrlShortenerControllers.cs",
               "ViewState": "AgIAAAIAAAAAAAAAAAASwDsAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:01:40.878Z"
+              "WhenOpened": "2025-10-25T19:01:40.878Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -230,11 +221,12 @@
               "RelativeToolTip": "Linky\\Hubs\\ActiveVisitorsHub.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T20:53:22.51Z"
+              "WhenOpened": "2025-10-25T20:53:22.51Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "global.json",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\global.json",
               "RelativeDocumentMoniker": "global.json",
@@ -242,11 +234,12 @@
               "RelativeToolTip": "global.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-25T20:21:43.107Z"
+              "WhenOpened": "2025-11-25T20:21:43.107Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Linky.csproj",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Linky.csproj",
               "RelativeDocumentMoniker": "Linky\\Linky.csproj",
@@ -259,15 +252,42 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
+              "RelativeDocumentMoniker": "Linky\\Program.cs",
+              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
+              "RelativeToolTip": "Linky\\Program.cs",
+              "ViewState": "AgIAAKsAAAAAAAAAAAAQwLIAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T19:42:13.645Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "cookies.txt",
+              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\cookies.txt",
+              "RelativeDocumentMoniker": "Linky\\cookies.txt",
+              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\cookies.txt",
+              "RelativeToolTip": "Linky\\cookies.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2026-02-20T20:27:19.833Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 6,
               "Title": "VisitorRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\VisitorRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\VisitorRepository.cs",
               "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\VisitorRepository.cs",
               "RelativeToolTip": "Linky\\Repository\\VisitorRepository.cs",
-              "ViewState": "AgIAAKsAAAAAAAAAAAA8wL8AAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAKwAAAAAAAAAAAAmwL8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-22T17:02:23.556Z"
+              "WhenOpened": "2025-10-22T17:02:23.556Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -279,19 +299,8 @@
               "RelativeToolTip": "Linky\\Mappers\\VisitorMapper.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAqwBAAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-12T20:48:35.029Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
-              "RelativeDocumentMoniker": "Linky\\Program.cs",
-              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
-              "RelativeToolTip": "Linky\\Program.cs",
-              "ViewState": "AgIAAGgBAAAAAAAAAAAQwHoBAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:42:13.645Z"
+              "WhenOpened": "2026-02-12T20:48:35.029Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -303,7 +312,8 @@
               "RelativeToolTip": "Linky\\Repository\\ActiveVisitorRepository.cs",
               "ViewState": "AgIAACEAAAAAAAAAAAAiwCYAAABBAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:22:13.706Z"
+              "WhenOpened": "2025-10-25T19:22:13.706Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -315,7 +325,8 @@
               "RelativeToolTip": "Linky\\Controllers\\VisitorStatsController.cs",
               "ViewState": "AgIAAGcAAAAAAAAAAAAewGMAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T20:17:46.126Z"
+              "WhenOpened": "2026-01-23T20:17:46.126Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -327,7 +338,8 @@
               "RelativeToolTip": "Linky\\Repository\\VisitorStatsRepository.cs",
               "ViewState": "AgIAALUAAAAAAAAAAAAqwMkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-24T15:21:34.647Z"
+              "WhenOpened": "2025-10-24T15:21:34.647Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -339,7 +351,8 @@
               "RelativeToolTip": "Linky\\Repository\\URLShortenerRepository.cs",
               "ViewState": "AgIAAIMAAAAAAAAAAAAmwJYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T20:35:30.185Z"
+              "WhenOpened": "2026-01-23T20:35:30.185Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -351,7 +364,8 @@
               "RelativeToolTip": "Linky\\Middlewares\\VisitorIdMiddleware.cs",
               "ViewState": "AgIAABcAAAAAAAAAAAAuwCwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-12T19:44:58.733Z"
+              "WhenOpened": "2026-02-12T19:44:58.733Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -361,9 +375,10 @@
               "RelativeDocumentMoniker": "Linky\\DataLayer\\DapperDbContext.cs",
               "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\DataLayer\\DapperDbContext.cs",
               "RelativeToolTip": "Linky\\DataLayer\\DapperDbContext.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAIBZwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-12T20:28:32.334Z"
+              "WhenOpened": "2026-02-12T20:28:32.334Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -375,7 +390,8 @@
               "RelativeToolTip": "Linky\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-10-25T18:50:00.014Z"
+              "WhenOpened": "2025-10-25T18:50:00.014Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -387,7 +403,8 @@
               "RelativeToolTip": "Linky\\Controllers\\DefaultController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-24T14:48:18.386Z"
+              "WhenOpened": "2026-01-24T14:48:18.386Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -399,7 +416,8 @@
               "RelativeToolTip": "Linky\\Controllers\\BaseController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-24T14:47:47.554Z"
+              "WhenOpened": "2026-01-24T14:47:47.554Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -411,7 +429,8 @@
               "RelativeToolTip": "Linky\\Repository\\QRCodeRepository.cs",
               "ViewState": "AgIAABQAAAAAAAAAAADgvyMAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-24T15:21:29.529Z"
+              "WhenOpened": "2025-10-24T15:21:29.529Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -423,7 +442,8 @@
               "RelativeToolTip": "Linky\\Controllers\\QRCodeController.cs",
               "ViewState": "AgIAAKQAAAAAAAAAAAAIwLkAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-24T12:10:15.43Z"
+              "WhenOpened": "2025-10-24T12:10:15.43Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -435,7 +455,8 @@
               "RelativeToolTip": "docker-compose.override.yml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAADQAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
-              "WhenOpened": "2025-11-25T14:37:43.157Z"
+              "WhenOpened": "2025-11-25T14:37:43.157Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -447,7 +468,8 @@
               "RelativeToolTip": "docker-compose.yml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
-              "WhenOpened": "2025-11-25T14:37:42.16Z"
+              "WhenOpened": "2025-11-25T14:37:42.16Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -472,7 +494,8 @@
               "RelativeToolTip": "Linky\\appsettings.Development.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-25T15:08:55.074Z"
+              "WhenOpened": "2025-11-25T15:08:55.074Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -484,7 +507,8 @@
               "RelativeToolTip": "Linky\\Utils\\ClientIp.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T20:40:44.477Z"
+              "WhenOpened": "2025-10-25T20:40:44.477Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -496,7 +520,8 @@
               "RelativeToolTip": "Linky\\Utils\\GeoLocation.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T20:43:49.927Z"
+              "WhenOpened": "2025-10-25T20:43:49.927Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -508,7 +533,8 @@
               "RelativeToolTip": "Linky\\Utils\\IClientIp.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T20:44:56.329Z"
+              "WhenOpened": "2025-10-25T20:44:56.329Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -520,7 +546,8 @@
               "RelativeToolTip": "Linky\\Service\\GeoIpService.cs",
               "ViewState": "AgIAAEgAAAAAAAAAAAAYwFoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T20:31:11.042Z"
+              "WhenOpened": "2025-10-25T20:31:11.042Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -532,7 +559,8 @@
               "RelativeToolTip": "Linky\\Migrations\\20251025195146_RemovedOneToOne.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:51:46.661Z"
+              "WhenOpened": "2025-10-25T19:51:46.661Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -544,7 +572,8 @@
               "RelativeToolTip": "Linky\\DataLayer\\DataContextEf.cs",
               "ViewState": "AgIAAEAAAAAAAAAAAAAwwD4AAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:45:43.837Z"
+              "WhenOpened": "2025-10-25T19:45:43.837Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -556,7 +585,8 @@
               "RelativeToolTip": "Linky\\DTOs\\VisitorDto.cs",
               "ViewState": "AgIAAAIAAAAAAAAAAAAxwAsAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:49:32.954Z"
+              "WhenOpened": "2025-10-25T19:49:32.954Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -568,7 +598,8 @@
               "RelativeToolTip": "Linky\\Models\\ActiveVisitor.cs",
               "ViewState": "AgIAAAcAAAAAAAAAAAAQwBAAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:45:29.394Z"
+              "WhenOpened": "2025-10-25T19:45:29.394Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -580,7 +611,8 @@
               "RelativeToolTip": "Linky\\Models\\Visitor.cs",
               "ViewState": "AgIAAA0AAAAAAAAAAAAQwBIAAAA7AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:44:58.502Z"
+              "WhenOpened": "2025-10-25T19:44:58.502Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -592,7 +624,8 @@
               "RelativeToolTip": "Linky\\Jobs\\ActiveVisitorJob.cs",
               "ViewState": "AgIAAA0AAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:39:40.759Z"
+              "WhenOpened": "2025-10-25T19:39:40.759Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -604,7 +637,8 @@
               "RelativeToolTip": "Linky\\Models\\QRCode.cs",
               "ViewState": "AgIAAAoAAAAAAAAAAAAIwBMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T18:45:43.383Z"
+              "WhenOpened": "2025-10-25T18:45:43.383Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -616,7 +650,8 @@
               "RelativeToolTip": "Linky\\Jobs\\AggregateVisitorStats.cs",
               "ViewState": "AgIAAAgAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:40:27.288Z"
+              "WhenOpened": "2025-10-25T19:40:27.288Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -628,7 +663,8 @@
               "RelativeToolTip": "Linky\\Models\\VisitorStats.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:23:20.861Z"
+              "WhenOpened": "2025-10-25T19:23:20.861Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -640,7 +676,8 @@
               "RelativeToolTip": "Linky\\IRepository\\IQRCodeRepository.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAIBJwA0AAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:17:26.864Z"
+              "WhenOpened": "2025-10-25T19:17:26.864Z",
+              "EditorCaption": ""
             }
           ]
         }

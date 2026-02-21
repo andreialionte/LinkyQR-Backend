@@ -4,6 +4,7 @@ using Linky.IRepository;
 using Linky.IService;
 using Linky.Jobs;
 using Linky.Mappers;
+using Linky.Middlewares;
 using Linky.Middlewares.Linky.Middleware;
 using Linky.Repository;
 using Linky.Service;
@@ -12,14 +13,13 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
 using OwaspHeaders.Core.Extensions;
 using Quartz;
 using StackExchange.Redis;
 using System.Data;
 using System.Text.Json;
 using ZiggyCreatures.Caching.Fusion;
-using ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson;
+using ZiggyCreatures.Caching.Fusion.Serialization.CysharpMemoryPack;
 
 namespace Linky
 {
@@ -175,12 +175,7 @@ namespace Linky
 
 
             builder.Services.AddFusionCache()
-                .WithSerializer(new FusionCacheNewtonsoftJsonSerializer(new JsonSerializerSettings
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-                    NullValueHandling = NullValueHandling.Ignore
-                }))
+                .WithSerializer(new FusionCacheCysharpMemoryPackSerializer())
                 .WithDistributedCache(
                     new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCache(
                         new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCacheOptions
@@ -216,12 +211,26 @@ namespace Linky
                         Duration = TimeSpan.FromMinutes(2),
                         Priority = CacheItemPriority.High,
                         DistributedCacheDuration = TimeSpan.FromHours(1),
+                        
+                        // Fail-Safe: cache-ul funcționează chiar dacă DB/Redis cad
                         IsFailSafeEnabled = true,
                         FailSafeMaxDuration = TimeSpan.FromHours(6),
                         FailSafeThrottleDuration = TimeSpan.FromSeconds(2),
-                        JitterMaxDuration = TimeSpan.FromSeconds(30),
+                        
+                        // Performance: operații async în background
+                        AllowBackgroundDistributedCacheOperations = true,
                         SkipDistributedCacheReadWhenStale = true,
-                        AllowBackgroundDistributedCacheOperations = true
+                        
+                        // Anti cache-stampede: refresh înainte de expirare
+                        EagerRefreshThreshold = 0.8f,  // Refresh la 80% din Duration (1.6 min)
+                        
+                        // Timeouts pentru factory (DB queries)
+                        FactorySoftTimeout = TimeSpan.FromMilliseconds(500),  // soft timeout
+                        FactoryHardTimeout = TimeSpan.FromSeconds(3),         // hard timeout
+                        AllowTimedOutFactoryBackgroundCompletion = true,      // continuă în background
+                        
+                        // Jitter pentru a distribui load-ul
+                        JitterMaxDuration = TimeSpan.FromSeconds(10)
                     };
                 });
 
@@ -332,7 +341,22 @@ namespace Linky
 
         
 
-            // Delta Library https://github.com/SimonCropp/Delta/blob/main/docs/postgres.md
+            // IMPORTANT: Middleware Pipeline Order Matters!
+            // 
+            // CacheETagMiddleware - Adds ETag support for FusionCache responses (L1/L2)
+            //   - Generates ETags for data from cache (RAM/Redis)
+            //   - Returns 304 Not Modified when ETag matches
+            //   - COMPLEMENTS Delta.EF (doesn't replace it!)
+            // 
+            // MUST be placed BEFORE Delta.EF to intercept responses first
+            app.UseMiddleware<CacheETagMiddleware>();
+
+            // Delta.EF - Adds ETag support for EF Core database queries
+            //   - Generates ETags using PostgreSQL change tracking
+            //   - Returns 304 Not Modified for direct DB queries
+            //   - Only works when data comes directly from EF Core context
+            // 
+            // Read more: https://github.com/SimonCropp/Delta
             app.UseDelta<DataContextEf>();
 
             // Removed middleware that sets Cache-Control: no-cache when ETag is present
@@ -354,12 +378,22 @@ namespace Linky
 
             app.UseResponseCaching();
 
+            // Cache-Control Strategy for ETag-based caching:
+            // - public: Allows proxies/CDNs to cache
+            // - max-age=600: Browser caches for 10 minutes without revalidation
+            // - must-revalidate: After 10 min, MUST check with server using If-None-Match (ETag)
+            //
+            // FLOW:
+            // Request 1-N (< 10 min): Browser serves from local cache (instant, zero network)
+            // Request N+1 (> 10 min): Browser sends If-None-Match - Server returns 304 Not Modified (fast, minimal bandwidth)
+            //
+            // RESULT: Best of both worlds - local caching + freshness validation
             app.Use(async (context, next) =>
             {
                 await next();
                 if (context.Request.Method == "GET" && context.Response.StatusCode == 200 && !context.Response.Headers.ContainsKey("Cache-Control"))
                 {
-                    context.Response.Headers["Cache-Control"] = "public, max-age=3600";
+                    context.Response.Headers["Cache-Control"] = "public, max-age=600, must-revalidate";
                 }
             });
 
