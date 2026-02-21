@@ -1,4 +1,4 @@
-using Delta;
+// using Delta;  // COMMENTED OUT: Incompatible with FusionCache - see middleware section for details
 using Linky.DataLayer;
 using Linky.IRepository;
 using Linky.IService;
@@ -347,19 +347,24 @@ namespace Linky
             // CacheETagMiddleware - Adds ETag support for FusionCache responses (L1/L2)
             //   - Generates ETags for data from cache (RAM/Redis)
             //   - Returns 304 Not Modified when ETag matches
-            //   - COMPLEMENTS Delta.EF (doesn't replace it!)
+            //   - Works with both cached and non-cached responses
             // 
-            // TEMPORARILY DISABLED: Interfering with Delta.EF's ETag generation
-            // TODO: Fix middleware to not modify response body that Delta.EF processes
-            // app.UseMiddleware<CacheETagMiddleware>();
+            app.UseMiddleware<CacheETagMiddleware>();
 
-            // Delta.EF - Adds ETag support for EF Core database queries
-            //   - Generates ETags using PostgreSQL change tracking
-            //   - Returns 304 Not Modified for direct DB queries
-            //   - Only works when data comes directly from EF Core context
+            // Delta.EF - COMMENTED OUT: Incompatible with FusionCache
+            //   - Delta.EF can only generate consistent ETags for data returned DIRECTLY from EF Core queries
+            //   - When using FusionCache (return Ok(cached)), data bypasses EF Core tracking
+            //   - This causes Delta.EF to generate different ETags for identical content
+            //   - Result: 304 Not Modified never works because ETags don't match
+            // 
+            // Delta.EF is designed for:
+            //   - Direct DB queries without manual caching layers
+            //   - PostgreSQL change tracking for automatic invalidation
+            //   - Apps that don't use FusionCache/Redis/in-memory caching in controllers
             // 
             // Read more: https://github.com/SimonCropp/Delta
-            app.UseDelta<DataContextEf>();
+            // 
+            // app.UseDelta<DataContextEf>();
 
             // Removed middleware that sets Cache-Control: no-cache when ETag is present
             // This was preventing browsers from caching responses and sending If-None-Match for 304 Not Modified
