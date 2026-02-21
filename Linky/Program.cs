@@ -381,20 +381,20 @@ namespace Linky
 
             // Cache-Control Strategy for ETag-based caching:
             // - public: Allows proxies/CDNs to cache
-            // - max-age=600: Browser caches for 10 minutes without revalidation
-            // - must-revalidate: After 10 min, MUST check with server using If-None-Match (ETag)
+            // - max-age=0: Browser ALWAYS revalidates with server (sends If-None-Match)
+            // - must-revalidate: Forces validation when cache expires
             //
             // FLOW:
-            // Request 1-N (< 10 min): Browser serves from local cache (instant, zero network)
-            // Request N+1 (> 10 min): Browser sends If-None-Match - Server returns 304 Not Modified (fast, minimal bandwidth)
+            // Request 1: Server returns 200 OK + ETag, browser saves in cache
+            // Request 2+: Browser sends If-None-Match -> Server returns 304 Not Modified (minimal bandwidth)
             //
-            // RESULT: Best of both worlds - local caching + freshness validation
+            // RESULT: Always fresh data with bandwidth savings via 304 responses
             app.Use(async (context, next) =>
             {
                 await next();
                 if (context.Request.Method == "GET" && context.Response.StatusCode == 200 && !context.Response.Headers.ContainsKey("Cache-Control"))
                 {
-                    context.Response.Headers["Cache-Control"] = "public, max-age=600, must-revalidate";
+                    context.Response.Headers["Cache-Control"] = "public, max-age=0, must-revalidate";
                 }
             });
 
