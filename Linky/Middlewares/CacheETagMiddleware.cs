@@ -196,7 +196,7 @@ namespace Linky.Middlewares
 
         /// <summary>
         /// Returns HTTP 304 Not Modified response per RFC 7232.
-        /// Removes content-related headers and restores original body stream.
+        /// Removes content-related headers and ensures empty body (0 bytes).
         /// </summary>
         private static void Return304NotModified(HttpContext context, Stream originalBodyStream)
         {
@@ -204,9 +204,12 @@ namespace Linky.Middlewares
             context.Response.StatusCode = StatusCodes.Status304NotModified;
             context.Response.Body = originalBodyStream;
             
+            // CRITICAL: 304 responses MUST have empty body (0 bytes)
+            // Set ContentLength to 0 to ensure no body is sent
+            context.Response.ContentLength = 0;
+            
             // Per RFC 7232: Remove content-related headers for 304
             // These MUST be removed as they describe the message body, which is not sent
-            context.Response.Headers.Remove("Content-Length");
             context.Response.Headers.Remove("Content-Encoding");
             context.Response.Headers.Remove("Transfer-Encoding");
             
