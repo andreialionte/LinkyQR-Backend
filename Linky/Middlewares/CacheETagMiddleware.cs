@@ -133,6 +133,11 @@ namespace Linky.Middlewares
                         // (Delta.EF knows the actual DB modification timestamp)
                     }
 
+                    // Set Cache-Control header for browser/CDN caching
+                    // max-age=900 (15 minutes) - How long to cache before revalidating
+                    // must-revalidate - Must check ETag with server after expiration
+                    context.Response.Headers.CacheControl = "max-age=900, must-revalidate";
+
                     // ==========================================
                     // RFC 7232 CONDITIONAL REQUEST VALIDATION
                     // ==========================================
