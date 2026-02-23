@@ -133,11 +133,13 @@ namespace Linky.Middlewares
                         // (Delta.EF knows the actual DB modification timestamp)
                     }
 
-                    // Set Cache-Control header for browser/CDN caching per RFC 7234
-                    // public - Can be cached by browsers AND CDNs (Cloudflare)
-                    // max-age=900 (15 minutes) - Cache fresh for 15 min (no requests to server)
-                    // After expiration, browser revalidates with If-None-Match → 304 Not Modified
-                    context.Response.Headers.CacheControl = "public, max-age=900, must-revalidate";
+                    // Set Cache-Control: Expiration Model + Validation Model (best practice)
+                    // Per Görkem Kaya article: ResponseCache + ETag combination
+                    // public - Shared cache (browsers + CDN like Cloudflare)
+                    // max-age=900 (15 min) - Browser uses disk cache (0-15 min → NO requests)
+                    // After 900s expires → Browser sends If-None-Match → 304 Not Modified
+                    // Best of both: Fast (disk cache) + Fresh (ETag validation after expiry)
+                    context.Response.Headers.CacheControl = "public, max-age=180, must-revalidate";
 
                     // ==========================================
                     // RFC 7232 CONDITIONAL REQUEST VALIDATION
