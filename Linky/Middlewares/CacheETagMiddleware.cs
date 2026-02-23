@@ -133,12 +133,11 @@ namespace Linky.Middlewares
                         // (Delta.EF knows the actual DB modification timestamp)
                     }
 
-                    // Set Cache-Control: Expiration Model + Validation Model (best practice)
-                    // Per Görkem Kaya article: ResponseCache + ETag combination
-                    // public - Shared cache (browsers + CDN like Cloudflare)
-                    // max-age=900 (15 min) - Browser uses disk cache (0-15 min → NO requests)
-                    // After 900s expires → Browser sends If-None-Match → 304 Not Modified
-                    // Best of both: Fast (disk cache) + Fresh (ETag validation after expiry)
+                    // Set Cache-Control for ETag validation on EVERY request (Validation Model)
+                    // Per RFC 7234: max-age=0 with must-revalidate forces revalidation
+                    // Browser ALWAYS sends If-None-Match → 304 Not Modified if ETag matches
+                    // This gives you 304 on EVERY refresh (not disk cache)
+                    // Trade-off: Small request per refresh vs instant disk cache
                     context.Response.Headers.CacheControl = "public, max-age=180, must-revalidate";
 
                     // ==========================================
