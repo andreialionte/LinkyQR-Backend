@@ -138,7 +138,7 @@ namespace Linky.Middlewares
                     // Browser ALWAYS sends If-None-Match → 304 Not Modified if ETag matches
                     // This gives you 304 on EVERY refresh (not disk cache)
                     // Trade-off: Small request per refresh vs instant disk cache
-                    context.Response.Headers.CacheControl = "public, max-age=180, must-revalidate";
+                    context.Response.Headers.CacheControl = "public, max-age=300, must-revalidate";
 
                     // ==========================================
                     // RFC 7232 CONDITIONAL REQUEST VALIDATION
