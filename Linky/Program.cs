@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using OwaspHeaders.Core.Extensions;
 using Quartz;
 using StackExchange.Redis;
 using System.Data;
@@ -27,6 +26,14 @@ namespace Linky
     {
         public static void Main(string[] args)
         {
+            // ensure thread‑pool has a reasonable floor in case of sudden load spikes
+            // only bump if current min is lower to avoid wasting threads on small machines
+            ThreadPool.GetMinThreads(out var wt, out var io);
+            if (wt < 200 || io < 200)
+            {
+                ThreadPool.SetMinThreads(workerThreads: 200, completionPortThreads: 200);
+            }
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
@@ -153,10 +160,13 @@ namespace Linky
 
             builder.WebHost.ConfigureKestrel((context, options) =>
             {
+                options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(5);
+                options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+
                 options.ListenAnyIP(5000, listenOptions =>
                 {
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
-                    listenOptions.UseHttps(); 
+                    //  listenOptions.UseHttps(); 
                     // Disable Kestrel's auto-generated Alt-Svc header (adds only h3=":port"; ma=86400)
                     // so our middleware can set the full custom value with persist=1 and draft versions.
                     // Source: ListenOptions.DisableAltSvcHeader in ASP.NET Core Kestrel source.
@@ -216,24 +226,24 @@ namespace Linky
                         Duration = TimeSpan.FromMinutes(2),
                         Priority = CacheItemPriority.High,
                         DistributedCacheDuration = TimeSpan.FromHours(1),
-                        
+
                         // Fail-Safe: cache-ul funcționează chiar dacă DB/Redis cad
                         IsFailSafeEnabled = true,
                         FailSafeMaxDuration = TimeSpan.FromHours(6),
                         FailSafeThrottleDuration = TimeSpan.FromSeconds(2),
-                        
+
                         // Performance: operații async în background
                         AllowBackgroundDistributedCacheOperations = true,
                         SkipDistributedCacheReadWhenStale = true,
-                        
+
                         // Anti cache-stampede: refresh înainte de expirare
                         EagerRefreshThreshold = 0.8f,  // Refresh la 80% din Duration (1.6 min)
-                        
+
                         // Timeouts pentru factory (DB queries)
                         FactorySoftTimeout = TimeSpan.FromMilliseconds(500),  // soft timeout
                         FactoryHardTimeout = TimeSpan.FromSeconds(3),         // hard timeout
                         AllowTimedOutFactoryBackgroundCompletion = true,      // continuă în background
-                        
+
                         // Jitter pentru a distribui load-ul
                         JitterMaxDuration = TimeSpan.FromSeconds(10)
                     };
@@ -335,8 +345,8 @@ namespace Linky
                 .AddCustomHeader("X-Permitted-Cross-Domain-Policies", "none")
                 .AddCustomHeader("Cross-Origin-Embedder-Policy", "require-corp")
                 .AddCustomHeader("Cross-Origin-Resource-Policy", "same-origin");
-                // REMOVED: Cache-Control from security headers
-                // Let the ETag middleware and response caching middleware handle Cache-Control instead
+            // REMOVED: Cache-Control from security headers
+            // Let the ETag middleware and response caching middleware handle Cache-Control instead
 
             app.UseSecurityHeaders(policyCollection);
 
@@ -374,7 +384,7 @@ namespace Linky
 
             app.MapHub<ActiveVisitorsHub>("/ActiveVisitorsHub");
 
-        
+
 
             // IMPORTANT: Middleware Pipeline Order Matters!
             // 
