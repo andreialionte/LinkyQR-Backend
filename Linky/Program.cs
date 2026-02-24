@@ -275,6 +275,35 @@ namespace Linky
 
             app.UseCors("main");
 
+            // Advertise HTTP/3 support (QUIC) to clients via Alt-Svc header.
+            // Kestrel auto-adds h3=":443" when HTTP/3 is configured - we override it via OnStarting
+            // to ensure a single, complete Alt-Svc header.
+            //
+            // NOTE on draft versions (h3-29, h3-27):
+            //   These were QUIC/HTTP3 drafts from mid-2020. As of 2026, no modern browser
+            //   negotiates versions below h3-32. They are parsed and silently ignored.
+            //   Including them does no harm but provides zero benefit.
+            //
+            // NOTE on persist=1:
+            //   Per RFC 7838 §3.1, persist=1 is a per-alt-value parameter.
+            //   Without it, browsers clear cached Alt-Svc entries on network changes (wifi→4G etc.).
+            //   With persist=1, the browser keeps the HTTP/3 hint across network changes.
+            //   Must be on EACH entry individually to be spec-compliant.
+            //
+            // ma=86400 = client caches the hint for 24 hours
+            app.Use(async (context, next) =>
+            {
+                context.Response.OnStarting(() =>
+                {
+                    context.Response.Headers["Alt-Svc"] =
+                        "h3=\":443\"; ma=86400; persist=1, " +
+                        "h3-29=\":443\"; ma=86400; persist=1, " +
+                        "h3-27=\":443\"; ma=86400; persist=1";
+                    return Task.CompletedTask;
+                });
+                await next();
+            });
+
             // Security Headers - must be early in pipeline
             var policyCollection = new HeaderPolicyCollection()
                 .AddFrameOptionsDeny()
