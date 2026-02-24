@@ -156,6 +156,7 @@ namespace Linky
                 options.ListenAnyIP(5000, listenOptions =>
                 {
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
+                    listenOptions.UseHttps(); 
                     // Disable Kestrel's auto-generated Alt-Svc header (adds only h3=":port"; ma=86400)
                     // so our middleware can set the full custom value with persist=1 and draft versions.
                     // Source: ListenOptions.DisableAltSvcHeader in ASP.NET Core Kestrel source.
