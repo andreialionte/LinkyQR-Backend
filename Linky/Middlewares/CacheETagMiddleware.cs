@@ -4,9 +4,27 @@ using System.Text;
 namespace Linky.Middlewares
 {
     /// <summary>
-    /// RFC 7232 Compliant ETag Middleware for HTTP Conditional Requests
+    /// RFC 7232 Compliant ETag Middleware with Cloudflare-Style Cache-Control
     /// 
-    /// IMPLEMENTS: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Conditional_requests
+    /// IMPLEMENTS:
+    ///   RFC 7232 - Conditional Requests: https://datatracker.ietf.org/doc/html/rfc7232
+    ///   RFC 5861 - Stale Extensions:     https://datatracker.ietf.org/doc/html/rfc5861
+    ///   MDN:  https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Conditional_requests
+    /// 
+    /// ═══════════════════════════════════════════════════════════════════════════════
+    /// CACHING STRATEGY (matches Cloudflare CDN behavior)
+    /// ═══════════════════════════════════════════════════════════════════════════════
+    /// 
+    /// Cache-Control: max-age=300, stale-while-revalidate=10800, stale-if-error=10800, public
+    /// 
+    /// Timeline:
+    ///   0–300s (5 min)         → Browser serves from disk cache, ZERO network requests
+    ///                            DevTools shows "200 OK (from disk cache)"
+    ///   300s–10800s (5m–3h)    → Stale served instantly + background revalidation
+    ///                            If-None-Match → 304 Not Modified (ETag match)
+    ///                            User sees instant response, cache refreshes silently
+    ///   >10800s (>3h)          → Standard revalidation before serving
+    ///   Origin down (any time) → Stale served for up to 3 hrs (resilience)
     /// 
     /// ═══════════════════════════════════════════════════════════════════════════════
     /// SAFE METHODS (GET, HEAD) - FULL IMPLEMENTATION ✅
@@ -14,15 +32,18 @@ namespace Linky.Middlewares
     /// 
     /// Automatically handles:
     ///   ✅ ETag generation (SHA256, weak ETags with W/)
-    ///   ✅ If-None-Match validation → 304 Not Modified
+    ///   ✅ If-None-Match validation → 304 Not Modified (weak comparison per RFC 7232 §2.3.2)
     ///   ✅ If-Modified-Since validation → 304 Not Modified (only for Delta.EF DB responses)
-    ///   ✅ Proper header cleanup for 304 (Content-Length, Content-Encoding, Transfer-Encoding)
-    ///   ✅ Body cleared (0 bytes) for 304 responses
+    ///   ✅ Proper header cleanup for 304 (Content-Length removed, Content-Encoding, Transfer-Encoding)
+    ///   ✅ Vary: Accept-Encoding (correct caching with compression variants)
+    ///   ✅ Early 304 fast-path (skips body hashing when Delta.EF ETag already matches)
+    ///   ✅ WebSocket/SSE bypass (SignalR, streaming responses skip buffering)
     /// 
     /// Use cases:
-    ///   • Cache validation (browser/CDN checks if content changed)
-    ///   • Bandwidth savings (304 = ~400 bytes vs 1.5 kB full response)
+    ///   • Disk cache (zero requests during max-age window — instant)
+    ///   • Cache validation (304 = ~400 bytes vs 1.5 kB full response)
     ///   • Mobile data savings (~75% bandwidth reduction on cache hits)
+    ///   • Resilience (stale-if-error serves cached content when origin is down)
     /// 
     /// IMPORTANT: Last-Modified behavior:
     ///   • FusionCache responses: Only ETag (no Last-Modified timestamp available)
@@ -79,13 +100,25 @@ namespace Linky.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Only process GET and HEAD requests for full RFC 7232 conditional request handling
-            // (ETag generation, Last-Modified, If-None-Match/If-Modified-Since validation, 304 responses)
+            // ─────────────────────────────────────────────────────────────
+            // BYPASS: Non-cacheable requests skip body buffering entirely
+            // ─────────────────────────────────────────────────────────────
+            
+            // 1. Only GET/HEAD use conditional requests (ETag, If-None-Match, 304)
+            //    PUT/PATCH/DELETE/POST: Controllers validate If-Match manually → 412
             if (context.Request.Method != HttpMethods.Get && 
                 context.Request.Method != HttpMethods.Head)
             {
-                // For PUT/PATCH/DELETE/POST: Controllers must validate If-Match/If-Unmodified-Since manually
-                // and return 412 Precondition Failed if needed (see class documentation above)
+                await _next(context);
+                return;
+            }
+
+            // 2. WebSocket upgrades (SignalR) must NOT be buffered in MemoryStream
+            //    The Upgrade header signals a protocol switch — response body is a
+            //    persistent bidirectional stream, not a finite HTTP response.
+            if (context.WebSockets.IsWebSocketRequest ||
+                context.Request.Headers.Connection.ToString().Contains("Upgrade", StringComparison.OrdinalIgnoreCase))
+            {
                 await _next(context);
                 return;
             }
@@ -102,63 +135,110 @@ namespace Linky.Middlewares
                 // Only process successful responses
                 if (context.Response.StatusCode == 200)
                 {
+                    // ──────────────────────────────────────────────────────────
+                    // FAST PATH: Delta.EF already set an ETag → check If-None-Match
+                    // BEFORE reading the body into a byte array. This avoids:
+                    //   • responseBody.ToArray() allocation (can be several KB)
+                    //   • SHA256.HashData() CPU cost
+                    // Only possible when the upstream pipeline already set ETag.
+                    // ──────────────────────────────────────────────────────────
+                    if (context.Response.Headers.ContainsKey("ETag") &&
+                        context.Request.Headers.TryGetValue("If-None-Match", out var earlyIncomingETags))
+                    {
+                        var existingEtag = context.Response.Headers.ETag.ToString();
+                        var earlyEtagList = earlyIncomingETags.ToString()
+                            .Split(',')
+                            .Select(e => e.Trim());
+
+                        if (earlyEtagList.Any(e => WeakETagEquals(e, existingEtag)) ||
+                            earlyEtagList.Contains("*"))
+                        {
+                            // ETag match — content unchanged. Return 304 without touching body.
+                            SetCacheHeaders(context);
+                            Return304NotModified(context, originalBodyStream);
+                            return;
+                        }
+                    }
+
                     responseBody.Seek(0, SeekOrigin.Begin);
                     var responseBytes = responseBody.ToArray();
 
-                    // CRITICAL: Check if Delta.EF already generated an ETag
-                    // Delta.EF generates ETags ONLY for direct EF Core DB queries
-                    // FusionCache responses (from RAM/Redis) bypass EF Core - no ETag from Delta
-                    // If no ETag exists, we generate one from the cached response content
+                    // Determine ETag: reuse Delta.EF's or generate from response body
+                    // Delta.EF generates ETags ONLY for direct EF Core DB queries.
+                    // FusionCache responses (from RAM/Redis) bypass EF Core — no ETag from Delta.
                     string etag;
                     
                     if (!context.Response.Headers.ContainsKey("ETag"))
                     {
-                        // No ETag from Delta.EF - This is a cached response
-                        // Generate ETag from response body for 304 support
+                        // No ETag from Delta.EF → This is a cached response
+                        // Generate ETag from response body content for 304 support
                         etag = GenerateETag(responseBytes);
                         context.Response.Headers.ETag = etag;
                         
                         // DO NOT set Last-Modified for cached responses!
-                        // Why? FusionCache doesn't preserve original modification timestamp.
-                        // Using DateTime.UtcNow would change on every request, breaking 304 validation.
+                        // FusionCache doesn't preserve original modification timestamp.
+                        // DateTime.UtcNow would change on every request, breaking 304 validation.
                         // ETags alone are sufficient and more reliable for cache validation.
                     }
                     else
                     {
-                        // ETag already exists from Delta.EF - This is a direct DB query
-                        // Reuse Delta's ETag (it's already optimized for PostgreSQL change tracking)
+                        // ETag already exists from Delta.EF → This is a direct DB query
+                        // Reuse Delta's ETag (optimized for PostgreSQL change tracking)
                         etag = context.Response.Headers.ETag.ToString();
                         
                         // Only use Last-Modified if Delta.EF already set it
                         // (Delta.EF knows the actual DB modification timestamp)
                     }
 
-                    // Set Cache-Control for ETag validation on EVERY request (Validation Model)
-                    // Per RFC 7234: max-age=0 with must-revalidate forces revalidation
-                    // Browser ALWAYS sends If-None-Match → 304 Not Modified if ETag matches
-                    // This gives you 304 on EVERY refresh (not disk cache)
-                    // Trade-off: Small request per refresh vs instant disk cache
-                    context.Response.Headers.CacheControl = "public, max-age=0, must-revalidate";
+                    // Cache-Control: Cloudflare-style freshness + stale directives
+                    // ─────────────────────────────────────────────────────────────
+                    // max-age=300 (5 min):
+                    //   Browser serves from disk cache with ZERO network requests.
+                    //   DevTools shows "200 OK (from disk cache)" or "302 Found (from disk cache)".
+                    //
+                    // stale-while-revalidate=10800 (3 hrs):
+                    //   After max-age expires, browser immediately serves stale cached response
+                    //   AND fires a background revalidation request (If-None-Match → 304/200).
+                    //   User sees instant response; cache silently refreshes in the background.
+                    //   RFC 5861 §3: https://datatracker.ietf.org/doc/html/rfc5861#section-3
+                    //
+                    // stale-if-error=10800 (3 hrs):
+                    //   If origin returns 5xx or is unreachable, browser serves stale content
+                    //   instead of showing an error page. Resilience against downtime.
+                    //   RFC 5861 §4: https://datatracker.ietf.org/doc/html/rfc5861#section-4
+                    //
+                    // public:
+                    //   Response can be stored by any cache (browser, CDN, proxy).
+                    //
+                    // NO must-revalidate:
+                    //   must-revalidate forces the browser to contact the server once max-age
+                    //   expires, blocking the response until revalidation completes. Without it,
+                    //   stale-while-revalidate can serve stale instantly + revalidate in background.
+                    //
+                    // Timeline:
+                    //   0–300s        → disk cache (zero requests, instant)
+                    //   300s–10800s   → stale served instantly + background revalidation (ETag/304)
+                    //   >10800s       → must revalidate before serving (standard behavior)
+                    //   Origin down   → stale served for up to 3 hrs (stale-if-error)
+                    SetCacheHeaders(context);
 
                     // ==========================================
                     // RFC 7232 CONDITIONAL REQUEST VALIDATION
                     // ==========================================
                     
                     // Check If-None-Match (ETag-based validation - primary method)
-                    // Per RFC 7232: If-None-Match can contain multiple ETags comma-separated
+                    // Per RFC 7232 §3.2: If-None-Match can contain multiple ETags, comma-separated
+                    // Uses weak comparison (W/ prefix ignored) per RFC 7232 §2.3.2
                     if (context.Request.Headers.TryGetValue("If-None-Match", out var incomingETags))
                     {
-                        // Split multiple ETags and check if current ETag matches any
                         var etagList = incomingETags.ToString()
                             .Split(',')
-                            .Select(e => e.Trim())
-                            .ToList();
+                            .Select(e => e.Trim());
 
-                        if (etagList.Contains(etag) || etagList.Contains("*"))
+                        if (etagList.Any(e => WeakETagEquals(e, etag)) || etagList.Contains("*"))
                         {
-                            // ETags match - Content hasn't changed
+                            // ETags match — content unchanged
                             // DON'T copy responseBody to originalBodyStream at all
-                            // Just set 304 status and return immediately (Delta.EF approach)
                             Return304NotModified(context, originalBodyStream);
                             return;
                         }
@@ -177,9 +257,6 @@ namespace Linky.Middlewares
                         // Round to seconds (HTTP dates don't include milliseconds)
                         if (lastModified.AddMilliseconds(-lastModified.Millisecond) <= ifModifiedSince)
                         {
-                            // Resource not modified since client's cache date
-                            // DON'T copy responseBody to originalBodyStream at all
-                            // Just set 304 status and return immediately
                             Return304NotModified(context, originalBodyStream);
                             return;
                         }
@@ -204,39 +281,84 @@ namespace Linky.Middlewares
         }
 
         /// <summary>
-        /// Returns HTTP 304 Not Modified response per RFC 7232.
-        /// Removes content-related headers and ensures empty body (0 bytes).
+        /// Returns HTTP 304 Not Modified response per RFC 7232 §4.1.
         /// 
-        /// DELTA.EF APPROACH: Don't write ANY body data - just set status code and headers.
+        /// Removes content-related headers and ensures empty body.
         /// The key is to NOT copy the responseBody MemoryStream to originalBodyStream at all.
+        /// 
+        /// Content-Length handling per RFC 7230 §3.3:
+        ///   A 304 MUST NOT contain Content-Length that differs from what would have
+        ///   been sent in the corresponding 200. Since we don't know the 200 body size
+        ///   at this point (body may not have been read), we REMOVE Content-Length entirely.
+        ///   This is safer than setting 0 (which would be a spec violation for non-empty bodies).
         /// </summary>
         private static void Return304NotModified(HttpContext context, Stream originalBodyStream)
         {
-            // Return 304 Not Modified (saves bandwidth, ultra-fast response)
             context.Response.StatusCode = StatusCodes.Status304NotModified;
             
-            // CRITICAL: Set Content-Length to 0 BEFORE setting Body stream
-            // This tells ASP.NET Core to NOT write any content
-            context.Response.ContentLength = 0;
-            
-            // Switch back to the original body stream (which has nothing written to it)
-            // All JSON generation happened in the temporary MemoryStream, which we discard
+            // Switch back to the original body stream (nothing written to it)
             context.Response.Body = originalBodyStream;
             
-            // Per RFC 7232: Remove content-related headers for 304
-            // These MUST be removed as they describe the message body, which is not sent
+            // Per RFC 7232 §4.1: Remove headers describing the message body
+            // A 304 has no body — these headers would be misleading
+            context.Response.ContentLength = null; // REMOVE, not 0 (RFC 7230 §3.3)
             context.Response.Headers.Remove("Content-Encoding");
             context.Response.Headers.Remove("Transfer-Encoding");
-            
-            // Explicitly clear Content-Type as well (no body = no content type)
             context.Response.Headers.Remove("Content-Type");
             
-            // Headers that remain (auto-set by ASP.NET Core or already present):
+            // Headers that REMAIN on 304 (per RFC 7232 §4.1):
             // - Date (server timestamp)
-            // - ETag (validation identifier)
-            // - Last-Modified (only if set by Delta.EF for DB queries)
+            // - ETag (the validator that matched)
             // - Cache-Control (caching directives)
-            // - Vary (content negotiation)
+            // - Vary (content negotiation — tells caches to key on Accept-Encoding)
+            // - Last-Modified (only if set by Delta.EF for DB queries)
+        }
+
+        /// <summary>
+        /// Sets Cache-Control and Vary headers for Cloudflare-style caching.
+        /// Extracted to avoid duplication between the fast-path and normal-path.
+        /// </summary>
+        private static void SetCacheHeaders(HttpContext context)
+        {
+            // Cache-Control: Cloudflare-style freshness + stale directives
+            // ─────────────────────────────────────────────────────────────
+            // max-age=300 (5 min):
+            //   Browser serves from disk cache with ZERO network requests.
+            //   DevTools shows "200 OK (from disk cache)".
+            //
+            // stale-while-revalidate=10800 (3 hrs):
+            //   After max-age expires, browser immediately serves stale cached response
+            //   AND fires a background revalidation request (If-None-Match → 304/200).
+            //   User sees instant response; cache silently refreshes in the background.
+            //   RFC 5861 §3: https://datatracker.ietf.org/doc/html/rfc5861#section-3
+            //
+            // stale-if-error=10800 (3 hrs):
+            //   If origin returns 5xx or is unreachable, browser serves stale content
+            //   instead of showing an error page. Resilience against downtime.
+            //   RFC 5861 §4: https://datatracker.ietf.org/doc/html/rfc5861#section-4
+            //
+            // public:
+            //   Response can be stored by any cache (browser, CDN, proxy).
+            //
+            // NO must-revalidate:
+            //   must-revalidate forces the browser to contact the server once max-age
+            //   expires, blocking the response until revalidation completes. Without it,
+            //   stale-while-revalidate can serve stale instantly + revalidate in background.
+            //
+            // Timeline:
+            //   0–300s        → disk cache (zero requests, instant)
+            //   300s–10800s   → stale served instantly + background revalidation (ETag/304)
+            //   >10800s       → must revalidate before serving (standard behavior)
+            //   Origin down   → stale served for up to 3 hrs (stale-if-error)
+            context.Response.Headers.CacheControl =
+                "max-age=300, stale-while-revalidate=10800, stale-if-error=10800, public";
+
+            // Vary: Accept-Encoding
+            // Tells caches (CDN, proxies, browser) to store separate cached variants
+            // per encoding (gzip, br, zstd, identity). Without this, a proxy could
+            // serve a gzip-compressed response to a client expecting brotli.
+            // Cloudflare always sets this — we match that behavior at origin.
+            context.Response.Headers.Vary = "Accept-Encoding";
         }
 
         /// <summary>
@@ -252,14 +374,42 @@ namespace Linky.Middlewares
         /// 
         /// PERFORMANCE:
         /// SHA256.HashData is highly optimized in .NET and uses hardware acceleration when available.
-        /// The hash is deterministic - same content ALWAYS produces same ETag.
+        /// The hash is deterministic — same content ALWAYS produces same ETag.
         /// </summary>
         private static string GenerateETag(byte[] content)
         {
             var hash = SHA256.HashData(content);
             var base64Hash = Convert.ToBase64String(hash);
-            // Use weak ETag (W/) for better performance and compatibility with gzip/compression
             return $"W/\"{base64Hash}\"";
+        }
+
+        /// <summary>
+        /// Weak comparison per RFC 7232 §2.3.2:
+        ///   Two ETags are weakly equivalent if their opaque-tags match,
+        ///   regardless of either or both being tagged as "weak".
+        /// 
+        /// This means:
+        ///   W/"abc" == W/"abc"  → true
+        ///   W/"abc" == "abc"    → true  (weak comparison ignores W/ prefix)
+        ///   "abc"   == "abc"    → true
+        ///   W/"abc" == W/"xyz"  → false
+        /// 
+        /// Required for If-None-Match on GET/HEAD (RFC 7232 §3.2):
+        ///   "A recipient MUST use the weak comparison function when comparing
+        ///    entity-tags for If-None-Match"
+        /// </summary>
+        private static bool WeakETagEquals(string a, string b)
+        {
+            // Strip W/ prefix from both sides, then compare the quoted opaque-tags
+            return StripWeakPrefix(a) == StripWeakPrefix(b);
+        }
+
+        private static ReadOnlySpan<char> StripWeakPrefix(ReadOnlySpan<char> etag)
+        {
+            etag = etag.Trim();
+            if (etag.StartsWith("W/", StringComparison.OrdinalIgnoreCase))
+                etag = etag[2..];
+            return etag;
         }
     }
 }

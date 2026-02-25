@@ -429,24 +429,12 @@ namespace Linky
 
             app.UseResponseCaching();
 
-            // Cache-Control Strategy for ETag-based caching:
-            // - public: Allows proxies/CDNs to cache
-            // - max-age=0: Browser ALWAYS revalidates with server (sends If-None-Match)
-            // - must-revalidate: Forces validation when cache expires
-            //
-            // FLOW:
-            // Request 1: Server returns 200 OK + ETag, browser saves in cache
-            // Request 2+: Browser sends If-None-Match -> Server returns 304 Not Modified (minimal bandwidth)
-            //
-            // RESULT: Always fresh data with bandwidth savings via 304 responses
-            app.Use(async (context, next) =>
-            {
-                await next();
-                if (context.Request.Method == "GET" && context.Response.StatusCode == 200 && !context.Response.Headers.ContainsKey("Cache-Control"))
-                {
-                    context.Response.Headers["Cache-Control"] = "public, max-age=0, must-revalidate";
-                }
-            });
+            // REMOVED: Old Cache-Control fallback middleware
+            // Previously set "public, max-age=0, must-revalidate" for GET 200 responses
+            // without Cache-Control. This is now dead code because CacheETagMiddleware
+            // (which runs earlier in the pipeline) sets Cloudflare-style Cache-Control
+            // on ALL 200 GET responses. Keeping it would just waste CPU on a check
+            // whose header is always overwritten.
 
             //app.UseRateLimiter();
 
