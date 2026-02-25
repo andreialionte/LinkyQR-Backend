@@ -162,15 +162,11 @@ namespace Linky
             {
                 options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(5);
                 options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+                options.AddServerHeader = false;
 
                 options.ListenAnyIP(5000, listenOptions =>
                 {
-                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
-                    //  listenOptions.UseHttps(); 
-                    // Disable Kestrel's auto-generated Alt-Svc header (adds only h3=":port"; ma=86400)
-                    // so our middleware can set the full custom value with persist=1 and draft versions.
-                    // Source: ListenOptions.DisableAltSvcHeader in ASP.NET Core Kestrel source.
-                    listenOptions.DisableAltSvcHeader = true;
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
                 });
             });
 
@@ -290,22 +286,17 @@ namespace Linky
 
             app.UseCors("main");
 
-            // Advertise HTTP/3 support (QUIC) to clients via Alt-Svc header.
-            // Kestrel auto-adds h3=":443" when HTTP/3 is configured - we override it via OnStarting
-            // to ensure a single, complete Alt-Svc header.
+            // Alt-Svc header for HTTP/3 and HTTP/2 protocol advertisement
+            // 
+            // NOTE: In production with Cloudflare Tunnel + Traefik:
+            //   - Cloudflare automatically adds Alt-Svc headers at the edge
+            //   - This middleware may be redundant (Cloudflare's headers take precedence)
+            //   - Useful if you want to ensure Alt-Svc is always present
             //
-            // NOTE on draft versions (h3-29, h3-27):
-            //   These were QUIC/HTTP3 drafts from mid-2020. As of 2026, no modern browser
-            //   negotiates versions below h3-32. They are parsed and silently ignored.
-            //   Including them does no harm but provides zero benefit.
+            // WARNING: Your app receives plain HTTP from Traefik on port 5000,
+            //   but advertises :443 because that's where clients connect to Cloudflare.
+            //   This is CORRECT - don't change :443 to :5000
             //
-            // NOTE on persist=1:
-            //   Per RFC 7838 §3.1, persist=1 is a per-alt-value parameter.
-            //   Without it, browsers clear cached Alt-Svc entries on network changes (wifi→4G etc.).
-            //   With persist=1, the browser keeps the HTTP/3 hint across network changes.
-            //   Must be on EACH entry individually to be spec-compliant.
-            //
-            // ma=86400 = client caches the hint for 24 hours
             app.Use(async (context, next) =>
             {
                 context.Response.OnStarting(() =>
@@ -313,7 +304,7 @@ namespace Linky
                     context.Response.Headers["Alt-Svc"] =
                         "h3=\":443\"; ma=86400; persist=1, " +
                         "h3-29=\":443\"; ma=86400; persist=1, " +
-                        "h3-27=\":443\"; ma=86400; persist=1";
+                        "h2=\":443\"; ma=86400; persist=1";
                     return Task.CompletedTask;
                 });
                 await next();

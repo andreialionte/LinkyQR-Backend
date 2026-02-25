@@ -166,8 +166,12 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 4,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
@@ -182,27 +186,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "ActiveVisitorController.cs",
-              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\ActiveVisitorController.cs",
-              "RelativeDocumentMoniker": "Linky\\Controllers\\ActiveVisitorController.cs",
-              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\ActiveVisitorController.cs",
-              "RelativeToolTip": "Linky\\Controllers\\ActiveVisitorController.cs",
-              "ViewState": "AgIAABgAAAAAAAAAAIBZwCsAAABdAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
+              "RelativeDocumentMoniker": "Linky\\Program.cs",
+              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
+              "RelativeToolTip": "Linky\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAALMBAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T20:40:06.757Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "VisitorController.cs",
-              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\VisitorController.cs",
-              "RelativeDocumentMoniker": "Linky\\Controllers\\VisitorController.cs",
-              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\VisitorController.cs",
-              "RelativeToolTip": "Linky\\Controllers\\VisitorController.cs",
-              "ViewState": "AgIAADoAAAAAAAAAAAAmwE0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:36:13.484Z"
+              "WhenOpened": "2025-10-25T19:42:13.645Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -242,6 +235,18 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "VisitorController.cs",
+              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\VisitorController.cs",
+              "RelativeDocumentMoniker": "Linky\\Controllers\\VisitorController.cs",
+              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\VisitorController.cs",
+              "RelativeToolTip": "Linky\\Controllers\\VisitorController.cs",
+              "ViewState": "AgIAADoAAAAAAAAAAAAmwE0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T19:36:13.484Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
               "Title": "Linky.csproj",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Linky.csproj",
@@ -254,16 +259,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
-              "RelativeDocumentMoniker": "Linky\\Program.cs",
-              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
-              "RelativeToolTip": "Linky\\Program.cs",
-              "ViewState": "AgIAABgAAAAAAAAAAAAAACUAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 8,
+              "Title": "ActiveVisitorController.cs",
+              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\ActiveVisitorController.cs",
+              "RelativeDocumentMoniker": "Linky\\Controllers\\ActiveVisitorController.cs",
+              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\ActiveVisitorController.cs",
+              "RelativeToolTip": "Linky\\Controllers\\ActiveVisitorController.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAIBZwCsAAABdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-25T19:42:13.645Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-25T20:40:06.757Z"
             },
             {
               "$type": "Document",
