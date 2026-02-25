@@ -162,11 +162,10 @@ namespace Linky
             {
                 options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(5);
                 options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
-                options.AddServerHeader = false;
-
+                options.AddServerHeader = true;
                 options.ListenAnyIP(5000, listenOptions =>
                 {
-                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2Http3;
                 });
             });
 
