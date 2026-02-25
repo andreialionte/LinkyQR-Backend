@@ -286,30 +286,6 @@ namespace Linky
 
             app.UseCors("main");
 
-            // Alt-Svc header for HTTP/3 and HTTP/2 protocol advertisement
-            // 
-            // NOTE: In production with Cloudflare Tunnel + Traefik:
-            //   - Cloudflare automatically adds Alt-Svc headers at the edge
-            //   - This middleware may be redundant (Cloudflare's headers take precedence)
-            //   - Useful if you want to ensure Alt-Svc is always present
-            //
-            // WARNING: Your app receives plain HTTP from Traefik on port 5000,
-            //   but advertises :443 because that's where clients connect to Cloudflare.
-            //   This is CORRECT - don't change :443 to :5000
-            //
-            app.Use(async (context, next) =>
-            {
-                context.Response.OnStarting(() =>
-                {
-                    context.Response.Headers["Alt-Svc"] =
-                        "h3=\":443\"; ma=86400; persist=1, " +
-                        "h3-29=\":443\"; ma=86400; persist=1, " +
-                        "h2=\":443\"; ma=86400; persist=1";
-                    return Task.CompletedTask;
-                });
-                await next();
-            });
-
             // Security Headers - must be early in pipeline
             var policyCollection = new HeaderPolicyCollection()
                 .AddFrameOptionsDeny()
