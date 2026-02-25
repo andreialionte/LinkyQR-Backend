@@ -4,10 +4,12 @@ using System.Text;
 namespace Linky.Middlewares
 {
     /// <summary>
-    /// RFC 7232 Compliant ETag Middleware with Cloudflare-Style Cache-Control
+    /// RFC 9110 Compliant ETag Middleware with Cloudflare-Style Cache-Control
     /// 
     /// IMPLEMENTS:
-    ///   RFC 7232 - Conditional Requests: https://datatracker.ietf.org/doc/html/rfc7232
+    ///   RFC 9110 - HTTP Semantics (§8.8.3 ETag, §13 Conditional Requests, §15.4.5 304):
+    ///              https://datatracker.ietf.org/doc/html/rfc9110
+    ///   RFC 9111 - HTTP Caching:         https://datatracker.ietf.org/doc/html/rfc9111
     ///   RFC 5861 - Stale Extensions:     https://datatracker.ietf.org/doc/html/rfc5861
     ///   MDN:  https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Conditional_requests
     /// 
@@ -190,36 +192,7 @@ namespace Linky.Middlewares
                         // (Delta.EF knows the actual DB modification timestamp)
                     }
 
-                    // Cache-Control: Cloudflare-style freshness + stale directives
-                    // ─────────────────────────────────────────────────────────────
-                    // max-age=300 (5 min):
-                    //   Browser serves from disk cache with ZERO network requests.
-                    //   DevTools shows "200 OK (from disk cache)" or "302 Found (from disk cache)".
-                    //
-                    // stale-while-revalidate=10800 (3 hrs):
-                    //   After max-age expires, browser immediately serves stale cached response
-                    //   AND fires a background revalidation request (If-None-Match → 304/200).
-                    //   User sees instant response; cache silently refreshes in the background.
-                    //   RFC 5861 §3: https://datatracker.ietf.org/doc/html/rfc5861#section-3
-                    //
-                    // stale-if-error=10800 (3 hrs):
-                    //   If origin returns 5xx or is unreachable, browser serves stale content
-                    //   instead of showing an error page. Resilience against downtime.
-                    //   RFC 5861 §4: https://datatracker.ietf.org/doc/html/rfc5861#section-4
-                    //
-                    // public:
-                    //   Response can be stored by any cache (browser, CDN, proxy).
-                    //
-                    // NO must-revalidate:
-                    //   must-revalidate forces the browser to contact the server once max-age
-                    //   expires, blocking the response until revalidation completes. Without it,
-                    //   stale-while-revalidate can serve stale instantly + revalidate in background.
-                    //
-                    // Timeline:
-                    //   0–300s        → disk cache (zero requests, instant)
-                    //   300s–10800s   → stale served instantly + background revalidation (ETag/304)
-                    //   >10800s       → must revalidate before serving (standard behavior)
-                    //   Origin down   → stale served for up to 3 hrs (stale-if-error)
+                    // Set Cache-Control + Vary (see SetCacheHeaders() for full documentation)
                     SetCacheHeaders(context);
 
                     // ==========================================
