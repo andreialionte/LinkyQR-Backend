@@ -10,12 +10,14 @@ using Linky.Repository;
 using Linky.Service;
 using Linky.Utils;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Quartz;
 using StackExchange.Redis;
 using System.Data;
+using System.IO.Compression;
 using System.Text.Json;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.CysharpMemoryPack;
@@ -165,7 +167,7 @@ namespace Linky
                 options.AddServerHeader = true;
                 options.ListenAnyIP(5000, listenOptions =>
                 {
-                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2Http3;
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
                 });
             });
 
@@ -247,7 +249,7 @@ namespace Linky
             builder.Services.AddScoped<ICacheService, CacheService>();
 
 
-            builder.services.AddResponseCompression(options =>
+            builder.Services.AddResponseCompression(options =>
             {
                 options.EnableForHttps = true;
 
@@ -256,7 +258,7 @@ namespace Linky
                 options.Providers.Add<GzipCompressionProvider>();
 
                 // compress responses larger than 1 KB avoid CPU overhead
-                options.MinimumResponseSizeBytes = 1024;
+                //options.MinimumResponseSizeBytes = 1024;
             });
 
             // Brotli to optimal for better compression (smaller payloads)
