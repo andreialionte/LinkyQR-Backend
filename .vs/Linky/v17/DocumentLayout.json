@@ -3,88 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\linky.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\linky\\linky.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\linky.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{81DDED9D-158B-E303-5F62-77A2896D2A5A}|docker-compose.dcproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\global.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{81DDED9D-158B-E303-5F62-77A2896D2A5A}|docker-compose.dcproj|solutionrelative:global.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\cookies.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\cookies.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\hubs\\activevisitorshub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\hubs\\activevisitorshub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\controllers\\visitorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\controllers\\visitorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\repository\\visitorrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\repository\\visitorrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\controllers\\urlshortenercontrollers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\controllers\\urlshortenercontrollers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\controllers\\activevisitorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\controllers\\activevisitorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\mappers\\visitormapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\mappers\\visitormapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\controllers\\visitorstatscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\controllers\\visitorstatscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\repository\\activevisitorrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\repository\\activevisitorrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\repository\\visitorstatsrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\repository\\visitorstatsrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\repository\\urlshortenerrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\repository\\urlshortenerrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\middlewares\\visitoridmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\middlewares\\visitoridmiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\datalayer\\dapperdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\datalayer\\dapperdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\controllers\\defaultcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\controllers\\defaultcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\controllers\\basecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\controllers\\basecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\repository\\qrcoderepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\repository\\qrcoderepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\controllers\\qrcodecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\controllers\\qrcodecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{81DDED9D-158B-E303-5F62-77A2896D2A5A}|docker-compose.dcproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}",
@@ -99,64 +27,136 @@
       "RelativeMoniker": "D:0:0:{81DDED9D-158B-E303-5F62-77A2896D2A5A}|docker-compose.dcproj|solutionrelative:docker-compose.override.yml||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\UrlShortenerControllers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Controllers\\UrlShortenerControllers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\utils\\clientip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\utils\\clientip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Hubs\\ActiveVisitorsHub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Hubs\\ActiveVisitorsHub.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\utils\\geolocation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\utils\\geolocation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\VisitorController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Controllers\\VisitorController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\utils\\iclientip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\utils\\iclientip.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\ActiveVisitorController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Controllers\\ActiveVisitorController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\service\\geoipservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\service\\geoipservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\cookies.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\cookies.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\datalayer\\datacontextef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\datalayer\\datacontextef.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\VisitorRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Repository\\VisitorRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\dtos\\visitordto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\dtos\\visitordto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Mappers\\VisitorMapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Mappers\\VisitorMapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\models\\activevisitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\models\\activevisitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\ActiveVisitorRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Repository\\ActiveVisitorRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\models\\qrcode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\models\\qrcode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\VisitorStatsController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Controllers\\VisitorStatsController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\models\\visitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\models\\visitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\VisitorStatsRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Repository\\VisitorStatsRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\jobs\\activevisitorjob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\jobs\\activevisitorjob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\URLShortenerRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Repository\\URLShortenerRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\jobs\\aggregatevisitorstats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\jobs\\aggregatevisitorstats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Middlewares\\VisitorIdMiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Middlewares\\VisitorIdMiddleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\models\\visitorstats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\models\\visitorstats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\DataLayer\\DapperDbContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\DataLayer\\DapperDbContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\irepository\\iqrcoderepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\irepository\\iqrcoderepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|c:\\users\\andrei\\desktop\\linkyqr\\linky\\linky\\migrations\\20251025195146_removedonetoone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AE149BBC-B590-48F5-A4A0-E50828CA5E90}|Linky\\Linky.csproj|solutionrelative:linky\\migrations\\20251025195146_removedonetoone.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\DefaultController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Controllers\\DefaultController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\BaseController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Controllers\\BaseController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\QRCodeRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Repository\\QRCodeRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\QRCodeController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Controllers\\QRCodeController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\appsettings.Development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\appsettings.Development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Utils\\ClientIp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Utils\\ClientIp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Utils\\GeoLocation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Utils\\GeoLocation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Utils\\IClientIp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Utils\\IClientIp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Service\\GeoIpService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Service\\GeoIpService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Migrations\\20251025195146_RemovedOneToOne.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Migrations\\20251025195146_RemovedOneToOne.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\DataLayer\\DataContextEf.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\DataLayer\\DataContextEf.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\DTOs\\VisitorDto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\DTOs\\VisitorDto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Models\\ActiveVisitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Models\\ActiveVisitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Models\\Visitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Models\\Visitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Jobs\\ActiveVisitorJob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Jobs\\ActiveVisitorJob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Models\\QRCode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Models\\QRCode.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Jobs\\AggregateVisitorStats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Jobs\\AggregateVisitorStats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Models\\VisitorStats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\Models\\VisitorStats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\IRepository\\IQRCodeRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Linky\\IRepository\\IQRCodeRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -166,12 +166,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
@@ -192,14 +188,14 @@
               "RelativeDocumentMoniker": "Linky\\Program.cs",
               "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Program.cs",
               "RelativeToolTip": "Linky\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJsBAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAALYBAAAAAAAAAAAAAL8BAABUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-25T19:42:13.645Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 6,
               "Title": "UrlShortenerControllers.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\UrlShortenerControllers.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\UrlShortenerControllers.cs",
@@ -211,7 +207,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
               "Title": "ActiveVisitorsHub.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Hubs\\ActiveVisitorsHub.cs",
               "RelativeDocumentMoniker": "Linky\\Hubs\\ActiveVisitorsHub.cs",
@@ -235,7 +231,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "VisitorController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\VisitorController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\VisitorController.cs",
@@ -247,19 +243,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Linky.csproj",
-              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Linky.csproj",
-              "RelativeDocumentMoniker": "Linky\\Linky.csproj",
-              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Linky.csproj",
-              "RelativeToolTip": "Linky\\Linky.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-01-23T19:40:23.962Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "ActiveVisitorController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\ActiveVisitorController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\ActiveVisitorController.cs",
@@ -271,7 +255,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 10,
               "Title": "cookies.txt",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\cookies.txt",
               "RelativeDocumentMoniker": "Linky\\cookies.txt",
@@ -283,7 +267,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 11,
               "Title": "VisitorRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\VisitorRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\VisitorRepository.cs",
@@ -295,7 +279,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 12,
               "Title": "VisitorMapper.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Mappers\\VisitorMapper.cs",
               "RelativeDocumentMoniker": "Linky\\Mappers\\VisitorMapper.cs",
@@ -307,7 +291,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 13,
               "Title": "ActiveVisitorRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\ActiveVisitorRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\ActiveVisitorRepository.cs",
@@ -319,7 +303,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 14,
               "Title": "VisitorStatsController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\VisitorStatsController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\VisitorStatsController.cs",
@@ -331,7 +315,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 15,
               "Title": "VisitorStatsRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\VisitorStatsRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\VisitorStatsRepository.cs",
@@ -343,7 +327,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 16,
               "Title": "URLShortenerRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\URLShortenerRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\URLShortenerRepository.cs",
@@ -355,7 +339,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 17,
               "Title": "VisitorIdMiddleware.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Middlewares\\VisitorIdMiddleware.cs",
               "RelativeDocumentMoniker": "Linky\\Middlewares\\VisitorIdMiddleware.cs",
@@ -367,7 +351,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 18,
               "Title": "DapperDbContext.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\DataLayer\\DapperDbContext.cs",
               "RelativeDocumentMoniker": "Linky\\DataLayer\\DapperDbContext.cs",
@@ -379,7 +363,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 19,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\appsettings.json",
               "RelativeDocumentMoniker": "Linky\\appsettings.json",
@@ -391,7 +375,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 20,
               "Title": "DefaultController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\DefaultController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\DefaultController.cs",
@@ -403,7 +387,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 21,
               "Title": "BaseController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\BaseController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\BaseController.cs",
@@ -415,7 +399,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 22,
               "Title": "QRCodeRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Repository\\QRCodeRepository.cs",
               "RelativeDocumentMoniker": "Linky\\Repository\\QRCodeRepository.cs",
@@ -427,7 +411,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 23,
               "Title": "QRCodeController.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Controllers\\QRCodeController.cs",
               "RelativeDocumentMoniker": "Linky\\Controllers\\QRCodeController.cs",
@@ -439,7 +423,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 5,
               "Title": "docker-compose.override.yml",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\docker-compose.override.yml",
               "RelativeDocumentMoniker": "docker-compose.override.yml",
@@ -451,7 +435,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 3,
               "Title": "docker-compose.yml",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\docker-compose.yml",
               "RelativeDocumentMoniker": "docker-compose.yml",
@@ -463,7 +447,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 4,
               "Title": "docker-compose.dcproj",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\docker-compose.dcproj",
               "RelativeDocumentMoniker": "docker-compose.dcproj",
@@ -535,7 +519,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 29,
               "Title": "20251025195146_RemovedOneToOne.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Migrations\\20251025195146_RemovedOneToOne.cs",
               "RelativeDocumentMoniker": "Linky\\Migrations\\20251025195146_RemovedOneToOne.cs",
@@ -547,7 +531,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "DataContextEf.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\DataLayer\\DataContextEf.cs",
               "RelativeDocumentMoniker": "Linky\\DataLayer\\DataContextEf.cs",
@@ -559,7 +543,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 31,
               "Title": "VisitorDto.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\DTOs\\VisitorDto.cs",
               "RelativeDocumentMoniker": "Linky\\DTOs\\VisitorDto.cs",
@@ -571,7 +555,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "ActiveVisitor.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Models\\ActiveVisitor.cs",
               "RelativeDocumentMoniker": "Linky\\Models\\ActiveVisitor.cs",
@@ -607,7 +591,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 35,
               "Title": "QRCode.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Models\\QRCode.cs",
               "RelativeDocumentMoniker": "Linky\\Models\\QRCode.cs",
@@ -619,7 +603,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "AggregateVisitorStats.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Jobs\\AggregateVisitorStats.cs",
               "RelativeDocumentMoniker": "Linky\\Jobs\\AggregateVisitorStats.cs",
@@ -631,7 +615,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "VisitorStats.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Models\\VisitorStats.cs",
               "RelativeDocumentMoniker": "Linky\\Models\\VisitorStats.cs",
@@ -643,7 +627,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 38,
               "Title": "IQRCodeRepository.cs",
               "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\IRepository\\IQRCodeRepository.cs",
               "RelativeDocumentMoniker": "Linky\\IRepository\\IQRCodeRepository.cs",
@@ -652,6 +636,22 @@
               "ViewState": "AgIAAAAAAAAAAAAAAIBJwA0AAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-25T19:17:26.864Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{56df62a4-05a3-4e5b-aa1a-99371ccfb997}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Linky.csproj",
+              "DocumentMoniker": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Linky.csproj",
+              "RelativeDocumentMoniker": "Linky\\Linky.csproj",
+              "ToolTip": "C:\\Users\\Andrei\\Desktop\\LinkyQR\\Linky\\Linky\\Linky.csproj",
+              "RelativeToolTip": "Linky\\Linky.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-01-23T19:40:23.962Z"
             }
           ]
         }

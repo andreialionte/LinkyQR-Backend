@@ -247,7 +247,29 @@ namespace Linky
             builder.Services.AddScoped<ICacheService, CacheService>();
 
 
+            builder.services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
 
+                // Brotli and Gzip providers
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+
+                // compress responses larger than 1 KB avoid CPU overhead
+                options.MinimumResponseSizeBytes = 1024;
+            });
+
+            // Brotli to optimal for better compression (smaller payloads)
+            builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Optimal;
+            });
+
+            // Gzip to fastest for low-latency fallback
+            builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Fastest;
+            });
 
             builder.Services.AddSwaggerGen();
 
@@ -416,11 +438,14 @@ namespace Linky
             //     app.UseHsts();
             // }
 
+
+
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
-
+            app.UseResponseCompression(); // early as possible for builder.Services.AddResponseCompression()
             app.MapControllers();
 
             app.Run();
