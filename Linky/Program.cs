@@ -19,7 +19,6 @@ using System.Data;
 using System.IO.Compression;
 using System.Text.Json;
 using TickerQ;
-using TickerQ.Caching.StackExchangeRedis.DependencyInjection;
 using TickerQ.Dashboard.DependencyInjection;
 using TickerQ.DependencyInjection;
 using ZiggyCreatures.Caching.Fusion;
@@ -124,17 +123,7 @@ namespace Linky
                     schedulerOptions.NodeIdentifier = "linky-node-01";
                 });
                 
-                // Add Redis for job state caching and locking
-                options.AddStackExchangeRedis(redisOptions =>
-                {
-                    var redisConnection = 
-                        builder.Configuration.GetConnectionString("Valkey")
-                        ?? "localhost:6379";
-                    
-                    redisOptions.Configuration = redisConnection;
-                    // NodeHeartbeatInterval not needed for single-node setup
-                });
-                
+
                 // Add Dashboard
                 options.AddDashboard(dashboardOptions =>
                 {
