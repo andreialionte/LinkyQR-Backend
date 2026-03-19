@@ -124,11 +124,11 @@ namespace Linky
                     schedulerOptions.NodeIdentifier = "linky-node-01";
                 });
 
-                var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
+                /*var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
                     ?? builder.Configuration.GetConnectionString("Valkey")
-                    ?? "localhost:6379";
+                    ?? "localhost:6379";*/
 
-                if (!string.IsNullOrEmpty(redisConnectionString))
+                /*if (!string.IsNullOrEmpty(redisConnectionString))
                 {
                     // Ensure abortConnect=false is in the connection string for graceful failure
                     if (!redisConnectionString.Contains("abortConnect"))
@@ -142,7 +142,7 @@ namespace Linky
                         redisOptions.InstanceName = "tickerq:";
                         redisOptions.NodeHeartbeatInterval = TimeSpan.FromMinutes(1);
                     });
-                }
+                }*/
 
                 // Add Dashboard
                 options.AddDashboard(dashboardOptions =>
