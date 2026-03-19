@@ -25,10 +25,8 @@ namespace Linky.Repository
 
         public async Task<IList<ActiveVisitorDto>> GetActiveVisitors()
         {
-            var cached = await _cacheService.GetAsync<List<ActiveVisitorDto>>(VISITORS_LIST_KEY);
-            if (cached != null && cached.Count > 0)
-                return cached;
-
+            // Always query fresh from DB for active visitors (don't use stale cache)
+            // Active visitors list changes frequently - cache timeout is too risky
             var result = await _context.ActiveVisitors.ToListAsync();
 
             if (result == null || result.Count == 0)
@@ -37,7 +35,9 @@ namespace Linky.Repository
             }
 
             var visitors = result.Select(_mapper.ToDto).ToList();
-            await _cacheService.SetAsync(VISITORS_LIST_KEY, visitors, TimeSpan.FromSeconds(41));
+            
+            // Cache only for 5 seconds (fast-moving data)
+            await _cacheService.SetAsync(VISITORS_LIST_KEY, visitors, TimeSpan.FromSeconds(5));
 
             return visitors;
         }
