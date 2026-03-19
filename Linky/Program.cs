@@ -130,6 +130,12 @@ namespace Linky
 
                 if (!string.IsNullOrEmpty(redisConnectionString))
                 {
+                    // Ensure abortConnect=false is in the connection string for graceful failure
+                    if (!redisConnectionString.Contains("abortConnect"))
+                    {
+                        redisConnectionString += ",abortConnect=false";
+                    }
+
                     options.AddStackExchangeRedis(redisOptions =>
                     {
                         redisOptions.Configuration = redisConnectionString;
