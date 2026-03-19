@@ -104,6 +104,7 @@ namespace Linky.Repository
 
         public async Task AggregateStatsForRange(DateTime startUtc, DateTime endUtc)
         {
+            // Get all visitors in the time range
             var visitorsQuery = _context.Visitors
                 .AsNoTracking()
                 .Where(v => v.Timestamp >= startUtc && v.Timestamp < endUtc);
@@ -139,11 +140,13 @@ namespace Linky.Repository
 
             var dateKey = DateOnly.FromDateTime(startUtc.Date);
 
+            // Check if stats already exist for this date
             var existing = await _context.VisitorStats
                 .FirstOrDefaultAsync(s => s.Date == dateKey);
 
             if (existing != null)
             {
+                // RESET daily stats (overwrite)
                 existing.TotalVisits = totalVisits;
                 existing.UniqueVisitors = uniqueVisitors;
                 existing.TopPages = topPages;
@@ -153,6 +156,7 @@ namespace Linky.Repository
             }
             else
             {
+                // Create new daily stats
                 var dto = new DTOs.VisitorStatsDto(dateKey, totalVisits, uniqueVisitors, topPages, topCountries);
                 var newStats = _mapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
                 await _context.VisitorStats.AddAsync(newStats);
@@ -160,7 +164,62 @@ namespace Linky.Repository
 
             await _context.SaveChangesAsync();
 
-            // invalidate visitor stats caches for affected ranges so controllers serve fresh data
+            // Calculate WEEKLY stats (SUM last 7 days)
+            var weekStart = dateKey.AddDays(-6);
+            var weeklyStats = await _context.VisitorStats
+                .AsNoTracking()
+                .Where(s => s.Date >= weekStart && s.Date <= dateKey)
+                .ToListAsync();
+
+            var weeklyTotalVisits = weeklyStats.Sum(s => s.TotalVisits);
+            var weeklyUniqueVisitors = weeklyStats.Sum(s => s.UniqueVisitors);
+
+            // Merge top pages from all 7 days
+            var weeklyTopPages = new Dictionary<string, int>();
+            foreach (var stat in weeklyStats)
+            {
+                foreach (var page in stat.TopPages)
+                {
+                    if (weeklyTopPages.ContainsKey(page.Key))
+                        weeklyTopPages[page.Key] += page.Value;
+                    else
+                        weeklyTopPages[page.Key] = page.Value;
+                }
+            }
+
+            // Calculate MONTHLY stats (SUM last 30 days)
+            var monthStart = dateKey.AddDays(-29);
+            var monthlyStats = await _context.VisitorStats
+                .AsNoTracking()
+                .Where(s => s.Date >= monthStart && s.Date <= dateKey)
+                .ToListAsync();
+
+            var monthlyTotalVisits = monthlyStats.Sum(s => s.TotalVisits);
+            var monthlyUniqueVisitors = monthlyStats.Sum(s => s.UniqueVisitors);
+
+            // Merge top pages from all 30 days
+            var monthlyTopPages = new Dictionary<string, int>();
+            foreach (var stat in monthlyStats)
+            {
+                foreach (var page in stat.TopPages)
+                {
+                    if (monthlyTopPages.ContainsKey(page.Key))
+                        monthlyTopPages[page.Key] += page.Value;
+                    else
+                        monthlyTopPages[page.Key] = page.Value;
+                }
+            }
+
+            // Log or store weekly/monthly aggregates (optional: store in separate table)
+            Console.WriteLine($"Daily ({dateKey}): {totalVisits} visits, {uniqueVisitors} unique");
+            Console.WriteLine($"Weekly (last 7 days): {weeklyTotalVisits} visits, {weeklyUniqueVisitors} unique");
+            Console.WriteLine($"Monthly (last 30 days): {monthlyTotalVisits} visits, {monthlyUniqueVisitors} unique");
+
+            // TODO: Store weekly/monthly stats in a separate table if you need to query them later
+            // Example: Create VisitorStatsWeekly and VisitorStatsMonthly tables
+            // OR query them on-demand by summing daily stats in your controllers
+
+            // Invalidate caches
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             if (dateKey == today)
             {
@@ -196,6 +255,64 @@ namespace Linky.Repository
                 .ToListAsync();
 
             return results;
+        }
+
+        /// <summary>
+        /// Get weekly aggregated stats (sum of last 7 days)
+        /// </summary>
+        public async Task<(int TotalVisits, int UniqueVisitors, Dictionary<string, int> TopPages)> GetWeeklyStats(DateOnly endDate)
+        {
+            var weekStart = endDate.AddDays(-6);
+            var weeklyStats = await _context.VisitorStats
+                .AsNoTracking()
+                .Where(s => s.Date >= weekStart && s.Date <= endDate)
+                .ToListAsync();
+
+            var totalVisits = weeklyStats.Sum(s => s.TotalVisits);
+            var uniqueVisitors = weeklyStats.Sum(s => s.UniqueVisitors);
+
+            var topPages = new Dictionary<string, int>();
+            foreach (var stat in weeklyStats)
+            {
+                foreach (var page in stat.TopPages ?? new Dictionary<string, int>())
+                {
+                    if (topPages.ContainsKey(page.Key))
+                        topPages[page.Key] += page.Value;
+                    else
+                        topPages[page.Key] = page.Value;
+                }
+            }
+
+            return (totalVisits, uniqueVisitors, topPages);
+        }
+
+        /// <summary>
+        /// Get monthly aggregated stats (sum of last 30 days)
+        /// </summary>
+        public async Task<(int TotalVisits, int UniqueVisitors, Dictionary<string, int> TopPages)> GetMonthlyStats(DateOnly endDate)
+        {
+            var monthStart = endDate.AddDays(-29);
+            var monthlyStats = await _context.VisitorStats
+                .AsNoTracking()
+                .Where(s => s.Date >= monthStart && s.Date <= endDate)
+                .ToListAsync();
+
+            var totalVisits = monthlyStats.Sum(s => s.TotalVisits);
+            var uniqueVisitors = monthlyStats.Sum(s => s.UniqueVisitors);
+
+            var topPages = new Dictionary<string, int>();
+            foreach (var stat in monthlyStats)
+            {
+                foreach (var page in stat.TopPages ?? new Dictionary<string, int>())
+                {
+                    if (topPages.ContainsKey(page.Key))
+                        topPages[page.Key] += page.Value;
+                    else
+                        topPages[page.Key] = page.Value;
+                }
+            }
+
+            return (totalVisits, uniqueVisitors, topPages);
         }
     }
 }

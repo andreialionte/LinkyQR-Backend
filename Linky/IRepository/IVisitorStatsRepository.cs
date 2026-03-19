@@ -8,5 +8,7 @@ namespace Linky.IRepository
         Task AggregateStatsForRange(DateTime startUtc, DateTime endUtc);
         Task<VisitorStats?> GetStatsForDate(DateOnly date);
         Task<IEnumerable<VisitorStats>> GetStatsRange(DateOnly start, DateOnly end);
+        Task<(int TotalVisits, int UniqueVisitors, Dictionary<string, int> TopPages)> GetWeeklyStats(DateOnly endDate);
+        Task<(int TotalVisits, int UniqueVisitors, Dictionary<string, int> TopPages)> GetMonthlyStats(DateOnly endDate);
     }
 }
