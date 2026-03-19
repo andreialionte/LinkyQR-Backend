@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using StackExchange.Redis;
 using System.IO.Compression;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using TickerQ;
 using TickerQ.Caching.StackExchangeRedis;
@@ -151,17 +152,35 @@ namespace Linky
                     dashboardOptions.WithBasicAuth("admin", "admin123");
                 });
             });
-
+            
             builder.WebHost.ConfigureKestrel((context, options) =>
             {
                 options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(5);
                 options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
                 options.AddServerHeader = true;
+
                 options.ListenAnyIP(5000, listenOptions =>
                 {
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
+
+                    // Use the SNI selector to handle BOTH domains on the SAME port
+                    listenOptions.UseHttps(httpsOptions =>
+                    {
+                        httpsOptions.ServerCertificateSelector = (connectionContext, name) =>
+                        {
+                            // Check if the request is for the API
+                            if (name != null && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return new X509Certificate2("/root/api.pfx", "linyqrCertificate");
+                            }
+
+                            // Default to the main domain certificate
+                            return new X509Certificate2("/root/linkyqr.pfx", "linyqrCertificate");
+                        };
+                    });
                 });
             });
+
 
 
             builder.Services.AddSignalR();
