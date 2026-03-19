@@ -14,11 +14,14 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Quartz;
 using StackExchange.Redis;
 using System.Data;
 using System.IO.Compression;
 using System.Text.Json;
+using TickerQ;
+using TickerQ.Caching.StackExchangeRedis.DependencyInjection;
+using TickerQ.Dashboard.DependencyInjection;
+using TickerQ.DependencyInjection;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Serialization.CysharpMemoryPack;
 
@@ -109,56 +112,36 @@ namespace Linky
 
 
 
-            var random = new Random();
-            int intervalSeconds = random.Next(40, 130); // interval între 20 și 45 secunde
+            builder.Services.AddScoped<ActiveVisitorJob>();
+            builder.Services.AddScoped<AggregateVisitorStats>();
 
-            builder.Services.AddQuartz(q =>
+            // Register TickerQ - jobs auto-discovered via [TickerFunction] attributes
+            builder.Services.AddTickerQ(options =>
             {
-                var jobKey = new JobKey("ActiveVisitorJob");
-                q.AddJob<ActiveVisitorJob>(opts => opts.WithIdentity(jobKey));
-
-                q.AddTrigger(opts =>
-                    opts.ForJob(jobKey)
-                        .WithIdentity("ActiveVisitorJob-trigger")
-                        .WithSimpleSchedule(x => x
-                            .WithIntervalInSeconds(intervalSeconds)
-                            .WithMisfireHandlingInstructionIgnoreMisfires()
-                            .RepeatForever()));
-
-                var jobKey2 = new JobKey("AggregateVisitorStatsJob");
-                q.AddJob<AggregateVisitorStats>(opts => opts.WithIdentity(jobKey2));
-
-                // Trigger: run weekly at 05:00 Romania time (aggregates previous 05:00 -> current 05:00 window)
-                // Resolve Romania timezone in a cross-platform way (Linux: "Europe/Bucharest", Windows: "E. Europe Standard Time")
-                TimeZoneInfo romaniaTimeZone;
-                try
+                options.ConfigureScheduler(schedulerOptions =>
                 {
-                    romaniaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Bucharest");
-                }
-                catch (TimeZoneNotFoundException)
+                    schedulerOptions.MaxConcurrency = Environment.ProcessorCount;
+                    schedulerOptions.NodeIdentifier = "linky-node-01";
+                });
+                
+                // Add Redis for job state caching and locking
+                options.AddStackExchangeRedis(redisOptions =>
                 {
-                    try
-                    {
-                        romaniaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("E. Europe Standard Time");
-                    }
-                    catch
-                    {
-                        // Fallback to UTC if Romania TZ cannot be found
-                        romaniaTimeZone = TimeZoneInfo.Utc;
-                    }
-                }
-
-                q.AddTrigger(opts => opts
-                    .ForJob(jobKey2)
-                    .WithIdentity("AggregateVisitorStatsTrigger")
-                    .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Monday, 5, 0)
-                        .InTimeZone(romaniaTimeZone)
-                        .WithMisfireHandlingInstructionDoNothing()) // Don't run missed schedules on startup
-                    );
+                    var redisConnection = 
+                        builder.Configuration.GetConnectionString("Valkey")
+                        ?? "localhost:6379";
+                    
+                    redisOptions.Configuration = redisConnection;
+                    // NodeHeartbeatInterval not needed for single-node setup
+                });
+                
+                // Add Dashboard
+                options.AddDashboard(dashboardOptions =>
+                {
+                    dashboardOptions.SetBasePath("/tickerq/dashboard");
+                    dashboardOptions.WithBasicAuth("admin", "admin123");
+                });
             });
-
-            //// Adaugă Quartz hosted service
-            builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
             builder.WebHost.ConfigureKestrel((context, options) =>
             {
@@ -171,8 +154,6 @@ namespace Linky
                 });
             });
 
-            int cpuCores = Environment.ProcessorCount;
-            int tickerQConcurrency = Math.Max(1, (int)(cpuCores * 0.25));
 
             builder.Services.AddSignalR();
 
@@ -305,9 +286,13 @@ namespace Linky
                 }
             }
 
-
+            // TickerQ is initialized automatically via builder.Services.AddTickerQ()
+            // Jobs are discovered and scheduled based on [TickerFunction] attributes
 
             app.UseCors("main");
+
+            // Initialize TickerQ scheduler and job execution
+            app.UseTickerQ();
 
             // Security Headers - must be early in pipeline
             var policyCollection = new HeaderPolicyCollection()

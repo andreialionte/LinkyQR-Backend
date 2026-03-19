@@ -1,29 +1,40 @@
 ﻿using Linky.IRepository;
-using Linky.IService;
-using Quartz;
+using TickerQ.Utilities.Base;
+
 
 namespace Linky.Jobs
 {
-    public class AggregateVisitorStats : IJob
+    public class AggregateVisitorStats
     {
         private readonly IVisitorStatsRepository _statsRepo;
-        private readonly IGeoIPService _geoIpService;
 
-        public AggregateVisitorStats(IVisitorStatsRepository statsRepo, IGeoIPService geoIpService)
+        public AggregateVisitorStats(IVisitorStatsRepository statsRepo)
         {
             _statsRepo = statsRepo;
-            _geoIpService = geoIpService;
         }
 
-        public async Task Execute(IJobExecutionContext context)
+        [TickerFunction("AggregateVisitorStatsJob")]
+        public async Task Execute(TickerFunctionContext context)
         {
-            // aggregate the 24h window from previous 06:00 UTC to current 06:00 UTC
-            var endUtc = DateTime.UtcNow.Date.AddHours(6);
-            if (DateTime.UtcNow < endUtc)
+            // Aggregate the 24h window that ENDED at 06:00 UTC
+            // Example: if it's 2026-03-19 08:00 UTC, aggregate 2026-03-18 06:00 to 2026-03-19 06:00
+            // Example: if it's 2026-03-19 04:00 UTC, aggregate 2026-03-17 06:00 to 2026-03-18 06:00
+            
+            var nowUtc = DateTime.UtcNow;
+            var todayAt6Utc = nowUtc.Date.AddHours(6);
+            
+            DateTime endUtc;
+            if (nowUtc >= todayAt6Utc)
             {
-                // if current time is before today's 06:00, the intended end is today 06:00 (still),
-                // but to be safe compute end as today's 06:00
-                endUtc = DateTime.UtcNow.Date.AddHours(6);
+                // Current time is after today's 06:00 UTC
+                // Aggregate yesterday's 06:00 to today's 06:00
+                endUtc = todayAt6Utc;
+            }
+            else
+            {
+                // Current time is before today's 06:00 UTC
+                // Aggregate day-before-yesterday's 06:00 to yesterday's 06:00
+                endUtc = todayAt6Utc.AddDays(-1);
             }
 
             var startUtc = endUtc.AddDays(-1);
