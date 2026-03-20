@@ -27,11 +27,13 @@ namespace Linky.Repository
         {
             // Always query fresh from DB for active visitors (don't use stale cache)
             // Active visitors list changes frequently - cache timeout is too risky
-            var result = await _context.ActiveVisitors.ToListAsync();
+            var result = await _context.ActiveVisitors
+                .Where(v => v.LastSeenUtc > DateTime.UtcNow.AddMinutes(-5))  // Only within last 5 minutes
+                .ToListAsync();
 
             if (result == null || result.Count == 0)
             {
-                throw new Exception("No active visitors found");
+                return new List<ActiveVisitorDto>();  // Return empty list instead of throwing
             }
 
             var visitors = result.Select(_mapper.ToDto).ToList();
