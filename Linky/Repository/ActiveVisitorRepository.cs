@@ -107,9 +107,12 @@ namespace Linky.Repository
             if (cachedNullable.HasValue)
                 return cachedNullable.Value;
 
-            var count = await _context.ActiveVisitors.CountAsync();
+            // Only count visitors from last 5 minutes (active sessions)
+            var count = await _context.ActiveVisitors
+                .Where(v => v.LastSeenUtc > DateTime.UtcNow.AddMinutes(-5))
+                .CountAsync();
 
-            await _cacheService.SetAsync(VISITOR_COUNT_KEY, count, TimeSpan.FromSeconds(41));
+            await _cacheService.SetAsync(VISITOR_COUNT_KEY, count, TimeSpan.FromSeconds(5));
 
             return count;
         }
