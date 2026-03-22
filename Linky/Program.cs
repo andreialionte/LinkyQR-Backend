@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using StackExchange.Redis;
 using System.IO.Compression;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using TickerQ;
@@ -159,8 +160,16 @@ namespace Linky
                 options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
                 options.AddServerHeader = true;
 
+                
+                options.ConfigureHttpsDefaults(httpsOptions =>
+                {
+                    httpsOptions.SslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12;
+                });
+
                 options.ListenAnyIP(5000, listenOptions =>
                 {
+                    /*listenOptions.Protocols =
+                        HttpProtocols.Http3 | HttpProtocols.Http2 | HttpProtocols.Http1;*/
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
 
                     //listenOptions.UseHttps();
