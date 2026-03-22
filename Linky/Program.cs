@@ -172,7 +172,7 @@ namespace Linky
                         HttpProtocols.Http3 | HttpProtocols.Http2 | HttpProtocols.Http1;*/
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
 
-                    //listenOptions.UseHttps();
+                    listenOptions.UseHttps();
                     // Use the SNI selector to handle BOTH domains on the SAME port
                     /*listenOptions.UseHttps(httpsOptions =>
                     {
