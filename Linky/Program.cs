@@ -177,9 +177,9 @@ namespace Linky
                         httpsOptions.ServerCertificateSelector = (ctx, name) =>
                         {
                             if (name != null && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
-                                return new X509Certificate2("/root/api.pfx", "parola_ta");
-        
-                            return new X509Certificate2("/root/linkyqr.com.pfx", "parola_ta");
+                                return new X509Certificate2("/app/api.pfx", "parola_ta");
+
+                            return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
                         };
                     });
                     // Use the SNI selector to handle BOTH domains on the SAME port
