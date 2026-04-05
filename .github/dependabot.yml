@@ -1,14 +1,18 @@
 version: 2
 updates:
-  # 1. Update GitHub Actions
+  # 1. GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
 
-  # 2. Update .NET NuGet packages
+  # 2. .NET NuGet packages
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
       interval: "weekly"
-
+    # GROUPS THEM ALL TOGETHER IN PR:
+    groups:
+      everything:
+        patterns:
+          - "*" 
