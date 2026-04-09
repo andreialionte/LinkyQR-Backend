@@ -5,6 +5,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Linky.Middlewares
 {
@@ -149,30 +151,38 @@ namespace Linky.Middlewares
     public class CacheETagMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<CacheETagMiddleware>? _logger;
+        private readonly CacheETagOptions _options;
+        private readonly CacheETagMetrics? _metrics;
 
-        public CacheETagMiddleware(RequestDelegate next)
+        public CacheETagMiddleware(
+            RequestDelegate next,
+            IOptions<CacheETagOptions> options,
+            ILogger<CacheETagMiddleware>? logger = null,
+            CacheETagMetrics? metrics = null)
         {
             _next = next;
+            _options = options?.Value ?? new CacheETagOptions();
+            _logger = logger;
+            _metrics = metrics;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
+            // TIER 1: Track total requests
+            _metrics?.IncrementTotalRequests();
+
             // ─────────────────────────────────────────────────────────────
             // BYPASS: Non-cacheable requests skip body buffering entirely
             // ─────────────────────────────────────────────────────────────
-            
-            // 1. Only GET/HEAD use conditional requests (ETag, If-None-Match, 304)
-            //    PUT/PATCH/DELETE/POST: Controllers validate If-Match manually → 412
-            if (context.Request.Method != HttpMethods.Get && 
+
+            if (context.Request.Method != HttpMethods.Get &&
                 context.Request.Method != HttpMethods.Head)
             {
                 await _next(context);
                 return;
             }
 
-            // 2. WebSocket upgrades (SignalR) must NOT be buffered in MemoryStream
-            //    The Upgrade header signals a protocol switch — response body is a
-            //    persistent bidirectional stream, not a finite HTTP response.
             if (context.WebSockets.IsWebSocketRequest ||
                 context.Request.Headers.Connection.ToString().Contains("Upgrade", StringComparison.OrdinalIgnoreCase))
             {
@@ -181,7 +191,6 @@ namespace Linky.Middlewares
             }
 
             var originalBodyStream = context.Response.Body;
-
             using var responseBody = new MemoryStream();
             context.Response.Body = responseBody;
 
@@ -195,57 +204,96 @@ namespace Linky.Middlewares
                     responseBody.Seek(0, SeekOrigin.Begin);
                     var responseBytes = responseBody.ToArray();
 
-                    // ──────────────────────────────────────────────────────────
-                    // STEP 1: Determine ETag for this response
-                    // Delta.EF: Sets ETag directly on DB queries
-                    // FusionCache: No ETag from upstream → generate from body hash
-                    // ──────────────────────────────────────────────────────────
+                    // ══════════════════════════════════════════════════════════
+                    // TIER 1: SIZE LIMIT CHECK - Skip ETag if response too large
+                    // ══════════════════════════════════════════════════════════
+                    if (responseBytes.Length > _options.MaxResponseSizeForETag)
+                    {
+                        _logger?.LogDebug(
+                            "CacheETag: Skipping ETag (response {Size} bytes > limit {Limit} bytes)",
+                            responseBytes.Length, _options.MaxResponseSizeForETag);
+                        _metrics?.IncrementSkippedTooLarge();
+
+                        SetCacheHeadersIfNotPresent(context);
+                        context.Response.ContentLength = responseBytes.Length;
+                        responseBody.Seek(0, SeekOrigin.Begin);
+                        await responseBody.CopyToAsync(originalBodyStream);
+                        return;
+                    }
+
+                    // ══════════════════════════════════════════════════════════
+                    // TIER 2: CONTENT-TYPE FILTERING - Skip binary/image types
+                    // ══════════════════════════════════════════════════════════
+                    var contentType = context.Response.ContentType;
+                    if (!_options.IsContentTypeAllowed(contentType))
+                    {
+                        _logger?.LogDebug(
+                            "CacheETag: Skipping ETag for Content-Type '{ContentType}'",
+                            contentType ?? "(null)");
+                        _metrics?.IncrementSkippedContentType();
+
+                        SetCacheHeadersIfNotPresent(context);
+                        context.Response.ContentLength = responseBytes.Length;
+                        responseBody.Seek(0, SeekOrigin.Begin);
+                        await responseBody.CopyToAsync(originalBodyStream);
+                        return;
+                    }
+
+                    // ══════════════════════════════════════════════════════════
+                    // TIER 1: EXCEPTION HANDLING - Graceful ETag generation failure
+                    // ══════════════════════════════════════════════════════════
                     string etag;
-                    
-                    if (!context.Response.Headers.ContainsKey("ETag"))
+                    try
                     {
-                        // No ETag from Delta.EF → Generate from response body
-                        // This handles FusionCache responses (memory/Redis cached)
-                        etag = GenerateETag(responseBytes);
-                        context.Response.Headers.ETag = etag;
+                        if (!context.Response.Headers.ContainsKey("ETag"))
+                        {
+                            etag = GenerateETag(responseBytes);
+                            context.Response.Headers.ETag = etag;
+                            _metrics?.IncrementETagGenerated();
+                            _logger?.LogDebug("CacheETag: Generated ETag '{ETag}'", etag);
+                        }
+                        else
+                        {
+                            etag = context.Response.Headers.ETag.ToString();
+                            _logger?.LogDebug("CacheETag: Using existing ETag '{ETag}'", etag);
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        // ETag already exists from Delta.EF (direct DB query)
-                        etag = context.Response.Headers.ETag.ToString();
+                        _logger?.LogError(ex, "CacheETag: Exception generating ETag - skipping cache headers");
+                        _metrics?.IncrementException();
+
+                        context.Response.ContentLength = responseBytes.Length;
+                        responseBody.Seek(0, SeekOrigin.Begin);
+                        await responseBody.CopyToAsync(originalBodyStream);
+                        return;
                     }
 
-                    // Set Cache-Control + Vary headers on ALL 200 responses
-                    SetCacheHeaders(context);
+                    // TIER 3: Respect existing Cache-Control if set by controller
+                    SetCacheHeadersIfNotPresent(context);
 
-                    // ──────────────────────────────────────────────────────────
-                    // STEP 2: RFC 7232 Conditional Request Validation
-                    // Return 304 Not Modified if client's cached version matches
-                    // ──────────────────────────────────────────────────────────
-                    
-                    // If-None-Match (ETag-based validation - primary, stronger method)
-                    // Per RFC 7232 §3.2: weak comparison for GET/HEAD
-                    // Client can send multiple ETags: If-None-Match: "v1", "v2", "v3"
+                    // ══════════════════════════════════════════════════════════
+                    // TIER 2: HEADER VALIDATION - Validate If-None-Match format
+                    // ══════════════════════════════════════════════════════════
                     if (context.Request.Headers.TryGetValue("If-None-Match", out var incomingETags))
                     {
-                        var incomingEtagList = incomingETags.ToString()
-                            .Split(',')
-                            .Select(e => e.Trim());
-
-                        // RFC 7232 §3.2: If-None-Match matches if ANY etag matches (weak comparison)
-                        // Also handle "*" which means "if resource exists" (used in conditional uploads)
-                        if (incomingEtagList.Contains("*") || 
-                            incomingEtagList.Any(e => WeakETagEquals(e, etag)))
+                        if (!ValidateIfNoneMatchHeader(incomingETags.ToString(), out var incomingEtagList))
                         {
-                            // Content hasn't changed — return 304 Not Modified
+                            _logger?.LogDebug(
+                                "CacheETag: Invalid If-None-Match header format: '{Header}'",
+                                incomingETags);
+                        }
+                        else if (incomingEtagList.Contains("*") ||
+                                 incomingEtagList.Any(e => WeakETagEquals(e, etag)))
+                        {
+                            _metrics?.IncrementResponses304();
+                            _logger?.LogDebug("CacheETag: 304 Not Modified (ETag match)");
                             Return304NotModified(context, originalBodyStream);
                             return;
                         }
                     }
-                    
-                    // If-Modified-Since (date-based validation - fallback)
-                    // Only used if If-None-Match NOT present (per RFC 7232 §6)
-                    // Only meaningful for responses that have Last-Modified (Delta.EF DB queries)
+
+                    // If-Modified-Since fallback
                     if (!context.Request.Headers.ContainsKey("If-None-Match") &&
                         context.Response.Headers.ContainsKey("Last-Modified") &&
                         context.Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSinceValue) &&
@@ -253,30 +301,75 @@ namespace Linky.Middlewares
                         context.Response.Headers.TryGetValue("Last-Modified", out var lastModifiedValue) &&
                         DateTime.TryParse(lastModifiedValue, out var lastModified))
                     {
-                        // Compare dates: resource unchanged if Last-Modified <= If-Modified-Since
-                        // HTTP dates are second-precision; round to compare safely
-                        if (lastModified.AddMilliseconds(-lastModified.Millisecond) <= ifModifiedSince.AddMilliseconds(-ifModifiedSince.Millisecond))
+                        if (lastModified.AddMilliseconds(-lastModified.Millisecond) <=
+                            ifModifiedSince.AddMilliseconds(-ifModifiedSince.Millisecond))
                         {
+                            _metrics?.IncrementResponses304();
+                            _logger?.LogDebug("CacheETag: 304 Not Modified (Last-Modified match)");
                             Return304NotModified(context, originalBodyStream);
                             return;
                         }
                     }
 
-                    // No conditional match — return full 200 with new ETag
+                    // Return full 200 with ETag
+                    _metrics?.IncrementResponses200();
                     context.Response.ContentLength = responseBytes.Length;
                     responseBody.Seek(0, SeekOrigin.Begin);
                     await responseBody.CopyToAsync(originalBodyStream);
                 }
                 else
                 {
-                    // Non-200 responses - just pass through
                     responseBody.Seek(0, SeekOrigin.Begin);
                     await responseBody.CopyToAsync(originalBodyStream);
                 }
             }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "CacheETag: Unhandled exception in middleware");
+                _metrics?.IncrementException();
+                throw;
+            }
             finally
             {
                 context.Response.Body = originalBodyStream;
+            }
+        }
+
+        /// <summary>
+        /// TIER 2: Validate If-None-Match header format per RFC 9110.
+        /// </summary>
+        private static bool ValidateIfNoneMatchHeader(string headerValue, out string[] etagList)
+        {
+            etagList = Array.Empty<string>();
+
+            if (string.IsNullOrWhiteSpace(headerValue))
+                return false;
+
+            try
+            {
+                etagList = headerValue
+                    .Split(',')
+                    .Select(e => e.Trim())
+                    .Where(e => !string.IsNullOrEmpty(e))
+                    .ToArray();
+
+                return etagList.Length > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// TIER 3: Set Cache-Control headers only if not already present.
+        /// Respects controller-level Cache-Control overrides.
+        /// </summary>
+        private void SetCacheHeadersIfNotPresent(HttpContext context)
+        {
+            if (!context.Response.Headers.ContainsKey("Cache-Control"))
+            {
+                SetCacheHeaders(context);
             }
         }
 
@@ -320,61 +413,24 @@ namespace Linky.Middlewares
         {
             context.Response.StatusCode = StatusCodes.Status304NotModified;
             context.Response.Body = originalBodyStream;
-            
+
             // Remove content-related headers (304 has NO body)
-            context.Response.ContentLength = null;  // RFC 7230 §3.3: MUST NOT be 0 if body is non-empty
+            context.Response.ContentLength = null; // RFC 7230 §3.3: MUST NOT be 0 if body is non-empty
             context.Response.Headers.Remove("Content-Encoding");
             context.Response.Headers.Remove("Transfer-Encoding");
             context.Response.Headers.Remove("Content-Type");
-            
+
             // Keep validation + caching headers for client
             // ETag, Last-Modified, Cache-Control, Vary, Date remain
         }
 
         /// <summary>
-        /// Sets Cache-Control and Vary headers for Cloudflare-style caching.
-        /// Extracted to avoid duplication between the fast-path and normal-path.
+        /// Sets Cache-Control and Vary headers using configured options (TIER 2).
+        /// Uses CacheETagOptions for max-age, stale-while-revalidate, stale-if-error.
         /// </summary>
-        private static void SetCacheHeaders(HttpContext context)
+        private void SetCacheHeaders(HttpContext context)
         {
-            // Cache-Control: Cloudflare-style freshness + stale directives
-            // ─────────────────────────────────────────────────────────────
-            // max-age=300 (5 min):
-            //   Browser serves from disk cache with ZERO network requests.
-            //   DevTools shows "200 OK (from disk cache)".
-            //
-            // stale-while-revalidate=10800 (3 hrs):
-            //   After max-age expires, browser immediately serves stale cached response
-            //   AND fires a background revalidation request (If-None-Match → 304/200).
-            //   User sees instant response; cache silently refreshes in the background.
-            //   RFC 5861 §3: https://datatracker.ietf.org/doc/html/rfc5861#section-3
-            //
-            // stale-if-error=10800 (3 hrs):
-            //   If origin returns 5xx or is unreachable, browser serves stale content
-            //   instead of showing an error page. Resilience against downtime.
-            //   RFC 5861 §4: https://datatracker.ietf.org/doc/html/rfc5861#section-4
-            //
-            // public:
-            //   Response can be stored by any cache (browser, CDN, proxy).
-            //
-            // NO must-revalidate:
-            //   must-revalidate forces the browser to contact the server once max-age
-            //   expires, blocking the response until revalidation completes. Without it,
-            //   stale-while-revalidate can serve stale instantly + revalidate in background.
-            //
-            // Timeline:
-            //   0–300s        → disk cache (zero requests, instant)
-            //   300s–10800s   → stale served instantly + background revalidation (ETag/304)
-            //   >10800s       → must revalidate before serving (standard behavior)
-            //   Origin down   → stale served for up to 3 hrs (stale-if-error)
-            context.Response.Headers.CacheControl =
-                "max-age=300, stale-while-revalidate=10800, stale-if-error=10800, public";
-
-            // Vary: Accept-Encoding
-            // Tells caches (CDN, proxies, browser) to store separate cached variants
-            // per encoding (gzip, br, zstd, identity). Without this, a proxy could
-            // serve a gzip-compressed response to a client expecting brotli.
-            // Cloudflare always sets this — we match that behavior at origin.
+            context.Response.Headers.CacheControl = _options.BuildCacheControlHeader();
             context.Response.Headers.Vary = "Accept-Encoding";
         }
 
@@ -429,4 +485,101 @@ namespace Linky.Middlewares
             return etag;
         }
     }
+
+    /// <summary>
+    /// TIER 3: Metrics for CacheETagMiddleware.
+    /// Thread-safe counter using Interlocked operations.
+    /// </summary>
+    public class CacheETagMetrics
+    {
+        private long _totalRequests;
+        private long _responses200;
+        private long _responses304;
+        private long _etagGenerated;
+        private long _skippedTooLarge;
+        private long _skippedContentType;
+        private long _exceptions;
+
+        public long TotalRequests => System.Threading.Interlocked.Read(ref _totalRequests);
+        public long Responses200 => System.Threading.Interlocked.Read(ref _responses200);
+        public long Responses304 => System.Threading.Interlocked.Read(ref _responses304);
+        public long ETagGenerated => System.Threading.Interlocked.Read(ref _etagGenerated);
+        public long SkippedTooLarge => System.Threading.Interlocked.Read(ref _skippedTooLarge);
+        public long SkippedContentType => System.Threading.Interlocked.Read(ref _skippedContentType);
+        public long Exceptions => System.Threading.Interlocked.Read(ref _exceptions);
+
+        public double NotModifiedRate
+        {
+            get
+            {
+                var total = Responses200 + Responses304;
+                return total == 0 ? 0.0 : (double)Responses304 / total * 100.0;
+            }
+        }
+
+        public void IncrementTotalRequests() => System.Threading.Interlocked.Increment(ref _totalRequests);
+        public void IncrementResponses200() => System.Threading.Interlocked.Increment(ref _responses200);
+        public void IncrementResponses304() => System.Threading.Interlocked.Increment(ref _responses304);
+        public void IncrementETagGenerated() => System.Threading.Interlocked.Increment(ref _etagGenerated);
+        public void IncrementSkippedTooLarge() => System.Threading.Interlocked.Increment(ref _skippedTooLarge);
+        public void IncrementSkippedContentType() => System.Threading.Interlocked.Increment(ref _skippedContentType);
+        public void IncrementException() => System.Threading.Interlocked.Increment(ref _exceptions);
+    }
+
+    /// <summary>
+    /// Configuration options for CacheETagMiddleware (TIER 2).
+    /// Register in Program.cs via builder.Services.Configure&lt;CacheETagOptions&gt;()
+    /// </summary>
+    /*public class CacheETagOptions
+    {
+        public long MaxResponseSizeForETag { get; set; } = 5 * 1024 * 1024;
+        public int MaxAgeSeconds { get; set; } = 300;
+        public int StaleWhileRevalidateSeconds { get; set; } = 10800;
+        public int StaleIfErrorSeconds { get; set; } = 10800;
+        public bool EnableLogging { get; set; } = false;
+        public bool EnableMetrics { get; set; } = false;
+
+        public string[] AllowedContentTypePatternsForETag { get; set; } = new[]
+        {
+            "application/json",
+            "application/ld+json",
+            "application/*+json",
+            "application/xml",
+            "application/*+xml",
+            "text/plain",
+            "text/html",
+            "text/csv",
+            "application/problem+json",
+        };
+
+        public string BuildCacheControlHeader()
+        {
+            return $"max-age={MaxAgeSeconds}, stale-while-revalidate={StaleWhileRevalidateSeconds}, stale-if-error={StaleIfErrorSeconds}, public";
+        }
+
+        public bool IsContentTypeAllowed(string? contentType)
+        {
+            if (string.IsNullOrWhiteSpace(contentType))
+                return false;
+
+            var mimeType = contentType.Split(';')[0].Trim();
+
+            foreach (var pattern in AllowedContentTypePatternsForETag)
+            {
+                if (pattern.EndsWith("*"))
+                {
+                    var prefix = pattern[..^1];
+                    if (mimeType.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+                else
+                {
+                    if (mimeType.Equals(pattern, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+            }
+
+            return false;
+        }*/
+    
 }
