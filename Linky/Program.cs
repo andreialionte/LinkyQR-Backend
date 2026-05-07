@@ -182,7 +182,7 @@ namespace Linky
                         HttpProtocols.Http3 | HttpProtocols.Http2 | HttpProtocols.Http1;*/
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
 
-                    listenOptions.UseHttps(httpsOptions =>
+                    /*listenOptions.UseHttps(httpsOptions =>
                     {
                         httpsOptions.ServerCertificateSelector = (ctx, name) =>
                         {
@@ -191,7 +191,10 @@ namespace Linky
 
                             return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
                         };
-                    });
+                    });*/
+                    
+                    
+                    
                     // Use the SNI selector to handle BOTH domains on the SAME port
                     /*listenOptions.UseHttps(httpsOptions =>
                     {
