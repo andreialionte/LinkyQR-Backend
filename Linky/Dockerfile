@@ -6,13 +6,13 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy csproj and restore with cache mount
-COPY ["Linky.csproj", "./"]
+# Copy csproj from Linky/ subdirectory (build context is repo root)
+COPY ["Linky/Linky.csproj", "./"]
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet restore "Linky.csproj" -r linux-x64 --disable-parallel --verbosity normal
 
-# Copy everything else
-COPY . ./
+# Copy project source from Linky/ subdirectory
+COPY ["Linky/", "./"]
 
 # Build and publish with cache mount
 RUN --mount=type=cache,target=/root/.nuget/packages \
