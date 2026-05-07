@@ -86,4 +86,10 @@
     <Folder Include="NewFolder\" />
   </ItemGroup>
 
+  <!-- Explicitly include middleware options file to avoid Docker build misses
+       (some build contexts / docker COPY patterns can omit newly added files).
+       This prevents CS0246 "CacheETagOptions not found" during publish. -->
+  <ItemGroup>
+    <Compile Include="Middlewares\CacheETagOptions.cs" />
+  </ItemGroup>
 </Project>
