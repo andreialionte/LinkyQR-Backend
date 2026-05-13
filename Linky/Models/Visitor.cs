@@ -3,7 +3,7 @@
     public class Visitor
     {
         public Guid Id { get; set; }
-        public string Path { get; set; }
+        public string Path { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; }
         public string? Ip { get; set; }
         public string? Country { get; set; }

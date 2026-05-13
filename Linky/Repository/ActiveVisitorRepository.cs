@@ -29,7 +29,7 @@ namespace Linky.Repository
             // Active visitors list changes frequently - cache timeout is too risky
             var result = await _context.ActiveVisitors
                 .Where(v => v.LastSeenUtc > DateTime.UtcNow.AddMinutes(-5))  // Only within last 5 minutes
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             if (result == null || result.Count == 0)
             {
@@ -39,7 +39,7 @@ namespace Linky.Repository
             var visitors = result.Select(_mapper.ToDto).ToList();
             
             // Cache only for 5 seconds (fast-moving data)
-            await _cacheService.SetAsync(VISITORS_LIST_KEY, visitors, TimeSpan.FromSeconds(5));
+            await _cacheService.SetAsync(VISITORS_LIST_KEY, visitors, TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
             return visitors;
         }
@@ -62,11 +62,11 @@ namespace Linky.Repository
                 existing.Ip = visitorDto.Ip;
 
                 _context.ActiveVisitors.Update(existing);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
 
                 // update may affect cached list/order invalidate caches
-                await _cacheService.RemoveAsync(VISITORS_LIST_KEY);
-                await _cacheService.RemoveAsync(VISITOR_COUNT_KEY);
+                await _cacheService.RemoveAsync(VISITORS_LIST_KEY).ConfigureAwait(false);
+                await _cacheService.RemoveAsync(VISITOR_COUNT_KEY).ConfigureAwait(false);
 
                 return _mapper.ToDto(existing);
             }
@@ -76,11 +76,11 @@ namespace Linky.Repository
                 var newVisitor = _mapper.ToModel(visitorDto);
 
                 _context.ActiveVisitors.Add(newVisitor);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync().ConfigureAwait(false);
 
                 // Invalidate cache only on new INSERT
-                await _cacheService.RemoveAsync(VISITOR_COUNT_KEY);
-                await _cacheService.RemoveAsync(VISITORS_LIST_KEY);
+                await _cacheService.RemoveAsync(VISITOR_COUNT_KEY).ConfigureAwait(false);
+                await _cacheService.RemoveAsync(VISITORS_LIST_KEY).ConfigureAwait(false);
 
                 return _mapper.ToDto(newVisitor);
             }
@@ -92,27 +92,27 @@ namespace Linky.Repository
 
             var deletedCount = await _context.ActiveVisitors
                 .Where(a => a.LastSeenUtc < cutoffTime)
-                .ExecuteDeleteAsync();
+                .ExecuteDeleteAsync().ConfigureAwait(false);
 
             if (deletedCount > 0)
             {
-                await _cacheService.RemoveAsync(VISITOR_COUNT_KEY);
-                await _cacheService.RemoveAsync(VISITORS_LIST_KEY);
+                await _cacheService.RemoveAsync(VISITOR_COUNT_KEY).ConfigureAwait(false);
+                await _cacheService.RemoveAsync(VISITORS_LIST_KEY).ConfigureAwait(false);
             }
         }
 
         public async Task<int> GetActiveVisitorCount()
         {
-            var cachedNullable = await _cacheService.GetAsync<int?>(VISITOR_COUNT_KEY);
+            var cachedNullable = await _cacheService.GetAsync<int?>(VISITOR_COUNT_KEY).ConfigureAwait(false);
             if (cachedNullable.HasValue)
                 return cachedNullable.Value;
 
             // Only count visitors from last 5 minutes (active sessions)
             var count = await _context.ActiveVisitors
                 .Where(v => v.LastSeenUtc > DateTime.UtcNow.AddMinutes(-5))
-                .CountAsync();
+                .CountAsync().ConfigureAwait(false);
 
-            await _cacheService.SetAsync(VISITOR_COUNT_KEY, count, TimeSpan.FromSeconds(5));
+            await _cacheService.SetAsync(VISITOR_COUNT_KEY, count, TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
             return count;
         }

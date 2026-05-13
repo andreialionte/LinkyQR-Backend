@@ -21,15 +21,15 @@ namespace Linky.Jobs
         public async Task Execute(TickerFunctionContext context)
         {
             // Șterge vizitatorii inactivi
-            await _activeVisitorRepo.DeleteInactiveVisitors(TimeSpan.FromMinutes(5));
+            await _activeVisitorRepo.DeleteInactiveVisitors(TimeSpan.FromMinutes(5)).ConfigureAwait(false);
 
             // Obține vizitatorii activi
-            var visitors = await _activeVisitorRepo.GetActiveVisitors();
+            var visitors = await _activeVisitorRepo.GetActiveVisitors().ConfigureAwait(false);
 
             Console.WriteLine("Job just runned " + DateTime.UtcNow);
 
             // Trimite count-ul către clienți
-            await _hubContext.Clients.All.SendAsync("ReceiveVisitorCount", visitors.Count);
+            await _hubContext.Clients.All.SendAsync("ReceiveVisitorCount", visitors.Count).ConfigureAwait(false);
         }
     }
 }

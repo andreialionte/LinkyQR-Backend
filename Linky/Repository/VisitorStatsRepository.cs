@@ -31,11 +31,11 @@ namespace Linky.Repository
                 .AsNoTracking()
                 .Where(v => v.Timestamp >= startDateTime && v.Timestamp < endDateTime);
 
-            var totalVisits = await visitorsQuery.CountAsync();
+            var totalVisits = await visitorsQuery.CountAsync().ConfigureAwait(false);
             var uniqueVisitors = await visitorsQuery
                 .Select(v => v.Ip)
                 .Distinct()
-                .CountAsync();
+                .CountAsync().ConfigureAwait(false);
 
             // top pages
             var pages = await visitorsQuery
@@ -43,7 +43,7 @@ namespace Linky.Repository
                 .Select(g => new { Path = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var topPages = pages
                 .Where(p => p.Path != null)
@@ -56,7 +56,7 @@ namespace Linky.Repository
                 .Select(g => new { Country = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var topCountries = countries
                 .Where(c => c.Country != null)
@@ -64,7 +64,8 @@ namespace Linky.Repository
 
             // find existing stats by DateOnly (assumes VisitorStats.Date is DateOnly)
             var existing = await _context.VisitorStats
-                .FirstOrDefaultAsync(s => s.Date == date);
+                .FirstOrDefaultAsync(s => s.Date == date)
+                .ConfigureAwait(false);
 
             if (existing != null)
             {
@@ -81,24 +82,24 @@ namespace Linky.Repository
             {
                 var dto = new DTOs.VisitorStatsDto(date, totalVisits, uniqueVisitors, topPages, topCountries);
                 var newStats = _mapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
-                await _context.VisitorStats.AddAsync(newStats);
+                await _context.VisitorStats.AddAsync(newStats).ConfigureAwait(false);
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             // invalidate visitor stats caches for affected ranges so controllers serve fresh data
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             if (date == today)
             {
-                await _cacheService.RemoveAsync("visitorstats:today");
+                await _cacheService.RemoveAsync("visitorstats:today").ConfigureAwait(false);
             }
             if (date >= today.AddDays(-6))
             {
-                await _cacheService.RemoveAsync("visitorstats:7days");
+                await _cacheService.RemoveAsync("visitorstats:7days").ConfigureAwait(false);
             }
             if (date >= today.AddDays(-29))
             {
-                await _cacheService.RemoveAsync("visitorstats:30days");
+                await _cacheService.RemoveAsync("visitorstats:30days").ConfigureAwait(false);
             }
         }
 
@@ -109,18 +110,18 @@ namespace Linky.Repository
                 .AsNoTracking()
                 .Where(v => v.Timestamp >= startUtc && v.Timestamp < endUtc);
 
-            var totalVisits = await visitorsQuery.CountAsync();
+            var totalVisits = await visitorsQuery.CountAsync().ConfigureAwait(false);
             var uniqueVisitors = await visitorsQuery
                 .Select(v => v.Ip)
                 .Distinct()
-                .CountAsync();
+                .CountAsync().ConfigureAwait(false);
 
             var pages = await visitorsQuery
                 .GroupBy(v => v.Path)
                 .Select(g => new { Path = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var topPages = pages
                 .Where(p => p.Path != null)
@@ -132,7 +133,7 @@ namespace Linky.Repository
                 .Select(g => new { Country = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var topCountries = countries
                 .Where(c => c.Country != null)
@@ -142,7 +143,8 @@ namespace Linky.Repository
 
             // Check if stats already exist for this date
             var existing = await _context.VisitorStats
-                .FirstOrDefaultAsync(s => s.Date == dateKey);
+                .FirstOrDefaultAsync(s => s.Date == dateKey)
+                .ConfigureAwait(false);
 
             if (existing != null)
             {
@@ -159,17 +161,17 @@ namespace Linky.Repository
                 // Create new daily stats
                 var dto = new DTOs.VisitorStatsDto(dateKey, totalVisits, uniqueVisitors, topPages, topCountries);
                 var newStats = _mapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
-                await _context.VisitorStats.AddAsync(newStats);
+                await _context.VisitorStats.AddAsync(newStats).ConfigureAwait(false);
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             // Calculate WEEKLY stats (SUM last 7 days)
             var weekStart = dateKey.AddDays(-6);
             var weeklyStats = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= weekStart && s.Date <= dateKey)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var weeklyTotalVisits = weeklyStats.Sum(s => s.TotalVisits);
             var weeklyUniqueVisitors = weeklyStats.Sum(s => s.UniqueVisitors);
@@ -192,7 +194,7 @@ namespace Linky.Repository
             var monthlyStats = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= monthStart && s.Date <= dateKey)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var monthlyTotalVisits = monthlyStats.Sum(s => s.TotalVisits);
             var monthlyUniqueVisitors = monthlyStats.Sum(s => s.UniqueVisitors);
@@ -240,7 +242,8 @@ namespace Linky.Repository
             // query by DateOnly and return the entity directly
             var result = await _context.VisitorStats
                 .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Date == date);
+                .FirstOrDefaultAsync(s => s.Date == date)
+                .ConfigureAwait(false);
 
             return result;
         }
@@ -252,7 +255,7 @@ namespace Linky.Repository
                 .AsNoTracking()
                 .Where(s => s.Date >= start && s.Date <= end)
                 .OrderByDescending(s => s.Date)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             return results;
         }
@@ -266,7 +269,7 @@ namespace Linky.Repository
             var weeklyStats = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= weekStart && s.Date <= endDate)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var totalVisits = weeklyStats.Sum(s => s.TotalVisits);
             var uniqueVisitors = weeklyStats.Sum(s => s.UniqueVisitors);
@@ -295,7 +298,7 @@ namespace Linky.Repository
             var monthlyStats = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= monthStart && s.Date <= endDate)
-                .ToListAsync();
+                .ToListAsync().ConfigureAwait(false);
 
             var totalVisits = monthlyStats.Sum(s => s.TotalVisits);
             var uniqueVisitors = monthlyStats.Sum(s => s.UniqueVisitors);

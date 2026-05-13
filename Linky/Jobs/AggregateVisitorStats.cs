@@ -39,7 +39,7 @@ namespace Linky.Jobs
 
             var startUtc = endUtc.AddDays(-1);
 
-            await _statsRepo.AggregateStatsForRange(startUtc, endUtc);
+            await _statsRepo.AggregateStatsForRange(startUtc, endUtc).ConfigureAwait(false);
         }
     }
 }

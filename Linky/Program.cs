@@ -45,10 +45,13 @@ namespace Linky
         {
             // ensure thread‑pool has a reasonable floor in case of sudden load spikes
             // only bump if current min is lower to avoid wasting threads on small machines
+            // use a conservative, machine-scaled minimum instead of a fixed 200 which
+            // can waste resources on small containers. Tune only after measuring.
             ThreadPool.GetMinThreads(out var wt, out var io);
-            if (wt < 200 || io < 200)
+            var targetMinThreads = Math.Max(Environment.ProcessorCount * 2, 16);
+            if (wt < targetMinThreads || io < targetMinThreads)
             {
-                ThreadPool.SetMinThreads(workerThreads: 200, completionPortThreads: 200);
+                ThreadPool.SetMinThreads(workerThreads: targetMinThreads, completionPortThreads: targetMinThreads);
             }
 
             var builder = WebApplication.CreateBuilder(args);
@@ -62,7 +65,8 @@ namespace Linky
             builder.Services.AddResponseCaching(options =>
             {
                 options.UseCaseSensitivePaths = false;
-                options.MaximumBodySize = 1024;
+                // Increase from 1 KB to 64 KB so typical JSON responses can be cached.
+                options.MaximumBodySize = 64 * 1024; // 64 KB
             });
 
             // memory cache used by custom ETag middleware
@@ -186,12 +190,38 @@ namespace Linky
 
                     listenOptions.UseHttps(httpsOptions =>
                     {
+                        // Load certificate paths and passwords from environment variables
+                        var apiPfxPath = Environment.GetEnvironmentVariable("API_PFX_PATH");
+                        var apiPfxPassword = Environment.GetEnvironmentVariable("API_PFX_PASSWORD");
+                        var linkyPfxPath = Environment.GetEnvironmentVariable("LINKY_PFX_PATH");
+                        var linkyPfxPassword = Environment.GetEnvironmentVariable("LINKY_PFX_PASSWORD");
+
                         httpsOptions.ServerCertificateSelector = (ctx, name) =>
                         {
-                            if (name != null && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
-                                return new X509Certificate2("/app/api.pfx", "parola_ta");
+                            try
+                            {
+                                // Prefer the API certificate when SNI name matches
+                                if (!string.IsNullOrEmpty(name) && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (!string.IsNullOrEmpty(apiPfxPath) && !string.IsNullOrEmpty(apiPfxPassword) && System.IO.File.Exists(apiPfxPath))
+                                        return new X509Certificate2(apiPfxPath, apiPfxPassword);
 
-                            return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
+                                    Console.Error.WriteLine("API certificate not found or password missing (API_PFX_PATH/API_PFX_PASSWORD).");
+                                    return null;
+                                }
+
+                                // Default certificate
+                                if (!string.IsNullOrEmpty(linkyPfxPath) && !string.IsNullOrEmpty(linkyPfxPassword) && System.IO.File.Exists(linkyPfxPath))
+                                    return new X509Certificate2(linkyPfxPath, linkyPfxPassword);
+
+                                Console.Error.WriteLine("Linky certificate not found or password missing (LINKY_PFX_PATH/LINKY_PFX_PASSWORD).");
+                                return null;
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Error.WriteLine($"Error loading certificate: {ex.Message}");
+                                return null;
+                            }
                         };
                     });
                     
@@ -289,8 +319,7 @@ namespace Linky
                     };
                 });
 
-            builder.Services.AddScoped<ICacheService, CacheService>();
-
+            // ICacheService already registered as Singleton above. Do not register again as Scoped.
 
             builder.Services.AddResponseCompression(options =>
             {
@@ -300,14 +329,14 @@ namespace Linky
                 options.Providers.Add<BrotliCompressionProvider>();
                 options.Providers.Add<GzipCompressionProvider>();
 
-                // compress responses larger than 1 KB avoid CPU overhead
-                //options.MinimumResponseSizeBytes = 1024;
+                // Compress only responses larger than 2 KB to avoid compressing tiny payloads
+                // NOTE: MinimumResponseSizeBytes is not available on this target framework; adjust via middleware or per-route headers if needed.
             });
 
-            // Brotli to optimal for better compression (smaller payloads)
+            // Brotli compression: prefer lower-latency compression for API responses
             builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
             {
-                options.Level = CompressionLevel.Optimal;
+                options.Level = CompressionLevel.Fastest;
             });
 
             // Gzip to fastest for low-latency fallback
@@ -403,7 +432,8 @@ namespace Linky
                     // Specify JsonSerializerOptions
                     var options = new JsonSerializerOptions
                     {
-                        WriteIndented = true
+                        // Compact machine-friendly output in production to save CPU and bandwidth
+                        WriteIndented = false
                     };
 
                     string result = System.Text.Json.JsonSerializer.Serialize(new

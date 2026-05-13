@@ -13,6 +13,11 @@ namespace Linky.Repository
 {
     public class URLShortenerRepository : IURLShortenerRepository
     {
+        // Compiled EF Core queries for hot paths
+        private static readonly Func<DataContextEf, string, Task<URLShortener?>> _getByCodeCompiled
+            = EF.CompileAsyncQuery((DataContextEf ctx, string code) =>
+                ctx.URLShorteners.AsNoTracking().FirstOrDefault(u => u.ShortenedUrl == code));
+
         private readonly DataContextEf _context;
         private readonly ICacheService _cacheService;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -45,7 +50,8 @@ namespace Linky.Repository
             {
                 var existingAlias = await _context.URLShorteners
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.ShortenedUrl == customAlias);
+                    .FirstOrDefaultAsync(u => u.ShortenedUrl == customAlias)
+                    .ConfigureAwait(false);
 
                 if (existingAlias != null)
                     return existingAlias;  // Alias already taken, return existing
@@ -57,7 +63,8 @@ namespace Linky.Repository
             {
                 var existing = await _context.URLShorteners
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.OriginalUrl == dto.OriginalUrl);
+                    .FirstOrDefaultAsync(u => u.OriginalUrl == dto.OriginalUrl)
+                    .ConfigureAwait(false);
 
                 if (existing != null)
                     return existing;  // Return existing URL
@@ -75,10 +82,10 @@ namespace Linky.Repository
             entity.LastIp = clientIp;
 
             _context.URLShorteners.Add(entity);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             // invalidate cache for lookup by code so next GetByCode returns fresh entity
-            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{entity.ShortenedUrl}");
+            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{entity.ShortenedUrl}").ConfigureAwait(false);
 
             return entity; 
         }
@@ -86,16 +93,14 @@ namespace Linky.Repository
         public async Task<URLShortener?> GetByCode(string code)
         {
             var cacheKey = $"urlshortener:GetByCode:{code}";
-            var cached = await _cacheService.GetAsync<URLShortener>(cacheKey);
+            var cached = await _cacheService.GetAsync<URLShortener>(cacheKey).ConfigureAwait(false);
             if (cached != null)
                 return cached;
 
-            var entity = await _context.URLShorteners
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.ShortenedUrl == code);
+            var entity = await _getByCodeCompiled(_context, code).ConfigureAwait(false);
 
             if (entity != null)
-                await _cacheService.SetAsync(cacheKey, entity, TimeSpan.FromMinutes(30));
+                await _cacheService.SetAsync(cacheKey, entity, TimeSpan.FromMinutes(30)).ConfigureAwait(false);
 
             return entity;
         }
@@ -109,7 +114,8 @@ namespace Linky.Repository
             string? referrer)
         {
             var entity = await _context.URLShorteners
-                .FirstOrDefaultAsync(u => u.ShortenedUrl == code);
+                .FirstOrDefaultAsync(u => u.ShortenedUrl == code)
+                .ConfigureAwait(false);
 
             if (entity == null)
                 return;
@@ -122,10 +128,10 @@ namespace Linky.Repository
             entity.Referrer = referrer;
             entity.ClickedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             // invalidate cache
-            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{code}");
+            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{code}").ConfigureAwait(false);
         }
 
         private static string GenerateShortCode(string input)

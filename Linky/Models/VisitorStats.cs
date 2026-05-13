@@ -6,7 +6,7 @@
         public DateOnly Date { get; set; }
         public int TotalVisits { get; set; }
         public int UniqueVisitors { get; set; }
-        public Dictionary<string, int> TopPages { get; set; }
-        public Dictionary<string, int> TopCountries { get; set; }
+        public Dictionary<string, int> TopPages { get; set; } = new Dictionary<string, int>();
+        public Dictionary<string, int> TopCountries { get; set; } = new Dictionary<string, int>();
     }
 }
