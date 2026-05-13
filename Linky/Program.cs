@@ -227,21 +227,23 @@ namespace Linky
                     
                     
                     
-                    // Use the SNI selector to handle BOTH domains on the SAME port
-                    /*listenOptions.UseHttps(httpsOptions =>
+                    // DEV-ONLY: Optional hardcoded SNI selector for local testing.
+                    // WARNING: Do NOT commit real certificate files or passwords to source control.
+                    // Replace the placeholder paths/passwords on your local machine only.
+#if DEBUG
+                    listenOptions.UseHttps(httpsOptions =>
                     {
                         httpsOptions.ServerCertificateSelector = (connectionContext, name) =>
                         {
-                            // Check if the request is for the API
                             if (name != null && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
                             {
-                                return new X509Certificate2("/root/api.pfx", "linyqrCertificate");
+                                return new X509Certificate2("/app/api.pfx", "parola_ta");
                             }
 
-                            // Default to the main domain certificate
-                            return new X509Certificate2("/root/linkyqr.pfx", "linyqrCertificate");
+                            return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
                         };
-                    });*/
+                    });
+#endif
                 });
             });
 
