@@ -30,10 +30,9 @@ namespace Linky.Middlewares
 
         /// <summary>
         /// Cache-Control max-age value in seconds.
-        /// Browser serves from disk cache with ZERO network requests during this window.
-        /// Default: 300 (5 minutes)
+        /// Browser serves from disk cache with ZERO network requests during this window. (if set higher than 0)
         /// </summary>
-        public int MaxAgeSeconds { get; set; } = 300;
+        public int MaxAgeSeconds { get; set; } = 0;
 
         /// <summary>
         /// Cache-Control stale-while-revalidate value in seconds (RFC 5861).
