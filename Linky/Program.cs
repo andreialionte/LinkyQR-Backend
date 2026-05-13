@@ -188,49 +188,13 @@ namespace Linky
                         HttpProtocols.Http3 | HttpProtocols.Http2 | HttpProtocols.Http1;*/
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
 
-                    listenOptions.UseHttps(httpsOptions =>
-                    {
-                        // Load certificate paths and passwords from environment variables
-                        var apiPfxPath = Environment.GetEnvironmentVariable("API_PFX_PATH");
-                        var apiPfxPassword = Environment.GetEnvironmentVariable("API_PFX_PASSWORD");
-                        var linkyPfxPath = Environment.GetEnvironmentVariable("LINKY_PFX_PATH");
-                        var linkyPfxPassword = Environment.GetEnvironmentVariable("LINKY_PFX_PASSWORD");
 
-                        httpsOptions.ServerCertificateSelector = (ctx, name) =>
-                        {
-                            try
-                            {
-                                // Prefer the API certificate when SNI name matches
-                                if (!string.IsNullOrEmpty(name) && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (!string.IsNullOrEmpty(apiPfxPath) && !string.IsNullOrEmpty(apiPfxPassword) && System.IO.File.Exists(apiPfxPath))
-                                        return new X509Certificate2(apiPfxPath, apiPfxPassword);
-
-                                    Console.Error.WriteLine("API certificate not found or password missing (API_PFX_PATH/API_PFX_PASSWORD).");
-                                    return null;
-                                }
-
-                                // Default certificate
-                                if (!string.IsNullOrEmpty(linkyPfxPath) && !string.IsNullOrEmpty(linkyPfxPassword) && System.IO.File.Exists(linkyPfxPath))
-                                    return new X509Certificate2(linkyPfxPath, linkyPfxPassword);
-
-                                Console.Error.WriteLine("Linky certificate not found or password missing (LINKY_PFX_PATH/LINKY_PFX_PASSWORD).");
-                                return null;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.Error.WriteLine($"Error loading certificate: {ex.Message}");
-                                return null;
-                            }
-                        };
-                    });
                     
                     
                     
-                    // DEV-ONLY: Optional hardcoded SNI selector for local testing.
-                    // WARNING: Do NOT commit real certificate files or passwords to source control.
-                    // Replace the placeholder paths/passwords on your local machine only.
-#if DEBUG
+                    // Hardcoded SNI selector using /app/*.pfx + "parola_ta"
+                    // WARNING: Do NOT commit this version to source control. This is for LOCAL/TESTING ONLY.
+                    // For production, use dokku config:set or environment variables instead.
                     listenOptions.UseHttps(httpsOptions =>
                     {
                         httpsOptions.ServerCertificateSelector = (connectionContext, name) =>
@@ -243,7 +207,6 @@ namespace Linky
                             return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
                         };
                     });
-#endif
                 });
             });
 
