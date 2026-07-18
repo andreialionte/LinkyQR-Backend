@@ -14,7 +14,7 @@ namespace Linky.Repository
     public class URLShortenerRepository : IURLShortenerRepository
     {
         // Compiled EF Core queries for hot paths
-        private static readonly Func<DataContextEf, string, Task<URLShortener?>> _getByCodeCompiled
+        private static readonly Func<DataContextEf, string, CancellationToken, Task<URLShortener?>> _getByCodeCompiled
             = EF.CompileAsyncQuery((DataContextEf ctx, string code) =>
                 ctx.URLShorteners.AsNoTracking().FirstOrDefault(u => u.ShortenedUrl == code));
 
@@ -31,7 +31,7 @@ namespace Linky.Repository
             _mapper = mapper;
         }
 
-        public async Task<URLShortener> CreateShortUrlAsync(URLShortenerDto dto, string? customAlias = null)
+        public async Task<URLShortener> CreateShortUrlAsync(URLShortenerDto dto, string? customAlias = null, CancellationToken cancellationToken = default)
         {
             //if the URL looks like a real web address
             if (!Uri.TryCreate(dto.OriginalUrl, UriKind.Absolute, out var validatedUri))
@@ -50,7 +50,7 @@ namespace Linky.Repository
             {
                 var existingAlias = await _context.URLShorteners
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.ShortenedUrl == customAlias)
+                    .FirstOrDefaultAsync(u => u.ShortenedUrl == customAlias, cancellationToken)
                     .ConfigureAwait(false);
 
                 if (existingAlias != null)
@@ -63,7 +63,7 @@ namespace Linky.Repository
             {
                 var existing = await _context.URLShorteners
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.OriginalUrl == dto.OriginalUrl)
+                    .FirstOrDefaultAsync(u => u.OriginalUrl == dto.OriginalUrl, cancellationToken)
                     .ConfigureAwait(false);
 
                 if (existing != null)
@@ -82,25 +82,26 @@ namespace Linky.Repository
             entity.LastIp = clientIp;
 
             _context.URLShorteners.Add(entity);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            // Non-idempotent write: do not cancel the actual DB save once we have started.
+            await _context.SaveChangesAsync(CancellationToken.None).ConfigureAwait(false);
 
             // invalidate cache for lookup by code so next GetByCode returns fresh entity
-            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{entity.ShortenedUrl}").ConfigureAwait(false);
+            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{entity.ShortenedUrl}", CancellationToken.None).ConfigureAwait(false);
 
             return entity; 
         }
 
-        public async Task<URLShortener?> GetByCode(string code)
+        public async Task<URLShortener?> GetByCode(string code, CancellationToken cancellationToken = default)
         {
             var cacheKey = $"urlshortener:GetByCode:{code}";
-            var cached = await _cacheService.GetAsync<URLShortener>(cacheKey).ConfigureAwait(false);
+            var cached = await _cacheService.GetAsync<URLShortener>(cacheKey, cancellationToken).ConfigureAwait(false);
             if (cached != null)
                 return cached;
 
-            var entity = await _getByCodeCompiled(_context, code).ConfigureAwait(false);
+            var entity = await _getByCodeCompiled(_context, code, cancellationToken).ConfigureAwait(false);
 
             if (entity != null)
-                await _cacheService.SetAsync(cacheKey, entity, TimeSpan.FromMinutes(30)).ConfigureAwait(false);
+                await _cacheService.SetAsync(cacheKey, entity, TimeSpan.FromMinutes(30), cancellationToken).ConfigureAwait(false);
 
             return entity;
         }
@@ -111,10 +112,11 @@ namespace Linky.Repository
             string? country,
             string? city,
             string? userAgent,
-            string? referrer)
+            string? referrer,
+            CancellationToken cancellationToken = default)
         {
             var entity = await _context.URLShorteners
-                .FirstOrDefaultAsync(u => u.ShortenedUrl == code)
+                .FirstOrDefaultAsync(u => u.ShortenedUrl == code, cancellationToken)
                 .ConfigureAwait(false);
 
             if (entity == null)
@@ -128,10 +130,11 @@ namespace Linky.Repository
             entity.Referrer = referrer;
             entity.ClickedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            // Non-idempotent write: do not cancel the actual DB save once we have started.
+            await _context.SaveChangesAsync(CancellationToken.None).ConfigureAwait(false);
 
             // invalidate cache
-            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{code}").ConfigureAwait(false);
+            await _cacheService.RemoveAsync($"urlshortener:GetByCode:{code}", CancellationToken.None).ConfigureAwait(false);
         }
 
         private static string GenerateShortCode(string input)

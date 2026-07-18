@@ -31,7 +31,7 @@ public sealed class ActiveVisitorsHub : Hub
         await base.OnConnectedAsync();
     }
 
-    public async Task GetVisitorCount()
+    public async Task GetVisitorCount(CancellationToken cancellationToken = default)
     {
         var httpContext = Context.GetHttpContext();
         var connectionId = Context.ConnectionId;
@@ -54,10 +54,10 @@ public sealed class ActiveVisitorsHub : Hub
         );
 
         // Pass the GUID to your repo
-        await _activeVisitorRepo.CreateActiveVisitor(visitor);
+        await _activeVisitorRepo.CreateActiveVisitor(visitor, CancellationToken.None);
 
-        var count = await _activeVisitorRepo.GetActiveVisitorCount();
-        await Clients.All.SendAsync("ReceiveVisitorCount", count);
+        var count = await _activeVisitorRepo.GetActiveVisitorCount(cancellationToken);
+        await Clients.All.SendAsync("ReceiveVisitorCount", count, cancellationToken);
     }
 
 }

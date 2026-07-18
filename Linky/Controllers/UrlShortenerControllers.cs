@@ -21,12 +21,12 @@ namespace Linky.Controllers
         }
 
         [HttpPost("ShortUrl")]
-        public async Task<IActionResult> ShortUrl([FromBody] URLShortenerDto urlDto, [FromQuery] string? customAlias = null)
+        public async Task<IActionResult> ShortUrl([FromBody] URLShortenerDto urlDto, [FromQuery] string? customAlias = null, CancellationToken cancellationToken = default)
         {
             // If custom alias provided, check if it exists
             if (!string.IsNullOrWhiteSpace(customAlias))
             {
-                var existingAlias = await _urlRepo.GetByCode(customAlias);
+                var existingAlias = await _urlRepo.GetByCode(customAlias, cancellationToken);
                 if (existingAlias != null)
                 {
                     // Alias exists, return 200 OK
@@ -35,7 +35,7 @@ namespace Linky.Controllers
             }
 
             // Create or return existing URL
-            var url = await _urlRepo.CreateShortUrlAsync(urlDto, customAlias);
+            var url = await _urlRepo.CreateShortUrlAsync(urlDto, customAlias, cancellationToken);
 
             // If TotalClicks > 0, it already existed in DB
             if (url.TotalClicks > 0)
@@ -51,9 +51,9 @@ namespace Linky.Controllers
         }
 
         [HttpGet("{code}")]
-        public async Task<IActionResult> GetByCode([FromRoute] string code)
+        public async Task<IActionResult> GetByCode([FromRoute] string code, CancellationToken cancellationToken = default)
         {
-            var url = await _urlRepo.GetByCode(code);
+            var url = await _urlRepo.GetByCode(code, cancellationToken);
             if (url == null)
                 return NotFound();
 
@@ -63,7 +63,7 @@ namespace Linky.Controllers
 
             var location = _geoIpService.GetLocationByIp(clientIp);
 
-            await _urlRepo.IncrementClickAsync(code, clientIp, location.Country, location.City, userAgent, referrer);
+            await _urlRepo.IncrementClickAsync(code, clientIp, location.Country, location.City, userAgent, referrer, cancellationToken);
 
             return Redirect(url.OriginalUrl);
         }

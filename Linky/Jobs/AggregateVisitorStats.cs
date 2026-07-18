@@ -16,6 +16,8 @@ namespace Linky.Jobs
         [TickerFunction("AggregateVisitorStatsJob")]
         public async Task Execute(TickerFunctionContext context)
         {
+            var cancellationToken = context.CancellationToken;
+
             // Aggregate the 24h window that ENDED at 06:00 UTC
             // Example: if it's 2026-03-19 08:00 UTC, aggregate 2026-03-18 06:00 to 2026-03-19 06:00
             // Example: if it's 2026-03-19 04:00 UTC, aggregate 2026-03-17 06:00 to 2026-03-18 06:00
@@ -39,7 +41,7 @@ namespace Linky.Jobs
 
             var startUtc = endUtc.AddDays(-1);
 
-            await _statsRepo.AggregateStatsForRange(startUtc, endUtc).ConfigureAwait(false);
+            await _statsRepo.AggregateStatsForRange(startUtc, endUtc, cancellationToken).ConfigureAwait(false);
         }
     }
 }

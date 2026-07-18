@@ -12,7 +12,7 @@ namespace Linky.Service
             _cache = cache;
         }
 
-        public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
+        public async ValueTask<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
         {
             // using TryGet to avoid boxing of value types instead of GetAsync !!!!!
             var maybeValue = await _cache.TryGetAsync<T>(key, options: null, cancellationToken)

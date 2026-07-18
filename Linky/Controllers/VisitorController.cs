@@ -23,7 +23,7 @@ namespace Linky.Controllers
         }
 
         [HttpPost("AddVisitor")]
-        public async Task<IActionResult> AddVisitor([FromBody] VisitorDto visitorDto)
+        public async Task<IActionResult> AddVisitor([FromBody] VisitorDto visitorDto, CancellationToken cancellationToken = default)
         {
             Guid sessionId = Guid.Empty;
             if (Request.Cookies.TryGetValue("VisitorId", out var cookieValue) && Guid.TryParse(cookieValue, out var parsed))
@@ -33,7 +33,7 @@ namespace Linky.Controllers
 
             if (sessionId != Guid.Empty)
             {
-                var existing = await _visitorRepo.GetVisitorBySessionId(sessionId);
+                var existing = await _visitorRepo.GetVisitorBySessionId(sessionId, cancellationToken);
                 if (existing != null && existing.Timestamp >= DateTime.UtcNow.AddMinutes(-30))
                     return StatusCode(StatusCodes.Status204NoContent);
             }
@@ -51,24 +51,24 @@ namespace Linky.Controllers
                 IsUnique = true
             };
 
-            await _visitorRepo.AddVisitor(visitorWithSession);
+            await _visitorRepo.AddVisitor(visitorWithSession, cancellationToken);
 
             return Ok(new { message = "Visitor added successfully", id = visitorWithSession.Id });
         }
 
         [HttpGet("visitor/{visitorId}")]
-        public async Task<IActionResult> GetVisitorById(Guid visitorId)
+        public async Task<IActionResult> GetVisitorById(Guid visitorId, CancellationToken cancellationToken = default)
         {
-            var visitor = await _visitorRepo.GetVisitorBySessionId(visitorId);
+            var visitor = await _visitorRepo.GetVisitorBySessionId(visitorId, cancellationToken);
             if (visitor == null) return NotFound();
             var dto = _mapper.ToDto(visitor);
             return Ok(dto);
         }
 
         [HttpGet("RecentVisitors")]
-        public async Task<IActionResult> GetRecentVisitors([FromQuery] int limit = 100)
+        public async Task<IActionResult> GetRecentVisitors([FromQuery] int limit = 100, CancellationToken cancellationToken = default)
         {
-            var visitors = await _visitorRepo.GetRecentVisitors(limit);
+            var visitors = await _visitorRepo.GetRecentVisitors(limit, cancellationToken);
             if (visitors == null || !visitors.Any())
                 return NotFound("No visitors found.");
             var dtos = visitors.Select(_mapper.ToDto);

@@ -20,7 +20,7 @@ namespace Linky.Repository
             _mapper = mapper;
         }
 
-        public async Task AggregateStatsForDate(DateOnly date)
+        public async Task AggregateStatsForDate(DateOnly date, CancellationToken cancellationToken = default)
         {
             // build DateTime range for filtering visitor timestamps
             var startDateTime = date.ToDateTime(TimeOnly.MinValue);
@@ -31,11 +31,11 @@ namespace Linky.Repository
                 .AsNoTracking()
                 .Where(v => v.Timestamp >= startDateTime && v.Timestamp < endDateTime);
 
-            var totalVisits = await visitorsQuery.CountAsync().ConfigureAwait(false);
+            var totalVisits = await visitorsQuery.CountAsync(cancellationToken).ConfigureAwait(false);
             var uniqueVisitors = await visitorsQuery
                 .Select(v => v.Ip)
                 .Distinct()
-                .CountAsync().ConfigureAwait(false);
+                .CountAsync(cancellationToken).ConfigureAwait(false);
 
             // top pages
             var pages = await visitorsQuery
@@ -43,7 +43,7 @@ namespace Linky.Repository
                 .Select(g => new { Path = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var topPages = pages
                 .Where(p => p.Path != null)
@@ -56,7 +56,7 @@ namespace Linky.Repository
                 .Select(g => new { Country = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var topCountries = countries
                 .Where(c => c.Country != null)
@@ -64,7 +64,7 @@ namespace Linky.Repository
 
             // find existing stats by DateOnly (assumes VisitorStats.Date is DateOnly)
             var existing = await _context.VisitorStats
-                .FirstOrDefaultAsync(s => s.Date == date)
+                .FirstOrDefaultAsync(s => s.Date == date, cancellationToken)
                 .ConfigureAwait(false);
 
             if (existing != null)
@@ -82,46 +82,48 @@ namespace Linky.Repository
             {
                 var dto = new DTOs.VisitorStatsDto(date, totalVisits, uniqueVisitors, topPages, topCountries);
                 var newStats = _mapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
-                await _context.VisitorStats.AddAsync(newStats).ConfigureAwait(false);
+                await _context.VisitorStats.AddAsync(newStats, cancellationToken).ConfigureAwait(false);
             }
 
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            // Non-idempotent write: do not cancel the actual DB save once we have started.
+            await _context.SaveChangesAsync(CancellationToken.None).ConfigureAwait(false);
 
-            // invalidate visitor stats caches for affected ranges so controllers serve fresh data
+            // Post-write cache invalidation: use CancellationToken.None so cleanup always completes
+            // even if the background job is being cancelled.
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             if (date == today)
             {
-                await _cacheService.RemoveAsync("visitorstats:today").ConfigureAwait(false);
+                await _cacheService.RemoveAsync("visitorstats:today", CancellationToken.None).ConfigureAwait(false);
             }
             if (date >= today.AddDays(-6))
             {
-                await _cacheService.RemoveAsync("visitorstats:7days").ConfigureAwait(false);
+                await _cacheService.RemoveAsync("visitorstats:7days", CancellationToken.None).ConfigureAwait(false);
             }
             if (date >= today.AddDays(-29))
             {
-                await _cacheService.RemoveAsync("visitorstats:30days").ConfigureAwait(false);
+                await _cacheService.RemoveAsync("visitorstats:30days", CancellationToken.None).ConfigureAwait(false);
             }
         }
 
-        public async Task AggregateStatsForRange(DateTime startUtc, DateTime endUtc)
+        public async Task AggregateStatsForRange(DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken = default)
         {
             // Get all visitors in the time range
             var visitorsQuery = _context.Visitors
                 .AsNoTracking()
                 .Where(v => v.Timestamp >= startUtc && v.Timestamp < endUtc);
 
-            var totalVisits = await visitorsQuery.CountAsync().ConfigureAwait(false);
+            var totalVisits = await visitorsQuery.CountAsync(cancellationToken).ConfigureAwait(false);
             var uniqueVisitors = await visitorsQuery
                 .Select(v => v.Ip)
                 .Distinct()
-                .CountAsync().ConfigureAwait(false);
+                .CountAsync(cancellationToken).ConfigureAwait(false);
 
             var pages = await visitorsQuery
                 .GroupBy(v => v.Path)
                 .Select(g => new { Path = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var topPages = pages
                 .Where(p => p.Path != null)
@@ -133,7 +135,7 @@ namespace Linky.Repository
                 .Select(g => new { Country = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(10)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var topCountries = countries
                 .Where(c => c.Country != null)
@@ -143,7 +145,7 @@ namespace Linky.Repository
 
             // Check if stats already exist for this date
             var existing = await _context.VisitorStats
-                .FirstOrDefaultAsync(s => s.Date == dateKey)
+                .FirstOrDefaultAsync(s => s.Date == dateKey, cancellationToken)
                 .ConfigureAwait(false);
 
             if (existing != null)
@@ -161,17 +163,18 @@ namespace Linky.Repository
                 // Create new daily stats
                 var dto = new DTOs.VisitorStatsDto(dateKey, totalVisits, uniqueVisitors, topPages, topCountries);
                 var newStats = _mapper.ToModel(new DTOs.VisitorStatsDto(dto.Date, dto.TotalVisits, dto.UniqueVisitors, dto.TopPages, dto.TopCountries));
-                await _context.VisitorStats.AddAsync(newStats).ConfigureAwait(false);
+                await _context.VisitorStats.AddAsync(newStats, cancellationToken).ConfigureAwait(false);
             }
 
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            // Non-idempotent write: do not cancel the actual DB save once we have started.
+            await _context.SaveChangesAsync(CancellationToken.None).ConfigureAwait(false);
 
             // Calculate WEEKLY stats (SUM last 7 days)
             var weekStart = dateKey.AddDays(-6);
             var weeklyStats = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= weekStart && s.Date <= dateKey)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var weeklyTotalVisits = weeklyStats.Sum(s => s.TotalVisits);
             var weeklyUniqueVisitors = weeklyStats.Sum(s => s.UniqueVisitors);
@@ -194,7 +197,7 @@ namespace Linky.Repository
             var monthlyStats = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= monthStart && s.Date <= dateKey)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var monthlyTotalVisits = monthlyStats.Sum(s => s.TotalVisits);
             var monthlyUniqueVisitors = monthlyStats.Sum(s => s.UniqueVisitors);
@@ -221,41 +224,42 @@ namespace Linky.Repository
             // Example: Create VisitorStatsWeekly and VisitorStatsMonthly tables
             // OR query them on-demand by summing daily stats in your controllers
 
-            // Invalidate caches
+            // Post-write cache invalidation: use CancellationToken.None so cleanup always completes
+            // even if the background job is being cancelled.
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             if (dateKey == today)
             {
-                await _cacheService.RemoveAsync("visitorstats:today");
+                await _cacheService.RemoveAsync("visitorstats:today", CancellationToken.None).ConfigureAwait(false);
             }
             if (dateKey >= today.AddDays(-6))
             {
-                await _cacheService.RemoveAsync("visitorstats:7days");
+                await _cacheService.RemoveAsync("visitorstats:7days", CancellationToken.None).ConfigureAwait(false);
             }
             if (dateKey >= today.AddDays(-29))
             {
-                await _cacheService.RemoveAsync("visitorstats:30days");
+                await _cacheService.RemoveAsync("visitorstats:30days", CancellationToken.None).ConfigureAwait(false);
             }
         }
 
-        public async Task<VisitorStats?> GetStatsForDate(DateOnly date)
+        public async Task<VisitorStats?> GetStatsForDate(DateOnly date, CancellationToken cancellationToken = default)
         {
             // query by DateOnly and return the entity directly
             var result = await _context.VisitorStats
                 .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Date == date)
+                .FirstOrDefaultAsync(s => s.Date == date, cancellationToken)
                 .ConfigureAwait(false);
 
             return result;
         }
 
-        public async Task<IEnumerable<VisitorStats>> GetStatsRange(DateOnly start, DateOnly end)
+        public async Task<IEnumerable<VisitorStats>> GetStatsRange(DateOnly start, DateOnly end, CancellationToken cancellationToken = default)
         {
             // compare DateOnly to DateOnly (assumes VisitorStats.Date is DateOnly)
             var results = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= start && s.Date <= end)
                 .OrderByDescending(s => s.Date)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             return results;
         }
@@ -263,13 +267,13 @@ namespace Linky.Repository
         /// <summary>
         /// Get weekly aggregated stats (sum of last 7 days)
         /// </summary>
-        public async Task<(int TotalVisits, int UniqueVisitors, Dictionary<string, int> TopPages)> GetWeeklyStats(DateOnly endDate)
+        public async Task<(int TotalVisits, int UniqueVisitors, Dictionary<string, int> TopPages)> GetWeeklyStats(DateOnly endDate, CancellationToken cancellationToken = default)
         {
             var weekStart = endDate.AddDays(-6);
             var weeklyStats = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= weekStart && s.Date <= endDate)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var totalVisits = weeklyStats.Sum(s => s.TotalVisits);
             var uniqueVisitors = weeklyStats.Sum(s => s.UniqueVisitors);
@@ -292,13 +296,13 @@ namespace Linky.Repository
         /// <summary>
         /// Get monthly aggregated stats (sum of last 30 days)
         /// </summary>
-        public async Task<(int TotalVisits, int UniqueVisitors, Dictionary<string, int> TopPages)> GetMonthlyStats(DateOnly endDate)
+        public async Task<(int TotalVisits, int UniqueVisitors, Dictionary<string, int> TopPages)> GetMonthlyStats(DateOnly endDate, CancellationToken cancellationToken = default)
         {
             var monthStart = endDate.AddDays(-29);
             var monthlyStats = await _context.VisitorStats
                 .AsNoTracking()
                 .Where(s => s.Date >= monthStart && s.Date <= endDate)
-                .ToListAsync().ConfigureAwait(false);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var totalVisits = monthlyStats.Sum(s => s.TotalVisits);
             var uniqueVisitors = monthlyStats.Sum(s => s.UniqueVisitors);

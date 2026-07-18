@@ -25,14 +25,14 @@ namespace Linky.Controllers
         /// Creates a new QR code metadata entry
         /// </summary>
         [HttpPost("Create")]
-        public async Task<IActionResult> Create([FromBody] QRCodeDto dto)
+        public async Task<IActionResult> Create([FromBody] QRCodeDto dto, CancellationToken cancellationToken = default)
         {
             if (dto == null)
                 return BadRequest(new { success = false, message = "QR Code data is required" });
 
             try
             {
-                var qrcode = await _qrcodeRepository.CreateAsync(dto);
+                var qrcode = await _qrcodeRepository.CreateAsync(dto, cancellationToken);
                 return Ok(new { success = true, data = qrcode, message = "QR code created successfully" });
             }
             catch (Exception ex)
@@ -46,14 +46,14 @@ namespace Linky.Controllers
         /// When QR code is scanned, it hits this endpoint, tracks the scan, then redirects
         /// </summary>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
         {
             if (id == Guid.Empty)
                 return BadRequest(new { success = false, message = "Invalid QR code ID" });
 
             try
             {
-                var qrcode = await _qrcodeRepository.GetByIdAsync(id);
+                var qrcode = await _qrcodeRepository.GetByIdAsync(id, cancellationToken);
                 if (qrcode == null)
                     return NotFound(new { success = false, message = "QR code not found" });
 
@@ -61,7 +61,7 @@ namespace Linky.Controllers
                 var clientIp = _clientIp.GetClientIp();
                 var location = _geolocationService.GetLocationByIp(clientIp);
 
-                await _qrcodeRepository.IncrementScanAsync(id, clientIp, location.Country, location.City);
+                await _qrcodeRepository.IncrementScanAsync(id, clientIp, location.Country, location.City, cancellationToken);
 
                 // Redirect to the actual destination URL
                 if (!string.IsNullOrEmpty(qrcode.Content))
@@ -81,11 +81,11 @@ namespace Linky.Controllers
         /// Gets all QR codes
         /// </summary>
         [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
         {
             try
             {
-                var qrcodes = await _qrcodeRepository.GetAllAsync();
+                var qrcodes = await _qrcodeRepository.GetAllAsync(cancellationToken);
                 return Ok(new { success = true, data = qrcodes });
             }
             catch (Exception ex)
@@ -98,7 +98,7 @@ namespace Linky.Controllers
         /// Manual increment scan (for external tracking)
         /// </summary>
         [HttpPost("IncrementScan/{id}")]
-        public async Task<IActionResult> IncrementScan(Guid id, [FromBody] ScanRequestDto request)
+        public async Task<IActionResult> IncrementScan(Guid id, [FromBody] ScanRequestDto request, CancellationToken cancellationToken = default)
         {
             if (id == Guid.Empty)
                 return BadRequest(new { success = false, message = "Invalid QR code ID" });
@@ -118,7 +118,7 @@ namespace Linky.Controllers
                     city = geoInfo?.City ?? request.City;
                 }
 
-                await _qrcodeRepository.IncrementScanAsync(id, request.ClientIp, country, city);
+                await _qrcodeRepository.IncrementScanAsync(id, request.ClientIp, country, city, cancellationToken);
                 return Ok(new { success = true, message = "Scan recorded successfully" });
             }
             catch (InvalidOperationException ex)
@@ -183,7 +183,8 @@ namespace Linky.Controllers
         public async Task<IActionResult> GenerateQrCodeImage(
     [FromForm] string text,
     [FromForm] IFormFile? logoFile = null,
-    [FromForm] int pixelsPerModule = 20)
+    [FromForm] int pixelsPerModule = 20,
+    CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(text))
                 return BadRequest(new { success = false, message = "Text is required to generate QR code" });
@@ -193,17 +194,8 @@ namespace Linky.Controllers
 
             try
             {
-                // Previous tracking behavior commented out to avoid embedding backend redirect URL:
-                /*
-                var dto = new QRCodeDto { ExpirationDate = null };
-                var qrCode = await _qrcodeRepository.CreateAsync(dto);
-                await _qrcodeRepository.UpdateContentAsync(qrCode.Id, text);
-                var trackingUrl = $"{Request.Scheme}://{Request.Host}/api/QRCode/{qrCode.Id}";
-                var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(trackingUrl, logoFile, pixelsPerModule);
-                */
-
                 // Privacy-safe behavior: embed the original text directly into the QR code
-                var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(text, logoFile, pixelsPerModule);
+                var svgBytes = await _qrcodeRepository.GenerateQrCodeImageAsync(text, logoFile, pixelsPerModule, cancellationToken);
 
                 return File(svgBytes, "image/svg+xml", $"qrcode-{DateTime.UtcNow:yyyyMMddHHmmss}.svg");
             }

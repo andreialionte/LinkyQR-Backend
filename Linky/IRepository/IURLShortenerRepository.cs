@@ -6,8 +6,8 @@ namespace Linky.IRepository
     public interface IURLShortenerRepository
     {
 
-        Task<URLShortener> CreateShortUrlAsync(URLShortenerDto dto, string? customAlias = null);
-        Task<URLShortener?> GetByCode(string code);
+        Task<URLShortener> CreateShortUrlAsync(URLShortenerDto dto, string? customAlias = null, CancellationToken cancellationToken = default);
+        Task<URLShortener?> GetByCode(string code, CancellationToken cancellationToken = default);
         //Task<URLShortener?> GetByOriginalUrl(string originalUrl);
         // Total Link Created
         //Task<int> TotalLinksCreated();
@@ -19,6 +19,7 @@ namespace Linky.IRepository
             string? country,
             string? city,
             string? userAgent,
-            string? referrer);
+            string? referrer,
+            CancellationToken cancellationToken = default);
     }
 }
