@@ -14,9 +14,8 @@ namespace Linky.Jobs
         }
 
         [TickerFunction("AggregateVisitorStatsJob")]
-        public async Task Execute(TickerFunctionContext context)
+        public async Task Execute(TickerFunctionContext context, CancellationToken cancellationToken)
         {
-            var cancellationToken = context.CancellationToken;
 
             // Aggregate the 24h window that ENDED at 06:00 UTC
             // Example: if it's 2026-03-19 08:00 UTC, aggregate 2026-03-18 06:00 to 2026-03-19 06:00

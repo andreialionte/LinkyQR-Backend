@@ -13,8 +13,9 @@ namespace Linky.Repository
 {
     public class URLShortenerRepository : IURLShortenerRepository
     {
-        // Compiled EF Core queries for hot paths
-        private static readonly Func<DataContextEf, string, CancellationToken, Task<URLShortener?>> _getByCodeCompiled
+        // Compiled EF Core queries for hot paths.
+        // NOTE: EF Core 10 CompileAsyncQuery with FirstOrDefault() returns Func<TContext, T1, Task<T?>> WITHOUT CancellationToken.
+        private static readonly Func<DataContextEf, string, Task<URLShortener?>> _getByCodeCompiled
             = EF.CompileAsyncQuery((DataContextEf ctx, string code) =>
                 ctx.URLShorteners.AsNoTracking().FirstOrDefault(u => u.ShortenedUrl == code));
 
@@ -98,7 +99,7 @@ namespace Linky.Repository
             if (cached != null)
                 return cached;
 
-            var entity = await _getByCodeCompiled(_context, code, cancellationToken).ConfigureAwait(false);
+            var entity = await _getByCodeCompiled(_context, code).ConfigureAwait(false);
 
             if (entity != null)
                 await _cacheService.SetAsync(cacheKey, entity, TimeSpan.FromMinutes(30), cancellationToken).ConfigureAwait(false);

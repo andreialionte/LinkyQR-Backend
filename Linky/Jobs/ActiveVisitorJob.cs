@@ -18,9 +18,8 @@ namespace Linky.Jobs
         }
 
         [TickerFunction("ActiveVisitorJob")]
-        public async Task Execute(TickerFunctionContext context)
+        public async Task Execute(TickerFunctionContext context, CancellationToken cancellationToken)
         {
-            var cancellationToken = context.CancellationToken;
 
             // Șterge vizitatorii inactivi
             await _activeVisitorRepo.DeleteInactiveVisitors(TimeSpan.FromMinutes(5), cancellationToken).ConfigureAwait(false);
