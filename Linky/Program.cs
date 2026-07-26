@@ -1,4 +1,4 @@
-// using Delta;  // COMMENTED OUT: Incompatible with FusionCache - see middleware section for details
+// using Delta;  // COMMENTED OUT: Incompatible with cache middleware - see middleware section for details
 
 using System;
 using Linky.DataLayer;
@@ -15,8 +15,6 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using StackExchange.Redis;
 using System.IO.Compression;
 using System.Linq;
 using System.Security.Authentication;
@@ -34,8 +32,10 @@ using TickerQ.Caching.StackExchangeRedis;
 using TickerQ.Caching.StackExchangeRedis.DependencyInjection;
 using TickerQ.Dashboard.DependencyInjection;
 using TickerQ.DependencyInjection;
-using ZiggyCreatures.Caching.Fusion;
-using ZiggyCreatures.Caching.Fusion.Serialization.CysharpMemoryPack;
+using UiPath.Caching;
+using UiPath.Caching.CloudEvents;
+using UiPath.Caching.Config;
+using UiPath.Caching.Polly;
 
 namespace Linky
 {
@@ -93,45 +93,40 @@ namespace Linky
             builder.Services.AddSingleton<URLShortenerMapper>();
             builder.Services.AddSingleton<ActiveVisitorMapper>();
 
-            builder.Services.AddHttpContextAccessor(); //for ips etc i thhink
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IClientIp, ClientIp>();
 
             builder.Services.AddSingleton<IGeoIPService, GeoIpService>();
-            builder.Services.AddSingleton<ICacheService, CacheService>(); //sau singleton trb sa inteleg bussiness logic-ul la app
+            builder.Services.AddSingleton<ICacheService, CacheService>();
 
             builder.Services.AddHealthChecks()
                 .AddCheck<UptimePercentageHealthCheck>("uptimeCheck", tags: new[] { "uptime" });
 
-            //rate limit by ips 15 req per min
-            //builder.Services.AddRateLimiter(options =>
-            //{
-            //    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-            //        RateLimitPartition.GetFixedWindowLimiter(
-            //            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            //            factory: _ => new FixedWindowRateLimiterOptions
-            //            {
-            //                PermitLimit = 15,
-            //                Window = TimeSpan.FromSeconds(45),
-            //                QueueLimit = 0,
-            //                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
-            //            }));
-
-            //    options.OnRejected = (context, cancellationToken) =>
-            //    {
-            //        context.HttpContext.Response.StatusCode = 429;
-            //        context.HttpContext.Response.Headers["Retry-After"] = "60";
-            //        return ValueTask.CompletedTask; // <-- Use ValueTask instead of Task
-            //    };
-            //});
-
-            //builder.Services.AddNatsServices(builder.Configuration);
-
-
-
             builder.Services.AddScoped<ActiveVisitorJob>();
             builder.Services.AddScoped<AggregateVisitorStats>();
 
-            // Register TickerQ - jobs auto-discovered via [TickerFunction] attributes
+            builder.Services.AddCaching(builder.Configuration.GetSection("Caching"), cachingBuilder =>
+                cachingBuilder
+                    .AddRedisConnection(connectionOptions =>
+                    {
+                        var connectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
+                            ?? builder.Configuration.GetConnectionString("Valkey")
+                            ?? builder.Configuration["Caching:Connections:Redis:ConnectionString"]
+                            ?? "localhost:6379";
+
+                        connectionOptions.ConnectionString = connectionString;
+                        connectionOptions.AbortOnConnectFail = false;
+                        connectionOptions.WarmUpOnStart = false;
+                    })
+                    .AddBroadcast()
+                    .AddRedis()
+                    .AddInMemoryRedis()
+                    .AddMemory()
+                    .AddLocalLock()
+                    .AddRedisDistributedLock()
+                    .AddResilienceStrategies()
+                    .AddCloudEvents());
+
             builder.Services.AddTickerQ(options =>
             {
                 options.ConfigureScheduler(schedulerOptions =>
@@ -144,11 +139,8 @@ namespace Linky
                     ?? builder.Configuration.GetConnectionString("Valkey")
                     ?? "localhost:6379";
 
-                // TickerQ REQUIRES a persistence provider to function
-                // Without this, the scheduler cannot store or retrieve jobs
                 if (!string.IsNullOrEmpty(redisConnectionString))
                 {
-                    // Ensure abortConnect=false is in the connection string for graceful failure
                     if (!redisConnectionString.Contains("abortConnect"))
                     {
                         redisConnectionString += ",abortConnect=false";
@@ -162,7 +154,6 @@ namespace Linky
                     });
                 }
 
-                // Add Dashboard
                 options.AddDashboard(dashboardOptions =>
                 {
                     dashboardOptions.SetBasePath("/tickerq/dashboard");
@@ -219,83 +210,11 @@ namespace Linky
             //builder.Services.AddReverseProxy()
             //    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
-
-            // builder.Services.AddMemoryCache();
-
-
-
-            builder.Services.AddFusionCache()
-                .WithSerializer(new FusionCacheCysharpMemoryPackSerializer())
-                .WithDistributedCache(
-                    new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCache(
-                        new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCacheOptions
-                        {
-                            ConnectionMultiplexerFactory = async () =>
-                            {
-                                var connectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
-    ?? builder.Configuration.GetConnectionString("Valkey");
-
-                                // Dacă nu există, returnează null și FusionCache va folosi doar Memory
-                                if (string.IsNullOrEmpty(connectionString))
-                                    return null;
-
-                                return await ConnectionMultiplexer.ConnectAsync(
-                                    connectionString,
-                                    config =>
-                                    {
-                                        config.AbortOnConnectFail = false;
-                                        config.ConnectTimeout = 5000;
-                                        config.ReconnectRetryPolicy = new LinearRetry(5000);
-                                        config.ConnectRetry = 5;
-                                    }
-                                );
-                            }
-                        }
-                    )
-                )
-                // ȘTERGE complet .WithBackplane() - nu-l folosești!
-                .WithOptions(options =>
-                {
-                    options.DefaultEntryOptions = new FusionCacheEntryOptions
-                    {
-                        Duration = TimeSpan.FromMinutes(2),
-                        Priority = CacheItemPriority.High,
-                        DistributedCacheDuration = TimeSpan.FromHours(1),
-
-                        // Fail-Safe: cache-ul funcționează chiar dacă DB/Redis cad
-                        IsFailSafeEnabled = true,
-                        FailSafeMaxDuration = TimeSpan.FromHours(6),
-                        FailSafeThrottleDuration = TimeSpan.FromSeconds(2),
-
-                        // Performance: operații async în background
-                        AllowBackgroundDistributedCacheOperations = true,
-                        SkipDistributedCacheReadWhenStale = true,
-
-                        // Anti cache-stampede: refresh înainte de expirare
-                        EagerRefreshThreshold = 0.8f,  // Refresh la 80% din Duration (1.6 min)
-
-                        // Timeouts pentru factory (DB queries)
-                        FactorySoftTimeout = TimeSpan.FromMilliseconds(500),  // soft timeout
-                        FactoryHardTimeout = TimeSpan.FromSeconds(3),         // hard timeout
-                        AllowTimedOutFactoryBackgroundCompletion = true,      // continuă în background
-
-                        // Jitter pentru a distribui load-ul
-                        JitterMaxDuration = TimeSpan.FromSeconds(10)
-                    };
-                });
-
-            // ICacheService already registered as Singleton above. Do not register again as Scoped.
-
-            builder.Services.AddResponseCompression(options =>
+            builder.Services.AddResponseCompression(responseCompressionOptions =>
             {
-                options.EnableForHttps = true;
-
-                // Brotli and Gzip providers
-                options.Providers.Add<BrotliCompressionProvider>();
-                options.Providers.Add<GzipCompressionProvider>();
-
-                // Compress only responses larger than 2 KB to avoid compressing tiny payloads
-                // NOTE: MinimumResponseSizeBytes is not available on this target framework; adjust via middleware or per-route headers if needed.
+                responseCompressionOptions.EnableForHttps = true;
+                responseCompressionOptions.Providers.Add<BrotliCompressionProvider>();
+                responseCompressionOptions.Providers.Add<GzipCompressionProvider>();
             });
 
             // Brotli compression: prefer lower-latency compression for API responses

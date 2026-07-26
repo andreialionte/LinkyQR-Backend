@@ -1,41 +1,37 @@
 ﻿using Linky.IService;
-using ZiggyCreatures.Caching.Fusion;
+using UiPath.Caching;
 
 namespace Linky.Service
 {
     public sealed class CacheService : ICacheService
     {
-        private readonly IFusionCache _cache;
+        private const string ProviderName = "InMemoryRedis";
+        private readonly ICache _cache;
 
-        public CacheService(IFusionCache cache)
+        public CacheService(ICacheFactory cacheFactory)
         {
-            _cache = cache;
+            _cache = cacheFactory.CreateCache(ProviderName);
         }
 
         public async ValueTask<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
         {
-            // using TryGet to avoid boxing of value types instead of GetAsync !!!!!
-            var maybeValue = await _cache.TryGetAsync<T>(key, options: null, cancellationToken)
-                .ConfigureAwait(false);
+            var entry = await _cache.GetCacheEntryAsync<object>(key, cancellationToken).ConfigureAwait(false);
 
-            return maybeValue.HasValue ? maybeValue.Value : default;
+            if (!entry.Found || entry.Value is null)
+                return default;
+
+            return (T)entry.Value;
         }
 
         public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
         {
-            await _cache.RemoveAsync(key, options: null, cancellationToken)
+            await _cache.RemoveAsync<object>(key, cancellationToken)
                 .ConfigureAwait(false);
         }
 
         public async Task SetAsync<T>(string key, T value, TimeSpan ttl, CancellationToken cancellationToken = default)
         {
-            var options = new FusionCacheEntryOptions
-            {
-                Duration = ttl,
-                AllowBackgroundDistributedCacheOperations = true
-            };
-
-            await _cache.SetAsync(key, value, options, cancellationToken)
+            await _cache.SetAsync(key, value!, ttl, cancellationToken)
                 .ConfigureAwait(false);
         }
     }

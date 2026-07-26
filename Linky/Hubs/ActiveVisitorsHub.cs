@@ -31,7 +31,7 @@ public sealed class ActiveVisitorsHub : Hub
         await base.OnConnectedAsync();
     }
 
-    public async Task GetVisitorCount(CancellationToken cancellationToken = default)
+        public async Task GetVisitorCount(CancellationToken cancellationToken = default)
     {
         var httpContext = Context.GetHttpContext();
         var connectionId = Context.ConnectionId;
