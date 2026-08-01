@@ -223,7 +223,7 @@ namespace Linky
                     // For production, use dokku config:set or environment variables instead.
                     listenOptions.UseHttps(httpsOptions =>
                     {
-                        /*httpsOptions.ServerCertificateSelector = (connectionContext, name) =>
+                        httpsOptions.ServerCertificateSelector = (connectionContext, name) =>
                         {
                             if (name != null && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
                             {
@@ -231,7 +231,7 @@ namespace Linky
                             }
 
                             return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
-                        };*/
+                        };
                     });
                 });
             });
