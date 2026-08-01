@@ -17,10 +17,11 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -201,9 +202,27 @@ namespace Linky
                 options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
                 options.AddServerHeader = true;
 
+                options.ConfigureHttpsDefaults(httpsOptions =>
+                {
+                    httpsOptions.SslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12;
+                });
+
                 options.ListenAnyIP(5000, listenOptions =>
                 {
-                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+                    listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
+
+                    listenOptions.UseHttps(httpsOptions =>
+                    {
+                        httpsOptions.ServerCertificateSelector = (connectionContext, name) =>
+                        {
+                            if (name != null && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return new X509Certificate2("/app/api.pfx", "parola_ta");
+                            }
+
+                            return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
+                        };
+                    });
                 });
             });
 
@@ -271,11 +290,6 @@ namespace Linky
             // Jobs are discovered and scheduled based on [TickerFunction] attributes
 
             app.UseCors("main");
-
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });
 
             // Initialize TickerQ scheduler and job execution
             app.UseTickerQ();
@@ -406,12 +420,14 @@ namespace Linky
                 app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                app.UseHttpsRedirection();
             } // PROD
              else
              {
                  app.UseHsts();
              }
+
+
+            app.UseHttpsRedirection();
 
 
 
