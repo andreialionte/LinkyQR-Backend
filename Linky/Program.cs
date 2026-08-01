@@ -128,6 +128,8 @@ namespace Linky
             builder.Services.AddScoped<ActiveVisitorJob>();
             builder.Services.AddScoped<AggregateVisitorStats>();
 
+            
+            builder.Services.AddSingleton<ICacheKeyStrategy, IdentityCacheKeyStrategy>();
             builder.Services.AddCaching(builder.Configuration.GetSection("Caching"), cachingBuilder =>
                 cachingBuilder
                     .AddRedisConnection(connectionOptions =>
