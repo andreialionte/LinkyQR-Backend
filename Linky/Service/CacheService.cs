@@ -15,12 +15,12 @@ namespace Linky.Service
 
         public async ValueTask<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
         {
-            var entry = await _cache.GetCacheEntryAsync<object>(key, cancellationToken).ConfigureAwait(false);
+            var entry = await _cache.GetCacheEntryAsync<T>(key, cancellationToken).ConfigureAwait(false);
 
             if (!entry.Found || entry.Value is null)
                 return default;
 
-            return (T)entry.Value;
+            return entry.Value;
         }
 
         public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)

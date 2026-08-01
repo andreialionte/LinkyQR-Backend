@@ -43,6 +43,28 @@ namespace Linky
     {
         public static void Main(string[] args)
         {
+            static bool IsPlaceholderValue(string? value)
+            {
+                return !string.IsNullOrWhiteSpace(value)
+                       && value.StartsWith("${", StringComparison.Ordinal)
+                       && value.EndsWith("}", StringComparison.Ordinal);
+            }
+
+            static string? FirstRealValue(params string?[] values)
+            {
+                foreach (var value in values)
+                {
+                    if (string.IsNullOrWhiteSpace(value) || IsPlaceholderValue(value))
+                    {
+                        continue;
+                    }
+
+                    return value;
+                }
+
+                return null;
+            }
+
             // ensure thread‑pool has a reasonable floor in case of sudden load spikes
             // only bump if current min is lower to avoid wasting threads on small machines
             // use a conservative, machine-scaled minimum instead of a fixed 200 which
@@ -73,8 +95,9 @@ namespace Linky
             builder.Services.AddMemoryCache();
 
             builder.Services.AddScoped<DapperDbContext>();
-            var dbConnection = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
-    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+            var dbConnection = FirstRealValue(
+                Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"),
+                builder.Configuration.GetConnectionString("DefaultConnection"));
 
             builder.Services.AddDbContext<DataContextEf>(options =>
                 options.UseNpgsql(dbConnection));
@@ -109,9 +132,10 @@ namespace Linky
                 cachingBuilder
                     .AddRedisConnection(connectionOptions =>
                     {
-                        var connectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
-                            ?? builder.Configuration.GetConnectionString("Valkey")
-                            ?? builder.Configuration["Caching:Connections:Redis:ConnectionString"]
+                        var connectionString = FirstRealValue(
+                            Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING"),
+                            builder.Configuration.GetConnectionString("Valkey"),
+                            builder.Configuration["Caching:Connections:Redis:ConnectionString"])
                             ?? "localhost:6379";
 
                         connectionOptions.ConnectionString = connectionString;
@@ -125,7 +149,17 @@ namespace Linky
                     .AddLocalLock()
                     .AddRedisDistributedLock()
                     .AddResilienceStrategies()
-                    .AddCloudEvents());
+                    .AddCloudEvents(),
+                options =>
+                {
+                    var section = builder.Configuration.GetSection("Caching");
+                    section.Bind(options);
+                    options.AppShortName = FirstRealValue(
+                        options.AppShortName,
+                        Environment.GetEnvironmentVariable("CACHING_APP_SHORT_NAME"),
+                        builder.Environment.ApplicationName,
+                        "linky");
+                });
 
             builder.Services.AddTickerQ(options =>
             {
@@ -135,9 +169,10 @@ namespace Linky
                     schedulerOptions.NodeIdentifier = "linky-node-01";
                 });
 
-                var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING")
-                    ?? builder.Configuration.GetConnectionString("Valkey")
-                    ?? "localhost:6379";
+                var redisConnectionString = FirstRealValue(
+                    Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING"),
+                    builder.Configuration.GetConnectionString("Valkey"),
+                    "localhost:6379");
 
                 if (!string.IsNullOrEmpty(redisConnectionString))
                 {
