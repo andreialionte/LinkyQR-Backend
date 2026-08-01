@@ -142,14 +142,16 @@ namespace Linky
                         connectionOptions.AbortOnConnectFail = false;
                         connectionOptions.WarmUpOnStart = false;
                     })
-                    .AddBroadcast()
+                    // Broadcast uses Redis Streams; disable on backends that don't support stream commands.
+                    // .AddBroadcast()
                     .AddRedis()
                     .AddInMemoryRedis()
                     .AddMemory()
                     .AddLocalLock()
                     .AddRedisDistributedLock()
                     .AddResilienceStrategies()
-                    .AddCloudEvents(),
+                    // .AddCloudEvents()
+                    ,
                 options =>
                 {
                     var section = builder.Configuration.GetSection("Caching");
