@@ -138,18 +138,14 @@ namespace Linky.Repository
             if (cached.HasValue)
                 return cached.Value;
 
-            int count;
+            int? count;
             if (start.HasValue)
-            {
                 count = await _countSinceCompiled(_context, start.Value).ConfigureAwait(false);
-            }
             else
-            {
                 count = await _countAllCompiled(_context).ConfigureAwait(false);
-            }
 
             await _cacheService.SetAsync(cacheKey, count, TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(false);
-            return count;
+            return count!.Value;
         }
 
         public async Task<int> GetUniqueVisitors(DateTime? start = null, CancellationToken cancellationToken = default)
@@ -159,18 +155,14 @@ namespace Linky.Repository
             if (cached.HasValue)
                 return cached.Value;
 
-            int count;
+            int? count;
             if (start.HasValue)
-            {
                 count = await _uniqueCountSinceCompiled(_context, start.Value).ConfigureAwait(false);
-            }
             else
-            {
                 count = await _uniqueCountAllCompiled(_context).ConfigureAwait(false);
-            }
 
             await _cacheService.SetAsync(cacheKey, count, TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(false);
-            return count;
+            return count!.Value;
         }
 
         public async Task<Visitor?> GetVisitorBySessionId(Guid sessionId, CancellationToken cancellationToken = default)
