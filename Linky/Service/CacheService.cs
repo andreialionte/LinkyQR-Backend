@@ -7,8 +7,8 @@ namespace Linky.Service
 {
     public sealed class CacheService : ICacheService
     {
-        private const string ProviderName = "InMemoryRedis";
-
+        private const string ProviderName = "Redis"; // Garnet/Dragonfly nu suportă comenzile de Redis Streams necesare pentru InMemoryRedis broadcast
+        
         // Only worth compressing above this size — Zstd has fixed overhead
         // (frame headers etc.) that makes it a net loss on tiny payloads
         // like a cached int? or a short string.
