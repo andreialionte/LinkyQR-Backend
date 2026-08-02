@@ -57,7 +57,7 @@ namespace Linky.Service
             byte[] payload;
             if (jsonBytes.Length >= CompressionThresholdBytes)
             {
-                using var compressor = new Compressor(level: 6); // 1 (fastest) – 22 (smallest); 3 is Zstd's own default, 6 is a good speed/ratio tradeoff for hot-path caches
+                using var compressor = new Compressor(level: -4); // 1 (fastest) – 22 (smallest); 3 is Zstd's own default, 6 is a good speed/ratio tradeoff for hot-path caches
                 var compressed = compressor.Wrap(jsonBytes);
                 payload = new byte[compressed.Length + 1];
                 payload[0] = 1; // flag: compressed
