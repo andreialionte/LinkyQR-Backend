@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace Linky.Controllers
 {
     [ApiController]
-    [EnableRateLimiting("public-api")]
+    [EnableRateLimiting("public-high-volume-api")]
     public sealed class UrlShortenerControllers : ControllerBase
     {
         private readonly IURLShortenerRepository _urlRepo;
