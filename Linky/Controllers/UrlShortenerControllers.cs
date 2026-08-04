@@ -3,10 +3,12 @@ using Linky.IRepository;
 using Linky.IService;
 using Linky.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Linky.Controllers
 {
     [ApiController]
+    [EnableRateLimiting("public-api")]
     public sealed class UrlShortenerControllers : ControllerBase
     {
         private readonly IURLShortenerRepository _urlRepo;

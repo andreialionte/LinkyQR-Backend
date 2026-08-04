@@ -1,4 +1,5 @@
-// using Delta;  // COMMENTED OUT: Incompatible with cache middleware - see middleware section for details
+// using Delta;
+// // COMMENTED OUT: Incompatible with cache middleware - see middleware section for details
 
 using System;
 using Linky.DataLayer;
@@ -21,12 +22,17 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using RedisRateLimiting;
+using RedisRateLimiting.AspNetCore;
+using StackExchange.Redis;
 using TickerQ;
 using TickerQ.Caching.StackExchangeRedis;
 using TickerQ.Caching.StackExchangeRedis.DependencyInjection;
@@ -83,6 +89,84 @@ namespace Linky
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            // ---- Rate Limiting ----
+            // Single policy ("spam-api") applied to every controller.
+            // Backed by Redis so the limit is enforced correctly across multiple instances.
+            // Partitioned per client IP (via IClientIp) so one abusive caller only burns their own bucket.
+            // If Redis is unreachable, falls back to an in-memory per-instance bucket
+            // (fail-open on a degraded/uncertain connection so a Redis blip doesn't 500 the whole API).
+
+            var rateLimiterRedisConnectionString = FirstRealValue(
+                Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING"),
+                builder.Configuration.GetConnectionString("Valkey"),
+                builder.Configuration["Caching:Connections:Redis:ConnectionString"])
+                ?? "localhost:6379";
+
+            var rateLimiterRedisOptions = ConfigurationOptions.Parse(rateLimiterRedisConnectionString);
+            rateLimiterRedisOptions.AbortOnConnectFail = false; // don't throw at startup if Redis is briefly unreachable
+
+            var rateLimiterRedis = ConnectionMultiplexer.Connect(rateLimiterRedisOptions);
+            builder.Services.AddSingleton<IConnectionMultiplexer>(rateLimiterRedis);
+
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+                options.OnRejected = async (context, ct) =>
+                {
+                    if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                    {
+                        context.HttpContext.Response.Headers.RetryAfter =
+                            ((int)retryAfter.TotalSeconds).ToString();
+                    }
+
+                    context.HttpContext.Response.ContentType = "application/problem+json";
+                    await context.HttpContext.Response.WriteAsJsonAsync(new
+                    {
+                        title = "Too many requests",
+                        status = StatusCodes.Status429TooManyRequests,
+                        detail = "Rate limit exceeded. Retry after the Retry-After header value."
+                    }, ct);
+                };
+
+                options.AddPolicy("spam-api", httpContext =>
+                {
+                    var clientIp = httpContext.RequestServices
+                        .GetRequiredService<IClientIp>()
+                        .GetClientIp();
+
+                    try
+                    {
+                        if (!rateLimiterRedis.IsConnected)
+                        {
+                            throw new RedisConnectionException(ConnectionFailureType.UnableToConnect, "Redis not connected");
+                        }
+
+                        return RateLimitPartition.Get(clientIp, key => new RedisTokenBucketRateLimiter<string>(
+                            key,
+                            new RedisTokenBucketRateLimiterOptions
+                            {
+                                ConnectionMultiplexerFactory = () => rateLimiterRedis,
+                                TokenLimit = 30,
+                                TokensPerPeriod = 30,
+                                ReplenishmentPeriod = TimeSpan.FromMinutes(1)
+                            }));
+                    }
+                    catch
+                    {
+                        return RateLimitPartition.GetTokenBucketLimiter(clientIp, _ => new TokenBucketRateLimiterOptions
+                        {
+                            TokenLimit = 30,
+                            TokensPerPeriod = 30,
+                            ReplenishmentPeriod = TimeSpan.FromMinutes(1),
+                            AutoReplenishment = true,
+                            QueueLimit = 0
+                        });
+                    }
+                });
+            });
+            // ---- End Rate Limiting ----
 
             builder.Services.AddResponseCaching(options =>
             {
@@ -416,9 +500,6 @@ namespace Linky
             // on ALL 200 GET responses. Keeping it would just waste CPU on a check
             // whose header is always overwritten.
 
-            //app.UseRateLimiter();
-
-
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
@@ -432,6 +513,8 @@ namespace Linky
 
 
             app.UseHttpsRedirection();
+            app.UseRouting();
+            app.UseRateLimiter();      // 429 before doing auth work
 
 
 
@@ -444,4 +527,3 @@ namespace Linky
         }
     }
 }
-
