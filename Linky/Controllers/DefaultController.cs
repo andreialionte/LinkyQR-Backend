@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace Linky.Controllers
 {
     [ApiController]
-    [DisableRateLimiting]
+    [EnableRateLimiting("public-high-volume-api")]
     public class DefaultController : BaseController
     {
         //redirect if someone its typing "https://linkyqr.com" instead of "https://www.linkyqr.com"

@@ -53,6 +53,7 @@ namespace Linky.Controllers
         }
 
         [HttpGet("{code}")]
+        [EnableRateLimiting("public-high-volume-api")]
         public async Task<IActionResult> GetByCode([FromRoute] string code, CancellationToken cancellationToken = default)
         {
             var url = await _urlRepo.GetByCode(code, cancellationToken);

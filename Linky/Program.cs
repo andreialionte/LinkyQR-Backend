@@ -130,7 +130,8 @@ namespace Linky
                     }, ct);
                 };
 
-                options.AddPolicy("spam-api", httpContext =>
+                // Shared helper: Redis-backed token bucket, per-IP, falls back to in-memory if Redis is down.
+                RateLimitPartition<string> TokenBucketWithFallback(HttpContext httpContext, int tokenLimit)
                 {
                     var clientIp = httpContext.RequestServices
                         .GetRequiredService<IClientIp>()
@@ -148,20 +149,65 @@ namespace Linky
                             new RedisTokenBucketRateLimiterOptions
                             {
                                 ConnectionMultiplexerFactory = () => rateLimiterRedis,
-                                TokenLimit = 30,
-                                TokensPerPeriod = 30,
+                                TokenLimit = tokenLimit,
+                                TokensPerPeriod = tokenLimit,
                                 ReplenishmentPeriod = TimeSpan.FromMinutes(1)
                             }));
                     }
                     catch
                     {
+                        // Redis unreachable - fall back to an in-memory bucket for this instance
+                        // so the API stays protected (albeit per-instance) instead of failing the request.
                         return RateLimitPartition.GetTokenBucketLimiter(clientIp, _ => new TokenBucketRateLimiterOptions
                         {
-                            TokenLimit = 30,
-                            TokensPerPeriod = 30,
+                            TokenLimit = tokenLimit,
+                            TokensPerPeriod = tokenLimit,
                             ReplenishmentPeriod = TimeSpan.FromMinutes(1),
                             AutoReplenishment = true,
                             QueueLimit = 0
+                        });
+                    }
+                }
+
+                // Default policy - writes, spammable endpoints, anything not explicitly overridden.
+                options.AddPolicy("spam-api", httpContext => TokenBucketWithFallback(httpContext, tokenLimit: 30));
+
+                // Generous policy - public redirects/reads (GetByCode, QR scan-and-redirect, etc.)
+                // Higher legitimate volume expected here, so a looser cap than the default.
+                // One that they role is to get use not so rarely more 
+                options.AddPolicy("public-high-volume-api", httpContext => TokenBucketWithFallback(httpContext, tokenLimit: 100));
+
+                // QR image generation - CPU/memory bound (render + optional logo composite).
+                // Caps how many can run AT ONCE per IP, not how many per minute.
+                options.AddPolicy("qr-image-gen", httpContext =>
+                {
+                    var clientIp = httpContext.RequestServices
+                        .GetRequiredService<IClientIp>()
+                        .GetClientIp();
+
+                    try
+                    {
+                        if (!rateLimiterRedis.IsConnected)
+                        {
+                            throw new RedisConnectionException(ConnectionFailureType.UnableToConnect, "Redis not connected");
+                        }
+
+                        return RateLimitPartition.Get(clientIp, key => new RedisConcurrencyRateLimiter<string>(
+                            key,
+                            new RedisConcurrencyRateLimiterOptions
+                            {
+                                ConnectionMultiplexerFactory = () => rateLimiterRedis,
+                                PermitLimit = 2,
+                                QueueLimit = 4
+                            }));
+                    }
+                    catch
+                    {
+                        return RateLimitPartition.GetConcurrencyLimiter(clientIp, _ => new ConcurrencyLimiterOptions
+                        {
+                            PermitLimit = 2,
+                            QueueLimit = 4,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
                         });
                     }
                 });

@@ -179,6 +179,7 @@ namespace Linky.Controllers
 
 
         [HttpPost("GenerateQrCodeImage")]
+        [EnableRateLimiting("qr-image-gen")]
         [Consumes("multipart/form-data")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> GenerateQrCodeImage(
