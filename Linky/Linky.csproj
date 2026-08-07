@@ -3,20 +3,49 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
 
-	  <IlcEnableProfileGuidedOptimization>true</IlcEnableProfileGuidedOptimization>
-	  <OptimizationPreference>Speed</OptimizationPreference>
-	  <Deterministic>true</Deterministic>
-	  <DebugSymbols>false</DebugSymbols>
-	  <StripSymbols>true</StripSymbols>
-	  <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-	  <PublishReadyToRun>true</PublishReadyToRun>
+    <!-- 🚀 Max Core Performance & Dynamic JIT Tuning -->
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
+    <OptimizationPreference>Speed</OptimizationPreference>
 
-	  <PublishSingleFile>false</PublishSingleFile>
-	  <SelfContained>false</SelfContained>
-	  <UseAppHost>false</UseAppHost>
+    <!-- 🧠 Memory Scaling (DATAS Mode) -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <GarbageCollectionAdaptationMode>1</GarbageCollectionAdaptationMode>
+
+    <!-- ⚡ Advanced .NET 10 Low-Latency Extensions -->
+    <Thread_UseAllCpuGroups>true</Thread_UseAllCpuGroups>
+    <GCCpuGroup>true</GCCpuGroup>
+    <UseVectorExtensions>true</UseVectorExtensions>
+    <EventSourceSupport>false</EventSourceSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
 
 
-	  <Nullable>enable</Nullable>
+    <!-- 🛠️ Production Build Optimization -->
+    <Deterministic>true</Deterministic>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+
+    <!-- 📦 Framework-Dependent Linux Container Deployment -->
+    <PublishSingleFile>false</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <UseAppHost>false</UseAppHost>
+
+    <!-- Maximize AVX10.2 / SIMD Hardware Vectorization -->
+    <AVXComputeMode>Max</AVXComputeMode>
+    <IncludeUnvctPaths>false</IncludeUnvctPaths>
+    <!-- Drop Reflection Overhead on Modern Serializers -->
+    <IlcGenerateMetadata>false</IlcGenerateMetadata>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <!-- ThreadPool Scaling & Lock Elision -->
+    <ThreadPool_UnfairSemaphoreSpinCount>100</ThreadPool_UnfairSemaphoreSpinCount>
+
+    <TailCallOptimization>true</TailCallOptimization>
+
+
+
+    <!-- 🛡️ Basic Configuration -->
+    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>1b8c3161-8da9-483b-9490-907dc4fc756c</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -52,7 +81,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.10" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.8.0" />
-    <!-- Microsoft.Owin removed (incompatible with .NET 10) -->
     <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
     <PackageReference Include="NATS.Net" Version="3.0.1" />
@@ -61,8 +89,7 @@
     <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
     <PackageReference Include="SkiaSharp" Version="4.150.1" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.150.1" />
-	<PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.6" ExcludeAssets="All" />
-    <!--<PackageReference Include="NATS.Client.Jetweam" Version="2.6.10" />-->
+    <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.6" ExcludeAssets="All" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="OwaspHeaders.Core" Version="10.4.0" />
