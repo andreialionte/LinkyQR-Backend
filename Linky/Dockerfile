@@ -3,8 +3,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
 
-# Install system dependencies for Npgsql (PostgreSQL driver)
-# libgssapi_krb5.so.2 is required for Kerberos authentication
 RUN apt-get update && apt-get install -y \
     libgssapi-krb5-2 \
     && rm -rf /var/lib/apt/lists/*
@@ -12,15 +10,14 @@ RUN apt-get update && apt-get install -y \
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy csproj (build context is Linky/ folder)
-COPY Linky.csproj ./
+# Context is repo root, so prefix with Linky/
+COPY Linky/Linky.csproj ./
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet restore "Linky.csproj" -r linux-x64 --disable-parallel --verbosity normal
 
-# Copy project source
-COPY . ./
+# Copy full project source
+COPY Linky/ ./
 
-# Build and publish with cache mount
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet publish "Linky.csproj" -c Release -o /app/publish \
     --no-restore --self-contained false --verbosity normal
