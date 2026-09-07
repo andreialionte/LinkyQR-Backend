@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
-EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:5000
+EXPOSE 5000
 
 RUN apt-get update && apt-get install -y \
     libgssapi-krb5-2 \
