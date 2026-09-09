@@ -26,30 +26,23 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
 
-    <!-- 📦 Native AOT self-contained Linux container deployment.
-         IMPORTANT: `dotnet publish` CLI flags (self-contained, RID) override these
-         MSBuild properties. The Dockerfile now passes those flags explicitly for
-         "true"/"linux-x64" - keep these two in sync or PublishAot will fail with
-         NETSDK1102 ("Optimizing assemblies for size is not supported ... publish
-         a self-contained app"). -->
+    <!-- 📦 Framework-Dependent Linux Container Deployment -->
     <PublishSingleFile>false</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <UseAppHost>true</UseAppHost>
+    <SelfContained>false</SelfContained>
+    <UseAppHost>false</UseAppHost>
 
-    <!-- Native AOT publish (dotnet publish -r linux-x64 -c Release, self contained).
-         Many packages here are NOT trim/AOT-safe (EF Core Design/Tools,
-         FluentMigrator, Newtonsoft.Json, Swashbuckle, Asp.Versioning.Mvc, Yarp), so
-         the build emits IL2026/IL3050 trim/AOT warnings, and some code paths
-         (EF Core Migrate(), non-source-gen JsonSerializer calls) may throw at
-         runtime under NativeAOT even though the build itself succeeds.
-         For Minimal Apis works, but for ControllerBase does not work. -->
-    <PublishAot>true</PublishAot>
+    <!-- Native AOT was tried and rolled back (too many AOT/trim-incompatible
+         dependencies - EF Core Design/Tools, FluentMigrator, Newtonsoft.Json,
+         Swashbuckle, Asp.Versioning.Mvc, Yarp - plus JSON source-gen would need
+         to replace every anonymous-type response and JsonSerializer<T> call).
+         Left here commented out in case someone wants to pick this back up later. -->
+    <!-- <PublishAot>true</PublishAot> -->
 
     <!-- Maximize AVX10.2 / SIMD Hardware Vectorization -->
     <AVXComputeMode>Max</AVXComputeMode>
     <IncludeUnvctPaths>false</IncludeUnvctPaths>
-    <!-- Drop Reflection Overhead on Modern Serializers -->
-    <IlcGenerateMetadata>false</IlcGenerateMetadata>
+    <!-- Drop Reflection Overhead on Modern Serializers (Native AOT only - no-op without PublishAot) -->
+    <!-- <IlcGenerateMetadata>false</IlcGenerateMetadata> -->
     <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
     <!-- ThreadPool Scaling & Lock Elision -->
     <ThreadPool_UnfairSemaphoreSpinCount>100</ThreadPool_UnfairSemaphoreSpinCount>
