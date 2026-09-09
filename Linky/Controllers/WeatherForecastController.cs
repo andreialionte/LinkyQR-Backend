@@ -1,3 +1,6 @@
+// Converted to Minimal API Endpoints - see Linky/Endpoints/WeatherForecastEndpoints.cs
+// and app.MapWeatherForecastEndpoints() in Program.cs. Kept here (commented out) for reference/rollback.
+/*
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linky.Controllers;
@@ -30,3 +33,4 @@ public class WeatherForecastController : ControllerBase
         .ToArray();
     }
 }
+*/

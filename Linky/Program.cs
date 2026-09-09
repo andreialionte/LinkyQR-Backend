@@ -3,6 +3,7 @@
 
 using System;
 using Linky.DataLayer;
+using Linky.Endpoints;
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Jobs;
@@ -117,7 +118,10 @@ namespace Linky
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            // Converted from MVC Controllers to Minimal API Endpoints (see Endpoints/ folder
+            // and the app.MapXxxEndpoints() calls below). AddControllers()/MapControllers()
+            // are kept here (commented out) for reference/rollback.
+            // builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
@@ -402,6 +406,9 @@ namespace Linky
                 options.Level = CompressionLevel.Fastest;
             });
 
+            // Needed so SwaggerGen/Swashbuckle can discover Minimal API endpoints
+            // (MVC controllers got this for free from AddControllers(); Minimal APIs need it explicitly).
+            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddCors(opts =>
@@ -581,7 +588,17 @@ namespace Linky
             app.UseAuthorization();
 
             app.UseResponseCompression(); // early as possible for builder.Services.AddResponseCompression()
-            app.MapControllers();
+
+            // Converted from MVC Controllers to Minimal API Endpoints - see Endpoints/ folder.
+            // app.MapControllers();
+            app.MapDefaultEndpoints();
+            app.MapQRCodeEndpoints();
+            app.MapVisitorEndpoints();
+            app.MapVisitorStatsEndpoints();
+            app.MapWeatherForecastEndpoints();
+            // UrlShortener owns the root-level "{code}" catch-all route, so it must be
+            // mapped last - otherwise it could shadow more specific routes above.
+            app.MapUrlShortenerEndpoints();
 
             app.Run();
         }

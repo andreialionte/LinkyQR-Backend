@@ -1,4 +1,7 @@
-﻿using Linky.DTOs;
+﻿// Converted to Minimal API Endpoints - see Linky/Endpoints/VisitorEndpoints.cs
+// and app.MapVisitorEndpoints() in Program.cs. Kept here (commented out) for reference/rollback.
+/*
+using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Mappers;
@@ -76,3 +79,4 @@ namespace Linky.Controllers
         }
     }
 }
+*/

@@ -1,4 +1,7 @@
-﻿using Linky.DTOs;
+﻿// Converted to Minimal API Endpoints - see Linky/Endpoints/UrlShortenerEndpoints.cs
+// and app.MapUrlShortenerEndpoints() in Program.cs. Kept here (commented out) for reference/rollback.
+/*
+using Linky.DTOs;
 using Linky.IRepository;
 using Linky.IService;
 using Linky.Utils;
@@ -72,3 +75,4 @@ namespace Linky.Controllers
         }
     }
 }
+*/

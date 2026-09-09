@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// Converted to Minimal API Endpoints - see Linky/Endpoints/*.cs and the
+// app.MapXxxEndpoints() calls in Program.cs. Kept here (commented out) for reference/rollback.
+/*
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace Linky.Controllers
@@ -25,3 +28,4 @@ namespace Linky.Controllers
         //}
     }
 }
+*/

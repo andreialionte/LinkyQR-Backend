@@ -31,6 +31,15 @@
     <SelfContained>false</SelfContained>
     <UseAppHost>false</UseAppHost>
 
+    <!-- Native AOT publish (dotnet publish -r linux-x64 -c Release).
+         NOTE: PublishAot forces SelfContained=true at publish time regardless of the
+         flag above. Many packages here are NOT trim/AOT-safe (EF Core Design/Tools,
+         FluentMigrator, Newtonsoft.Json, Swashbuckle, Asp.Versioning.Mvc, Yarp), so
+         `dotnet publish -p:PublishAot=true` will likely emit trim/AOT analysis
+         warnings or fail at publish time until those are swapped/removed.
+         For Minimal Apis works, but for ControllerBase does not work.-->
+    <PublishAot>true</PublishAot>
+
     <!-- Maximize AVX10.2 / SIMD Hardware Vectorization -->
     <AVXComputeMode>Max</AVXComputeMode>
     <IncludeUnvctPaths>false</IncludeUnvctPaths>
@@ -109,6 +118,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Endpoints\" />
     <Folder Include="NewFolder\" />
   </ItemGroup>
 

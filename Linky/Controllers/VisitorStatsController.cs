@@ -1,4 +1,7 @@
-﻿using Linky.IRepository;
+﻿// Converted to Minimal API Endpoints - see Linky/Endpoints/VisitorStatsEndpoints.cs
+// and app.MapVisitorStatsEndpoints() in Program.cs. Kept here (commented out) for reference/rollback.
+/*
+using Linky.IRepository;
 using Linky.IService;
 using Linky.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -106,3 +109,4 @@ namespace Linky.Controllers
         }
     }
 }
+*/
