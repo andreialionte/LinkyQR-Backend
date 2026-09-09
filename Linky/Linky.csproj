@@ -26,18 +26,23 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
 
-    <!-- 📦 Framework-Dependent Linux Container Deployment -->
+    <!-- 📦 Native AOT self-contained Linux container deployment.
+         IMPORTANT: `dotnet publish` CLI flags (self-contained, RID) override these
+         MSBuild properties. The Dockerfile now passes those flags explicitly for
+         "true"/"linux-x64" - keep these two in sync or PublishAot will fail with
+         NETSDK1102 ("Optimizing assemblies for size is not supported ... publish
+         a self-contained app"). -->
     <PublishSingleFile>false</PublishSingleFile>
-    <SelfContained>false</SelfContained>
-    <UseAppHost>false</UseAppHost>
+    <SelfContained>true</SelfContained>
+    <UseAppHost>true</UseAppHost>
 
-    <!-- Native AOT publish (dotnet publish -r linux-x64 -c Release).
-         NOTE: PublishAot forces SelfContained=true at publish time regardless of the
-         flag above. Many packages here are NOT trim/AOT-safe (EF Core Design/Tools,
+    <!-- Native AOT publish (dotnet publish -r linux-x64 -c Release, self contained).
+         Many packages here are NOT trim/AOT-safe (EF Core Design/Tools,
          FluentMigrator, Newtonsoft.Json, Swashbuckle, Asp.Versioning.Mvc, Yarp), so
-         `dotnet publish -p:PublishAot=true` will likely emit trim/AOT analysis
-         warnings or fail at publish time until those are swapped/removed.
-         For Minimal Apis works, but for ControllerBase does not work.-->
+         the build emits IL2026/IL3050 trim/AOT warnings, and some code paths
+         (EF Core Migrate(), non-source-gen JsonSerializer calls) may throw at
+         runtime under NativeAOT even though the build itself succeeds.
+         For Minimal Apis works, but for ControllerBase does not work. -->
     <PublishAot>true</PublishAot>
 
     <!-- Maximize AVX10.2 / SIMD Hardware Vectorization -->

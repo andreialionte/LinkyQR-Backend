@@ -1,5 +1,9 @@
 # syntax=docker/dockerfile:1
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+
+# Native AOT publishes a fully self-contained native executable, so the final
+# image doesn't need the .NET runtime at all - just the native OS dependencies
+# (openssl/icu/etc.) that runtime-deps provides. Much smaller than dotnet/aspnet.
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0 AS base
 WORKDIR /app
 EXPOSE 5000
 
@@ -18,11 +22,15 @@ RUN --mount=type=cache,target=/root/.nuget/packages \
 # Copy full project source
 COPY . ./
 
+# PublishAot requires a self-contained, RID-specific publish - it can't produce
+# a framework-dependent output. -r must match the restore RID above.
 RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet publish "Linky.csproj" -c Release -o /app/publish \
-    --no-restore --self-contained false --verbosity normal
+    dotnet publish "Linky.csproj" -c Release -r linux-x64 -o /app/publish \
+    --no-restore --self-contained true --verbosity normal
 
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "Linky.dll"]
+# Native AOT output is a native executable named after the assembly (no .dll,
+# no "dotnet" launcher needed).
+ENTRYPOINT ["./Linky"]
