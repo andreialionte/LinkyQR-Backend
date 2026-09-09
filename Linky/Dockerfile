@@ -14,6 +14,13 @@ RUN apt-get update && apt-get install -y \
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+# Native AOT (ILCompiler) needs a native linker + zlib headers to produce the
+# final executable. See https://aka.ms/nativeaot-prerequisites.
+RUN apt-get update && apt-get install -y \
+    clang \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Context is this folder (Linky/), so no prefix needed
 COPY Linky.csproj ./
 RUN --mount=type=cache,target=/root/.nuget/packages \
