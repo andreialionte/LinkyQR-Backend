@@ -68,6 +68,40 @@ namespace Linky
                 return null;
             }
 
+            // Valkey.Glide's ConfigurationOptions parser supports a smaller keyword set than
+            // StackExchange.Redis. Options like "abortConnect" (which we append/rely on for
+            // StackExchange.Redis based clients) throw an ArgumentException when handed to
+            // Valkey.Glide.ConfigurationOptions.Parse. Strip any keys Glide doesn't understand
+            // before parsing so the same connection string can be shared between both clients.
+            static string StripUnsupportedGlideOptions(string connectionString)
+            {
+                var unsupportedKeys = new[] { "abortConnect" };
+
+                var filteredParts = connectionString
+                    .Split(',')
+                    .Where(part =>
+                    {
+                        var trimmed = part.Trim();
+                        if (trimmed.Length == 0)
+                        {
+                            return false;
+                        }
+
+                        var eqIndex = trimmed.IndexOf('=');
+                        if (eqIndex < 0)
+                        {
+                            // host:port style entries have no '=' and should always be kept
+                            return true;
+                        }
+
+                        var key = trimmed[..eqIndex].Trim();
+                        return !unsupportedKeys.Any(unsupportedKey =>
+                            string.Equals(unsupportedKey, key, StringComparison.OrdinalIgnoreCase));
+                    });
+
+                return string.Join(",", filteredParts);
+            }
+
             // ensure thread‑pool has a reasonable floor in case of sudden load spikes
             // only bump if current min is lower to avoid wasting threads on small machines
             // use a conservative, machine-scaled minimum instead of a fixed 200 which
@@ -270,7 +304,8 @@ namespace Linky
                 ? parsedCachePort
                 : (ushort)6379;
 
-            var glideCacheOptions = Valkey.Glide.ConfigurationOptions.Parse(applicationCacheConnectionString);
+            var glideCacheOptions = Valkey.Glide.ConfigurationOptions.Parse(
+                StripUnsupportedGlideOptions(applicationCacheConnectionString));
             var glideCacheConnection = GlideConnectionMultiplexer.Connect(glideCacheOptions);
             builder.Services.AddSingleton(glideCacheConnection);
 
