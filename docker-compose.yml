@@ -2,5 +2,5 @@ services:
   linky:
     image: ${DOCKER_REGISTRY-}linky
     build:
-      context: .
-      dockerfile: Linky/Dockerfile
+      context: ./Linky
+      dockerfile: Dockerfile

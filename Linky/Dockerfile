@@ -10,13 +10,13 @@ RUN apt-get update && apt-get install -y \
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Context is repo root, so prefix with Linky/
-COPY Linky/Linky.csproj ./
+# Context is this folder (Linky/), so no prefix needed
+COPY Linky.csproj ./
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet restore "Linky.csproj" -r linux-x64 --disable-parallel --verbosity normal
 
 # Copy full project source
-COPY Linky/ ./
+COPY . ./
 
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet publish "Linky.csproj" -c Release -o /app/publish \

@@ -1,9 +1,8 @@
-version: "3.8"
 services:
   linky:
     build:
-      context: .
-      dockerfile: Linky/Dockerfile
+      context: ./Linky
+      dockerfile: Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
