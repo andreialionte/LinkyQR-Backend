@@ -324,18 +324,18 @@ namespace Linky
                 {
                     listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
 
-                    listenOptions.UseHttps(httpsOptions =>
-                    {
-                        httpsOptions.ServerCertificateSelector = (connectionContext, name) =>
-                        {
-                            if (name != null && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
-                            {
-                                return new X509Certificate2("/app/api.pfx", "parola_ta");
-                            }
+                    // listenOptions.UseHttps(httpsOptions =>
+                    // {
+                    //     httpsOptions.ServerCertificateSelector = (connectionContext, name) =>
+                    //     {
+                    //         if (name != null && name.Equals("api.linkyqr.com", StringComparison.OrdinalIgnoreCase))
+                    //         {
+                    //             return new X509Certificate2("/app/api.pfx", "parola_ta");
+                    //         }
 
-                            return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
-                        };
-                    });
+                    //         return new X509Certificate2("/app/linkyqr.pfx", "parola_ta");
+                    //     };
+                    // });
                 });
             });
 
