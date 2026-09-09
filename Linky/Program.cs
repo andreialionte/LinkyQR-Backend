@@ -38,10 +38,7 @@ using TickerQ.Caching.StackExchangeRedis;
 using TickerQ.Caching.StackExchangeRedis.DependencyInjection;
 using TickerQ.Dashboard.DependencyInjection;
 using TickerQ.DependencyInjection;
-using UiPath.Caching;
-using UiPath.Caching.CloudEvents;
-using UiPath.Caching.Config;
-using UiPath.Caching.Polly;
+using GlideConnectionMultiplexer = Valkey.Glide.ConnectionMultiplexer;
 
 namespace Linky
 {
@@ -103,11 +100,11 @@ namespace Linky
                 builder.Configuration["Caching:Connections:Redis:ConnectionString"])
                 ?? "localhost:6379";
 
-            var rateLimiterRedisOptions = ConfigurationOptions.Parse(rateLimiterRedisConnectionString);
+            var rateLimiterRedisOptions = StackExchange.Redis.ConfigurationOptions.Parse(rateLimiterRedisConnectionString);
             rateLimiterRedisOptions.AbortOnConnectFail = false; // don't throw at startup if Redis is briefly unreachable
 
-            var rateLimiterRedis = ConnectionMultiplexer.Connect(rateLimiterRedisOptions);
-            builder.Services.AddSingleton<IConnectionMultiplexer>(rateLimiterRedis);
+            var rateLimiterRedis = StackExchange.Redis.ConnectionMultiplexer.Connect(rateLimiterRedisOptions);
+            builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(rateLimiterRedis);
 
             builder.Services.AddRateLimiter(options =>
             {
@@ -141,7 +138,7 @@ namespace Linky
                     {
                         if (!rateLimiterRedis.IsConnected)
                         {
-                            throw new RedisConnectionException(ConnectionFailureType.UnableToConnect, "Redis not connected");
+                            throw new StackExchange.Redis.RedisConnectionException(StackExchange.Redis.ConnectionFailureType.UnableToConnect, "Redis not connected");
                         }
 
                         return RateLimitPartition.Get(clientIp, key => new RedisTokenBucketRateLimiter<string>(
@@ -189,7 +186,7 @@ namespace Linky
                     {
                         if (!rateLimiterRedis.IsConnected)
                         {
-                            throw new RedisConnectionException(ConnectionFailureType.UnableToConnect, "Redis not connected");
+                            throw new StackExchange.Redis.RedisConnectionException(StackExchange.Redis.ConnectionFailureType.UnableToConnect, "Redis not connected");
                         }
 
                         return RateLimitPartition.Get(clientIp, key => new RedisConcurrencyRateLimiter<string>(
@@ -259,41 +256,23 @@ namespace Linky
             builder.Services.AddScoped<AggregateVisitorStats>();
 
             
-            builder.Services.AddSingleton<ICacheKeyStrategy, IdentityCacheKeyStrategy>();
-            builder.Services.AddCaching(builder.Configuration.GetSection("Caching"), cachingBuilder =>
-                cachingBuilder
-                    .AddRedisConnection(connectionOptions =>
-                    {
-                        var connectionString = FirstRealValue(
-                            Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING"),
-                            builder.Configuration.GetConnectionString("Valkey"),
-                            builder.Configuration["Caching:Connections:Redis:ConnectionString"])
-                            ?? "localhost:6379";
+            var applicationCacheConnectionString = FirstRealValue(
+                Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING"),
+                builder.Configuration.GetConnectionString("Valkey"))
+                ?? "localhost:6379";
 
-                        connectionOptions.ConnectionString = connectionString;
-                        connectionOptions.AbortOnConnectFail = false;
-                        connectionOptions.WarmUpOnStart = false;
-                    })
-                    // Broadcast uses Redis Streams; disable on backends that don't support stream commands.
-                    // .AddBroadcast()
-                    .AddRedis()
-                    .AddInMemoryRedis()
-                    .AddMemory()
-                    .AddLocalLock()
-                    .AddRedisDistributedLock()
-                    .AddResilienceStrategies()
-                    // .AddCloudEvents()
-                    ,
-                options =>
-                {
-                    var section = builder.Configuration.GetSection("Caching");
-                    section.Bind(options);
-                    options.AppShortName = FirstRealValue(
-                        options.AppShortName,
-                        Environment.GetEnvironmentVariable("CACHING_APP_SHORT_NAME"),
-                        builder.Environment.ApplicationName,
-                        "linky");
-                });
+            var cacheEndpoint = applicationCacheConnectionString
+                .Split(',', 2, StringSplitOptions.TrimEntries)[0];
+            var cacheEndpointParts = cacheEndpoint.Split(':', 2, StringSplitOptions.TrimEntries);
+            var cacheHost = cacheEndpointParts[0];
+            var cachePort = cacheEndpointParts.Length == 2 &&
+                            ushort.TryParse(cacheEndpointParts[1], out var parsedCachePort)
+                ? parsedCachePort
+                : (ushort)6379;
+
+            var glideCacheOptions = Valkey.Glide.ConfigurationOptions.Parse(applicationCacheConnectionString);
+            var glideCacheConnection = GlideConnectionMultiplexer.Connect(glideCacheOptions);
+            builder.Services.AddSingleton(glideCacheConnection);
 
             builder.Services.AddTickerQ(options =>
             {

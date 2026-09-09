@@ -103,10 +103,7 @@
     <PackageReference Include="TickerQ" Version="10.4.0" />
     <PackageReference Include="TickerQ.Caching.StackExchangeRedis" Version="10.4.0" />
     <PackageReference Include="TickerQ.Dashboard" Version="10.4.0" />
-    <PackageReference Include="UiPath.Caching" Version="1.1.0" />
-    <PackageReference Include="UiPath.Caching.Abstractions" Version="1.1.0" />
-    <PackageReference Include="UiPath.Caching.CloudEvents" Version="1.1.0" />
-    <PackageReference Include="UiPath.Caching.Polly" Version="1.1.0" />
+    <PackageReference Include="Valkey.Glide" Version="1.1.0" />
     <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
     <PackageReference Include="ZstdSharp.Port" Version="0.8.8" />
   </ItemGroup>
