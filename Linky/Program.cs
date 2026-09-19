@@ -1,6 +1,5 @@
 using System;
 using Linky.DataLayer;
-using Linky.DI;
 using Linky.Endpoints;
 using Linky.IRepository;
 using Linky.IService;
