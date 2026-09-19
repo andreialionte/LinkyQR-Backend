@@ -7,7 +7,6 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
-using System.Net;
 using System.Net.Sockets;
 
 namespace Linky.Service
@@ -64,11 +63,7 @@ namespace Linky.Service
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             var clientOptionsBuilder = new MqttClientOptionsBuilder()
-                .WithTcpServer(tcpOptions =>
-                {
-                    tcpOptions.RemoteEndpoint = new DnsEndPoint(_config.Host, _config.Port, AddressFamily.InterNetwork);
-                    tcpOptions.AddressFamily = AddressFamily.InterNetwork;
-                })
+                .WithTcpServer(_config.Host, _config.Port)
                 .WithClientId($"{_config.ClientId}_{Guid.NewGuid():N}")
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(_config.KeepAliveIntervalSeconds))
                 .WithCleanSession();
@@ -124,7 +119,7 @@ namespace Linky.Service
 
         public void Dispose()
         {
-            _managedMqttClient?.Dispose();
+            _managedMqttClient.Dispose();
         }
     }
 }
