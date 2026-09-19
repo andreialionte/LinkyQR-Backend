@@ -7,6 +7,8 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Linky.Service
 {
@@ -42,7 +44,19 @@ namespace Linky.Service
 
             _managedMqttClient.ConnectingFailedAsync += async e =>
             {
-                _logger.LogError(e.Exception, "Connection to EMQX MQTT Broker failed at {Host}:{Port}", _config.Host, _config.Port);
+                if (e.Exception is SocketException or MQTTnet.Exceptions.MqttCommunicationException)
+                {
+                    _logger.LogError(
+                        e.Exception,
+                        "Connection to EMQX MQTT Broker failed at {Host}:{Port}. Hostname did not resolve or broker is unreachable. Attach this container to shared-app-net or set MQTT_HOST to the broker IP.",
+                        _config.Host,
+                        _config.Port);
+                }
+                else
+                {
+                    _logger.LogError(e.Exception, "Connection to EMQX MQTT Broker failed at {Host}:{Port}", _config.Host, _config.Port);
+                }
+
                 await Task.CompletedTask;
             };
         }
@@ -50,7 +64,11 @@ namespace Linky.Service
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             var clientOptionsBuilder = new MqttClientOptionsBuilder()
-                .WithTcpServer(_config.Host, _config.Port)
+                .WithTcpServer(tcpOptions =>
+                {
+                    tcpOptions.RemoteEndpoint = new DnsEndPoint(_config.Host, _config.Port, AddressFamily.InterNetwork);
+                    tcpOptions.AddressFamily = AddressFamily.InterNetwork;
+                })
                 .WithClientId($"{_config.ClientId}_{Guid.NewGuid():N}")
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(_config.KeepAliveIntervalSeconds))
                 .WithCleanSession();
