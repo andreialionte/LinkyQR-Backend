@@ -11,50 +11,46 @@ namespace Linky.Service
         {
             services.Configure<MqttConfig>(opts =>
             {
-                configuration.GetSection("Mqtt").Bind(opts);
+                var mqtt = configuration.GetSection("Mqtt");
 
                 opts.Host = FirstRealValue(
                     Env("Mqtt__Host"),
                     Env("MQTT_HOST"),
-                    opts.Host) ?? "localhost";
+                    mqtt["Host"]) ?? "localhost";
 
-                if (int.TryParse(FirstRealValue(Env("Mqtt__Port"), Env("MQTT_PORT"), opts.Port.ToString()), out var port)
+                if (int.TryParse(FirstRealValue(Env("Mqtt__Port"), Env("MQTT_PORT"), mqtt["Port"]), out var port)
                     && port > 0)
                 {
                     opts.Port = port;
-                }
-                else
-                {
-                    opts.Port = 1883;
                 }
 
                 opts.ClientId = FirstRealValue(
                     Env("Mqtt__ClientId"),
                     Env("MQTT_CLIENT_ID"),
-                    opts.ClientId) ?? "LinkyBackendService";
+                    mqtt["ClientId"]) ?? "LinkyBackendService";
 
                 opts.Username = FirstRealValue(
                     Env("Mqtt__Username"),
                     Env("MQTT_USERNAME"),
-                    opts.Username);
+                    mqtt["Username"]);
 
                 opts.Password = FirstRealValue(
                     Env("Mqtt__Password"),
                     Env("MQTT_PASSWORD"),
-                    opts.Password);
+                    mqtt["Password"]);
 
-                if (bool.TryParse(FirstRealValue(Env("Mqtt__UseTls"), Env("MQTT_USE_TLS")), out var useTls))
+                if (bool.TryParse(FirstRealValue(Env("Mqtt__UseTls"), Env("MQTT_USE_TLS"), mqtt["UseTls"]), out var useTls))
                 {
                     opts.UseTls = useTls;
                 }
 
-                if (int.TryParse(FirstRealValue(Env("Mqtt__KeepAliveIntervalSeconds"), Env("MQTT_KEEPALIVE_SECONDS")), out var keepAlive)
+                if (int.TryParse(FirstRealValue(Env("Mqtt__KeepAliveIntervalSeconds"), Env("MQTT_KEEPALIVE_SECONDS"), mqtt["KeepAliveIntervalSeconds"]), out var keepAlive)
                     && keepAlive > 0)
                 {
                     opts.KeepAliveIntervalSeconds = keepAlive;
                 }
 
-                if (int.TryParse(FirstRealValue(Env("Mqtt__ReconnectDelaySeconds"), Env("MQTT_RECONNECT_SECONDS")), out var reconnect)
+                if (int.TryParse(FirstRealValue(Env("Mqtt__ReconnectDelaySeconds"), Env("MQTT_RECONNECT_SECONDS"), mqtt["ReconnectDelaySeconds"]), out var reconnect)
                     && reconnect > 0)
                 {
                     opts.ReconnectDelaySeconds = reconnect;
@@ -84,7 +80,7 @@ namespace Linky.Service
         {
             foreach (var value in values)
             {
-                if (string.IsNullOrWhiteSpace(value) || IsPlaceholderValue(value) || value == "0")
+                if (string.IsNullOrWhiteSpace(value) || IsPlaceholderValue(value))
                 {
                     continue;
                 }
