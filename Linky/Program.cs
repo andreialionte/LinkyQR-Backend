@@ -1,8 +1,6 @@
-// using Delta;
-// // COMMENTED OUT: Incompatible with cache middleware - see middleware section for details
-
 using System;
 using Linky.DataLayer;
+using Linky.DI;
 using Linky.Endpoints;
 using Linky.IRepository;
 using Linky.IService;
@@ -33,7 +31,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RedisRateLimiting;
 using RedisRateLimiting.AspNetCore;
+using Microsoft.Extensions.Caching.Memory;
 using StackExchange.Redis;
+using Newtonsoft.Json;
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Serialization.NewtonsoftJson;
 using TickerQ;
 using TickerQ.Caching.StackExchangeRedis;
 using TickerQ.Caching.StackExchangeRedis.DependencyInjection;
@@ -382,10 +384,8 @@ namespace Linky
 
             builder.Services.AddSignalR();
 
-
-
-            //builder.Services.AddReverseProxy()
-            //    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+            // Register MQTT & EMQX Auth / CacheBroadcast Services
+            builder.Services.AddMqttServices(builder.Configuration);
 
             builder.Services.AddResponseCompression(responseCompressionOptions =>
             {
@@ -399,6 +399,41 @@ namespace Linky
             {
                 options.Level = CompressionLevel.Fastest;
             });
+
+            builder.Services.AddFusionCache()
+                .WithSerializer(new FusionCacheNewtonsoftJsonSerializer(new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                    NullValueHandling = NullValueHandling.Ignore
+                }))
+                .WithDistributedCache(sp =>
+                {
+                    var muxer = sp.GetRequiredService<IConnectionMultiplexer>();
+                    return new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCache(
+                        new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCacheOptions
+                        {
+                            ConnectionMultiplexerFactory = () => Task.FromResult(muxer)
+                        }
+                    );
+                })
+                .WithOptions(options =>
+                {
+                    options.DefaultEntryOptions = new FusionCacheEntryOptions
+                    {
+                        Duration = TimeSpan.FromMinutes(2),
+                        Priority = CacheItemPriority.High,
+                        DistributedCacheDuration = TimeSpan.FromHours(1),
+                        IsFailSafeEnabled = true,
+                        FailSafeMaxDuration = TimeSpan.FromHours(6),
+                        FailSafeThrottleDuration = TimeSpan.FromSeconds(2),
+                        JitterMaxDuration = TimeSpan.FromSeconds(30),
+                        SkipDistributedCacheReadWhenStale = true,
+                        AllowBackgroundDistributedCacheOperations = true
+                    };
+                });
+
+            builder.Services.AddScoped<ICacheService, CacheService>();
 
             // Gzip to fastest for low-latency fallback
             builder.Services.Configure<GzipCompressionProviderOptions>(options =>

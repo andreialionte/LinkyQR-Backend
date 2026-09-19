@@ -9,6 +9,7 @@ services:
       - ASPNETCORE_HTTPS_PORTS=5000
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=LinkyDB;Username=postgres;Password=postgres
       - ConnectionStrings__Valkey=dragonfly:6379
+      - Mqtt__Host=emqx
       # - ConnectionStrings__Nats=nats://nats:4222
     ports:
       - "8080:8080"
@@ -23,8 +24,36 @@ services:
       #   condition: service_healthy
       dragonfly:
         condition: service_started
+      emqx:
+        condition: service_started
       # nats:
       #   condition: service_started
+
+  emqx:
+    image: emqx/emqx:5.8.5
+    container_name: linky_emqx
+    restart: unless-stopped
+    ports:
+      - "1883:1883"     # MQTT TCP
+      - "8083:8083"     # MQTT WebSocket (Browser client connections)
+      - "8084:8084"     # MQTT WSS
+      - "18083:18083"   # EMQX Management Dashboard
+    environment:
+      - "EMQX_NODE_NAME=emqx@127.0.0.1"
+      - "EMQX_DASHBOARD__DEFAULT_PASSWORD=public"
+      # EMQX Redis Native Authentication (authn/redis)
+      - "EMQX_AUTHENTICATION__1__MECHANISM=password_based"
+      - "EMQX_AUTHENTICATION__1__BACKEND=redis"
+      - "EMQX_AUTHENTICATION__1__SERVER=dragonfly:6379"
+      - "EMQX_AUTHENTICATION__1__REDIS_TYPE=single"
+      - "EMQX_AUTHENTICATION__1__DATABASE=0"
+      - "EMQX_AUTHENTICATION__1__POOL_SIZE=16"
+      - "EMQX_AUTHENTICATION__1__CMD=HMGET mqtt_user:$${username} password_hash salt is_superuser"
+      - "EMQX_AUTHENTICATION__1__PASSWORD_HASH_ALGORITHM__NAME=sha256"
+      - "EMQX_AUTHENTICATION__1__PASSWORD_HASH_ALGORITHM__SALT_POSITION=suffix"
+    depends_on:
+      dragonfly:
+        condition: service_started
 
   dragonfly:
     image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
